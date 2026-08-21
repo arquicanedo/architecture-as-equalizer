@@ -1,0 +1,16 @@
+{
+  "name": "task-management-api",
+  "version": "1.0.0",
+  "description": "Task Management API — TypeScript, zero npm dependencies",
+  "type": "module",
+  "scripts": {
+    "start": "npx tsx src/main.ts",
+    "demo": "npx tsx src/demo.ts",
+    "typecheck": "npx tsc --noEmit"
+  },
+  "devDependencies": {
+    "@types/node": "^26.2.0",
+    "tsx": "^4.23.12",
+    "typescript": "^5.9.3"
+  }
+}

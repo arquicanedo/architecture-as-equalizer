@@ -1,0 +1,21 @@
+{
+  "name": "task-management-api",
+  "version": "1.0.0",
+  "description": "",
+  "main": "dist/main.js",
+  "scripts": {
+    "start": "npx tsx src/main.ts",
+    "dev": "npx tsx --watch src/main.ts",
+    "build": "npx tsc",
+    "test": "npx tsx src/demo.ts",
+    "check": "npx tsc --noEmit"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/node": "^20.12.12",
+    "tsx": "^4.10.2",
+    "typescript": "^5.4.5"
+  }
+}

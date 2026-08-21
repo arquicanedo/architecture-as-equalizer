@@ -1,0 +1,10 @@
+{
+  "trialId": "c4-2",
+  "specType": "c4",
+  "architecturalAdherence": 6,
+  "completeness": 8,
+  "codeQuality": 7,
+  "constraintCompliance": 7,
+  "notes": "Overall a solid implementation with clear separation of concerns and proper event bus usage for inter-service communication. Issues found: (1) ARCHITECTURAL VIOLATION - Rule #1 broken in router.ts: the comment creation endpoint directly calls taskService.getById() and userService.getById() to enrich the comment.added event payload. This is a direct service-to-service call mediated through the router, not through the event bus, violating the no-direct-service-to-service-calls rule. The enrichment data (taskTitle, assigneeId, authorName) should either be included by each service publishing richer events, or the notification service should maintain its own denormalized view. (2) Rule #2 partially violated: notification service receives assigneeId via comment.added payload that was injected by the router after cross-querying other services — the data ownership boundary is blurred. (3) task.update() allows bypassing status transition rules and directly overwriting status field without validation, which undermines the forward-only constraint. (4) assign() publishes task.assigned even when assigneeId is null, which would create a no-op notification silently skipped rather than not publishing at all. (5) changeStatus allows same-status transitions (no-op) without returning null, which is debatable but acceptable. (6) ProjectService does not validate that userId actually exists before adding as member — no cross-service validation which is architecturally correct but could lead to orphan memberIds. (7) No email uniqueness validation in UserService. (8) Error responses for invalid status transitions return 400 but with a generic message that conflates 'not found' with 'invalid transition'. (9) The demo is functional and covers the main happy paths well. (10) TypeScript typing is generally good but some 'any' usage in router and event bus callbacks reduces type safety.",
+  "overall": 7
+}

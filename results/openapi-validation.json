@@ -1,0 +1,2149 @@
+{
+  "coverage": [
+    {
+      "model": "Sonnet 4.6",
+      "trialId": "c4-1",
+      "specType": "c4",
+      "coverage": {
+        "totalSpecRoutes": 25,
+        "coveredRoutes": 25,
+        "missingRoutes": [],
+        "extraRoutes": [],
+        "coveragePercent": 100
+      }
+    },
+    {
+      "model": "Sonnet 4.6",
+      "trialId": "c4-2",
+      "specType": "c4",
+      "coverage": {
+        "totalSpecRoutes": 25,
+        "coveredRoutes": 25,
+        "missingRoutes": [],
+        "extraRoutes": [],
+        "coveragePercent": 100
+      }
+    },
+    {
+      "model": "Sonnet 4.6",
+      "trialId": "c4-3",
+      "specType": "c4",
+      "coverage": {
+        "totalSpecRoutes": 25,
+        "coveredRoutes": 25,
+        "missingRoutes": [],
+        "extraRoutes": [],
+        "coveragePercent": 100
+      }
+    },
+    {
+      "model": "Sonnet 4.6",
+      "trialId": "openapi-1",
+      "specType": "openapi",
+      "coverage": {
+        "totalSpecRoutes": 25,
+        "coveredRoutes": 25,
+        "missingRoutes": [],
+        "extraRoutes": [],
+        "coveragePercent": 100
+      }
+    },
+    {
+      "model": "Sonnet 4.6",
+      "trialId": "openapi-2",
+      "specType": "openapi",
+      "coverage": {
+        "totalSpecRoutes": 25,
+        "coveredRoutes": 25,
+        "missingRoutes": [],
+        "extraRoutes": [],
+        "coveragePercent": 100
+      }
+    },
+    {
+      "model": "Sonnet 4.6",
+      "trialId": "openapi-3",
+      "specType": "openapi",
+      "coverage": {
+        "totalSpecRoutes": 25,
+        "coveredRoutes": 25,
+        "missingRoutes": [],
+        "extraRoutes": [],
+        "coveragePercent": 100
+      }
+    },
+    {
+      "model": "Sonnet 4.6",
+      "trialId": "prose-1",
+      "specType": "prose",
+      "coverage": {
+        "totalSpecRoutes": 25,
+        "coveredRoutes": 25,
+        "missingRoutes": [],
+        "extraRoutes": [],
+        "coveragePercent": 100
+      }
+    },
+    {
+      "model": "Sonnet 4.6",
+      "trialId": "prose-2",
+      "specType": "prose",
+      "coverage": {
+        "totalSpecRoutes": 25,
+        "coveredRoutes": 25,
+        "missingRoutes": [],
+        "extraRoutes": [],
+        "coveragePercent": 100
+      }
+    },
+    {
+      "model": "Sonnet 4.6",
+      "trialId": "prose-3",
+      "specType": "prose",
+      "coverage": {
+        "totalSpecRoutes": 25,
+        "coveredRoutes": 25,
+        "missingRoutes": [],
+        "extraRoutes": [],
+        "coveragePercent": 100
+      }
+    },
+    {
+      "model": "Sonnet 4.6",
+      "trialId": "structured-1",
+      "specType": "structured",
+      "coverage": {
+        "totalSpecRoutes": 25,
+        "coveredRoutes": 25,
+        "missingRoutes": [],
+        "extraRoutes": [],
+        "coveragePercent": 100
+      }
+    },
+    {
+      "model": "Sonnet 4.6",
+      "trialId": "structured-2",
+      "specType": "structured",
+      "coverage": {
+        "totalSpecRoutes": 25,
+        "coveredRoutes": 25,
+        "missingRoutes": [],
+        "extraRoutes": [],
+        "coveragePercent": 100
+      }
+    },
+    {
+      "model": "Sonnet 4.6",
+      "trialId": "structured-3",
+      "specType": "structured",
+      "coverage": {
+        "totalSpecRoutes": 25,
+        "coveredRoutes": 25,
+        "missingRoutes": [],
+        "extraRoutes": [],
+        "coveragePercent": 100
+      }
+    },
+    {
+      "model": "Sonnet 4.6",
+      "trialId": "typescript-contracts-1",
+      "specType": "typescript-contracts",
+      "coverage": {
+        "totalSpecRoutes": 25,
+        "coveredRoutes": 25,
+        "missingRoutes": [],
+        "extraRoutes": [],
+        "coveragePercent": 100
+      }
+    },
+    {
+      "model": "Sonnet 4.6",
+      "trialId": "typescript-contracts-2",
+      "specType": "typescript-contracts",
+      "coverage": {
+        "totalSpecRoutes": 25,
+        "coveredRoutes": 25,
+        "missingRoutes": [],
+        "extraRoutes": [],
+        "coveragePercent": 100
+      }
+    },
+    {
+      "model": "Sonnet 4.6",
+      "trialId": "typescript-contracts-3",
+      "specType": "typescript-contracts",
+      "coverage": {
+        "totalSpecRoutes": 25,
+        "coveredRoutes": 25,
+        "missingRoutes": [],
+        "extraRoutes": [],
+        "coveragePercent": 100
+      }
+    },
+    {
+      "model": "Haiku 4.5",
+      "trialId": "c4-1",
+      "specType": "c4",
+      "coverage": {
+        "totalSpecRoutes": 25,
+        "coveredRoutes": 25,
+        "missingRoutes": [],
+        "extraRoutes": [],
+        "coveragePercent": 100
+      }
+    },
+    {
+      "model": "Haiku 4.5",
+      "trialId": "c4-2",
+      "specType": "c4",
+      "coverage": {
+        "totalSpecRoutes": 25,
+        "coveredRoutes": 25,
+        "missingRoutes": [],
+        "extraRoutes": [],
+        "coveragePercent": 100
+      }
+    },
+    {
+      "model": "Haiku 4.5",
+      "trialId": "c4-3",
+      "specType": "c4",
+      "coverage": {
+        "totalSpecRoutes": 25,
+        "coveredRoutes": 25,
+        "missingRoutes": [],
+        "extraRoutes": [],
+        "coveragePercent": 100
+      }
+    },
+    {
+      "model": "Haiku 4.5",
+      "trialId": "openapi-1",
+      "specType": "openapi",
+      "coverage": {
+        "totalSpecRoutes": 25,
+        "coveredRoutes": 25,
+        "missingRoutes": [],
+        "extraRoutes": [],
+        "coveragePercent": 100
+      }
+    },
+    {
+      "model": "Haiku 4.5",
+      "trialId": "openapi-2",
+      "specType": "openapi",
+      "coverage": {
+        "totalSpecRoutes": 25,
+        "coveredRoutes": 25,
+        "missingRoutes": [],
+        "extraRoutes": [],
+        "coveragePercent": 100
+      }
+    },
+    {
+      "model": "Haiku 4.5",
+      "trialId": "openapi-3",
+      "specType": "openapi",
+      "coverage": {
+        "totalSpecRoutes": 25,
+        "coveredRoutes": 25,
+        "missingRoutes": [],
+        "extraRoutes": [],
+        "coveragePercent": 100
+      }
+    },
+    {
+      "model": "Haiku 4.5",
+      "trialId": "prose-1",
+      "specType": "prose",
+      "coverage": {
+        "totalSpecRoutes": 25,
+        "coveredRoutes": 25,
+        "missingRoutes": [],
+        "extraRoutes": [],
+        "coveragePercent": 100
+      }
+    },
+    {
+      "model": "Haiku 4.5",
+      "trialId": "prose-2",
+      "specType": "prose",
+      "coverage": {
+        "totalSpecRoutes": 25,
+        "coveredRoutes": 25,
+        "missingRoutes": [],
+        "extraRoutes": [],
+        "coveragePercent": 100
+      }
+    },
+    {
+      "model": "Haiku 4.5",
+      "trialId": "prose-3",
+      "specType": "prose",
+      "coverage": {
+        "totalSpecRoutes": 25,
+        "coveredRoutes": 25,
+        "missingRoutes": [],
+        "extraRoutes": [],
+        "coveragePercent": 100
+      }
+    },
+    {
+      "model": "Haiku 4.5",
+      "trialId": "structured-1",
+      "specType": "structured",
+      "coverage": {
+        "totalSpecRoutes": 25,
+        "coveredRoutes": 25,
+        "missingRoutes": [],
+        "extraRoutes": [],
+        "coveragePercent": 100
+      }
+    },
+    {
+      "model": "Haiku 4.5",
+      "trialId": "structured-2",
+      "specType": "structured",
+      "coverage": {
+        "totalSpecRoutes": 25,
+        "coveredRoutes": 25,
+        "missingRoutes": [],
+        "extraRoutes": [],
+        "coveragePercent": 100
+      }
+    },
+    {
+      "model": "Haiku 4.5",
+      "trialId": "structured-3",
+      "specType": "structured",
+      "coverage": {
+        "totalSpecRoutes": 25,
+        "coveredRoutes": 25,
+        "missingRoutes": [],
+        "extraRoutes": [],
+        "coveragePercent": 100
+      }
+    },
+    {
+      "model": "Haiku 4.5",
+      "trialId": "typescript-contracts-1",
+      "specType": "typescript-contracts",
+      "coverage": {
+        "totalSpecRoutes": 25,
+        "coveredRoutes": 25,
+        "missingRoutes": [],
+        "extraRoutes": [],
+        "coveragePercent": 100
+      }
+    },
+    {
+      "model": "Haiku 4.5",
+      "trialId": "typescript-contracts-2",
+      "specType": "typescript-contracts",
+      "coverage": {
+        "totalSpecRoutes": 25,
+        "coveredRoutes": 25,
+        "missingRoutes": [],
+        "extraRoutes": [],
+        "coveragePercent": 100
+      }
+    },
+    {
+      "model": "Haiku 4.5",
+      "trialId": "typescript-contracts-3",
+      "specType": "typescript-contracts",
+      "coverage": {
+        "totalSpecRoutes": 25,
+        "coveredRoutes": 25,
+        "missingRoutes": [],
+        "extraRoutes": [],
+        "coveragePercent": 100
+      }
+    },
+    {
+      "model": "GPT-5-mini",
+      "trialId": "c4-1",
+      "specType": "c4",
+      "coverage": {
+        "totalSpecRoutes": 25,
+        "coveredRoutes": 25,
+        "missingRoutes": [],
+        "extraRoutes": [],
+        "coveragePercent": 100
+      }
+    },
+    {
+      "model": "GPT-5-mini",
+      "trialId": "c4-2",
+      "specType": "c4",
+      "coverage": {
+        "totalSpecRoutes": 25,
+        "coveredRoutes": 25,
+        "missingRoutes": [],
+        "extraRoutes": [],
+        "coveragePercent": 100
+      }
+    },
+    {
+      "model": "GPT-5-mini",
+      "trialId": "c4-3",
+      "specType": "c4",
+      "coverage": {
+        "totalSpecRoutes": 25,
+        "coveredRoutes": 25,
+        "missingRoutes": [],
+        "extraRoutes": [],
+        "coveragePercent": 100
+      }
+    },
+    {
+      "model": "GPT-5-mini",
+      "trialId": "openapi-1",
+      "specType": "openapi",
+      "coverage": {
+        "totalSpecRoutes": 25,
+        "coveredRoutes": 25,
+        "missingRoutes": [],
+        "extraRoutes": [],
+        "coveragePercent": 100
+      }
+    },
+    {
+      "model": "GPT-5-mini",
+      "trialId": "openapi-2",
+      "specType": "openapi",
+      "coverage": {
+        "totalSpecRoutes": 25,
+        "coveredRoutes": 25,
+        "missingRoutes": [],
+        "extraRoutes": [],
+        "coveragePercent": 100
+      }
+    },
+    {
+      "model": "GPT-5-mini",
+      "trialId": "openapi-3",
+      "specType": "openapi",
+      "coverage": {
+        "totalSpecRoutes": 25,
+        "coveredRoutes": 25,
+        "missingRoutes": [],
+        "extraRoutes": [],
+        "coveragePercent": 100
+      }
+    },
+    {
+      "model": "GPT-5-mini",
+      "trialId": "prose-1",
+      "specType": "prose",
+      "coverage": {
+        "totalSpecRoutes": 25,
+        "coveredRoutes": 14,
+        "missingRoutes": [
+          {
+            "method": "GET",
+            "path": "/users",
+            "operation": "getAll"
+          },
+          {
+            "method": "GET",
+            "path": "/users/:id",
+            "operation": "getById"
+          },
+          {
+            "method": "GET",
+            "path": "/projects",
+            "operation": "getAll"
+          },
+          {
+            "method": "GET",
+            "path": "/projects/:id",
+            "operation": "getById"
+          },
+          {
+            "method": "GET",
+            "path": "/tasks",
+            "operation": "getByProject"
+          },
+          {
+            "method": "GET",
+            "path": "/tasks/:id",
+            "operation": "getById"
+          },
+          {
+            "method": "PUT",
+            "path": "/tasks/:id/status",
+            "operation": "changeStatus"
+          },
+          {
+            "method": "GET",
+            "path": "/comments",
+            "operation": "getByTask"
+          },
+          {
+            "method": "GET",
+            "path": "/comments/:id",
+            "operation": "getById"
+          },
+          {
+            "method": "GET",
+            "path": "/notifications",
+            "operation": "getByUser"
+          },
+          {
+            "method": "PUT",
+            "path": "/notifications/:id/read",
+            "operation": "markAsRead"
+          }
+        ],
+        "extraRoutes": [],
+        "coveragePercent": 56.00000000000001
+      }
+    },
+    {
+      "model": "GPT-5-mini",
+      "trialId": "prose-2",
+      "specType": "prose",
+      "coverage": {
+        "totalSpecRoutes": 25,
+        "coveredRoutes": 25,
+        "missingRoutes": [],
+        "extraRoutes": [],
+        "coveragePercent": 100
+      }
+    },
+    {
+      "model": "GPT-5-mini",
+      "trialId": "prose-3",
+      "specType": "prose",
+      "coverage": {
+        "totalSpecRoutes": 25,
+        "coveredRoutes": 25,
+        "missingRoutes": [],
+        "extraRoutes": [],
+        "coveragePercent": 100
+      }
+    },
+    {
+      "model": "GPT-5-mini",
+      "trialId": "structured-1",
+      "specType": "structured",
+      "coverage": {
+        "totalSpecRoutes": 25,
+        "coveredRoutes": 25,
+        "missingRoutes": [],
+        "extraRoutes": [],
+        "coveragePercent": 100
+      }
+    },
+    {
+      "model": "GPT-5-mini",
+      "trialId": "structured-2",
+      "specType": "structured",
+      "coverage": {
+        "totalSpecRoutes": 25,
+        "coveredRoutes": 25,
+        "missingRoutes": [],
+        "extraRoutes": [],
+        "coveragePercent": 100
+      }
+    },
+    {
+      "model": "GPT-5-mini",
+      "trialId": "structured-3",
+      "specType": "structured",
+      "coverage": {
+        "totalSpecRoutes": 25,
+        "coveredRoutes": 25,
+        "missingRoutes": [],
+        "extraRoutes": [],
+        "coveragePercent": 100
+      }
+    },
+    {
+      "model": "GPT-5-mini",
+      "trialId": "typescript-contracts-1",
+      "specType": "typescript-contracts",
+      "coverage": {
+        "totalSpecRoutes": 25,
+        "coveredRoutes": 25,
+        "missingRoutes": [],
+        "extraRoutes": [],
+        "coveragePercent": 100
+      }
+    },
+    {
+      "model": "GPT-5-mini",
+      "trialId": "typescript-contracts-2",
+      "specType": "typescript-contracts",
+      "coverage": {
+        "totalSpecRoutes": 25,
+        "coveredRoutes": 25,
+        "missingRoutes": [],
+        "extraRoutes": [],
+        "coveragePercent": 100
+      }
+    },
+    {
+      "model": "GPT-5-mini",
+      "trialId": "typescript-contracts-3",
+      "specType": "typescript-contracts",
+      "coverage": {
+        "totalSpecRoutes": 25,
+        "coveredRoutes": 25,
+        "missingRoutes": [],
+        "extraRoutes": [],
+        "coveragePercent": 100
+      }
+    },
+    {
+      "model": "GPT-5",
+      "trialId": "c4-1",
+      "specType": "c4",
+      "coverage": {
+        "totalSpecRoutes": 25,
+        "coveredRoutes": 25,
+        "missingRoutes": [],
+        "extraRoutes": [],
+        "coveragePercent": 100
+      }
+    },
+    {
+      "model": "GPT-5",
+      "trialId": "c4-2",
+      "specType": "c4",
+      "coverage": {
+        "totalSpecRoutes": 25,
+        "coveredRoutes": 25,
+        "missingRoutes": [],
+        "extraRoutes": [],
+        "coveragePercent": 100
+      }
+    },
+    {
+      "model": "GPT-5",
+      "trialId": "c4-3",
+      "specType": "c4",
+      "coverage": {
+        "totalSpecRoutes": 25,
+        "coveredRoutes": 25,
+        "missingRoutes": [],
+        "extraRoutes": [],
+        "coveragePercent": 100
+      }
+    },
+    {
+      "model": "GPT-5",
+      "trialId": "openapi-1",
+      "specType": "openapi",
+      "coverage": {
+        "totalSpecRoutes": 25,
+        "coveredRoutes": 25,
+        "missingRoutes": [],
+        "extraRoutes": [],
+        "coveragePercent": 100
+      }
+    },
+    {
+      "model": "GPT-5",
+      "trialId": "openapi-2",
+      "specType": "openapi",
+      "coverage": {
+        "totalSpecRoutes": 25,
+        "coveredRoutes": 25,
+        "missingRoutes": [],
+        "extraRoutes": [],
+        "coveragePercent": 100
+      }
+    },
+    {
+      "model": "GPT-5",
+      "trialId": "openapi-3",
+      "specType": "openapi",
+      "coverage": {
+        "totalSpecRoutes": 25,
+        "coveredRoutes": 25,
+        "missingRoutes": [],
+        "extraRoutes": [],
+        "coveragePercent": 100
+      }
+    },
+    {
+      "model": "GPT-5",
+      "trialId": "prose-1",
+      "specType": "prose",
+      "coverage": {
+        "totalSpecRoutes": 25,
+        "coveredRoutes": 25,
+        "missingRoutes": [],
+        "extraRoutes": [],
+        "coveragePercent": 100
+      }
+    },
+    {
+      "model": "GPT-5",
+      "trialId": "prose-2",
+      "specType": "prose",
+      "coverage": {
+        "totalSpecRoutes": 25,
+        "coveredRoutes": 25,
+        "missingRoutes": [],
+        "extraRoutes": [],
+        "coveragePercent": 100
+      }
+    },
+    {
+      "model": "GPT-5",
+      "trialId": "prose-3",
+      "specType": "prose",
+      "coverage": {
+        "totalSpecRoutes": 25,
+        "coveredRoutes": 25,
+        "missingRoutes": [],
+        "extraRoutes": [],
+        "coveragePercent": 100
+      }
+    },
+    {
+      "model": "GPT-5",
+      "trialId": "structured-1",
+      "specType": "structured",
+      "coverage": {
+        "totalSpecRoutes": 25,
+        "coveredRoutes": 25,
+        "missingRoutes": [],
+        "extraRoutes": [],
+        "coveragePercent": 100
+      }
+    },
+    {
+      "model": "GPT-5",
+      "trialId": "structured-2",
+      "specType": "structured",
+      "coverage": {
+        "totalSpecRoutes": 25,
+        "coveredRoutes": 25,
+        "missingRoutes": [],
+        "extraRoutes": [],
+        "coveragePercent": 100
+      }
+    },
+    {
+      "model": "GPT-5",
+      "trialId": "structured-3",
+      "specType": "structured",
+      "coverage": {
+        "totalSpecRoutes": 25,
+        "coveredRoutes": 25,
+        "missingRoutes": [],
+        "extraRoutes": [],
+        "coveragePercent": 100
+      }
+    },
+    {
+      "model": "GPT-5",
+      "trialId": "typescript-contracts-1",
+      "specType": "typescript-contracts",
+      "coverage": {
+        "totalSpecRoutes": 25,
+        "coveredRoutes": 25,
+        "missingRoutes": [],
+        "extraRoutes": [],
+        "coveragePercent": 100
+      }
+    },
+    {
+      "model": "GPT-5",
+      "trialId": "typescript-contracts-2",
+      "specType": "typescript-contracts",
+      "coverage": {
+        "totalSpecRoutes": 25,
+        "coveredRoutes": 25,
+        "missingRoutes": [],
+        "extraRoutes": [],
+        "coveragePercent": 100
+      }
+    },
+    {
+      "model": "GPT-5",
+      "trialId": "typescript-contracts-3",
+      "specType": "typescript-contracts",
+      "coverage": {
+        "totalSpecRoutes": 25,
+        "coveredRoutes": 25,
+        "missingRoutes": [],
+        "extraRoutes": [],
+        "coveragePercent": 100
+      }
+    },
+    {
+      "model": "Gemini Flash",
+      "trialId": "c4-1",
+      "specType": "c4",
+      "coverage": {
+        "totalSpecRoutes": 25,
+        "coveredRoutes": 25,
+        "missingRoutes": [],
+        "extraRoutes": [],
+        "coveragePercent": 100
+      }
+    },
+    {
+      "model": "Gemini Flash",
+      "trialId": "c4-2",
+      "specType": "c4",
+      "coverage": {
+        "totalSpecRoutes": 25,
+        "coveredRoutes": 0,
+        "missingRoutes": [
+          {
+            "method": "GET",
+            "path": "/users",
+            "operation": "getAll"
+          },
+          {
+            "method": "POST",
+            "path": "/users",
+            "operation": "create"
+          },
+          {
+            "method": "GET",
+            "path": "/users/:id",
+            "operation": "getById"
+          },
+          {
+            "method": "PUT",
+            "path": "/users/:id",
+            "operation": "update"
+          },
+          {
+            "method": "DELETE",
+            "path": "/users/:id",
+            "operation": "delete"
+          },
+          {
+            "method": "GET",
+            "path": "/projects",
+            "operation": "getAll"
+          },
+          {
+            "method": "POST",
+            "path": "/projects",
+            "operation": "create"
+          },
+          {
+            "method": "GET",
+            "path": "/projects/:id",
+            "operation": "getById"
+          },
+          {
+            "method": "PUT",
+            "path": "/projects/:id",
+            "operation": "update"
+          },
+          {
+            "method": "DELETE",
+            "path": "/projects/:id",
+            "operation": "delete"
+          },
+          {
+            "method": "POST",
+            "path": "/projects/:id/members",
+            "operation": "addMember"
+          },
+          {
+            "method": "DELETE",
+            "path": "/projects/:id/members",
+            "operation": "removeMember"
+          },
+          {
+            "method": "GET",
+            "path": "/tasks",
+            "operation": "getByProject"
+          },
+          {
+            "method": "POST",
+            "path": "/tasks",
+            "operation": "create"
+          },
+          {
+            "method": "GET",
+            "path": "/tasks/:id",
+            "operation": "getById"
+          },
+          {
+            "method": "PUT",
+            "path": "/tasks/:id",
+            "operation": "update"
+          },
+          {
+            "method": "DELETE",
+            "path": "/tasks/:id",
+            "operation": "delete"
+          },
+          {
+            "method": "PUT",
+            "path": "/tasks/:id/status",
+            "operation": "changeStatus"
+          },
+          {
+            "method": "PUT",
+            "path": "/tasks/:id/assign",
+            "operation": "assign"
+          },
+          {
+            "method": "GET",
+            "path": "/comments",
+            "operation": "getByTask"
+          },
+          {
+            "method": "POST",
+            "path": "/comments",
+            "operation": "create"
+          },
+          {
+            "method": "GET",
+            "path": "/comments/:id",
+            "operation": "getById"
+          },
+          {
+            "method": "DELETE",
+            "path": "/comments/:id",
+            "operation": "delete"
+          },
+          {
+            "method": "GET",
+            "path": "/notifications",
+            "operation": "getByUser"
+          },
+          {
+            "method": "PUT",
+            "path": "/notifications/:id/read",
+            "operation": "markAsRead"
+          }
+        ],
+        "extraRoutes": [],
+        "coveragePercent": 0
+      }
+    },
+    {
+      "model": "Gemini Flash",
+      "trialId": "c4-3",
+      "specType": "c4",
+      "coverage": {
+        "totalSpecRoutes": 25,
+        "coveredRoutes": 25,
+        "missingRoutes": [],
+        "extraRoutes": [],
+        "coveragePercent": 100
+      }
+    },
+    {
+      "model": "Gemini Flash",
+      "trialId": "openapi-1",
+      "specType": "openapi",
+      "coverage": {
+        "totalSpecRoutes": 25,
+        "coveredRoutes": 0,
+        "missingRoutes": [
+          {
+            "method": "GET",
+            "path": "/users",
+            "operation": "getAll"
+          },
+          {
+            "method": "POST",
+            "path": "/users",
+            "operation": "create"
+          },
+          {
+            "method": "GET",
+            "path": "/users/:id",
+            "operation": "getById"
+          },
+          {
+            "method": "PUT",
+            "path": "/users/:id",
+            "operation": "update"
+          },
+          {
+            "method": "DELETE",
+            "path": "/users/:id",
+            "operation": "delete"
+          },
+          {
+            "method": "GET",
+            "path": "/projects",
+            "operation": "getAll"
+          },
+          {
+            "method": "POST",
+            "path": "/projects",
+            "operation": "create"
+          },
+          {
+            "method": "GET",
+            "path": "/projects/:id",
+            "operation": "getById"
+          },
+          {
+            "method": "PUT",
+            "path": "/projects/:id",
+            "operation": "update"
+          },
+          {
+            "method": "DELETE",
+            "path": "/projects/:id",
+            "operation": "delete"
+          },
+          {
+            "method": "POST",
+            "path": "/projects/:id/members",
+            "operation": "addMember"
+          },
+          {
+            "method": "DELETE",
+            "path": "/projects/:id/members",
+            "operation": "removeMember"
+          },
+          {
+            "method": "GET",
+            "path": "/tasks",
+            "operation": "getByProject"
+          },
+          {
+            "method": "POST",
+            "path": "/tasks",
+            "operation": "create"
+          },
+          {
+            "method": "GET",
+            "path": "/tasks/:id",
+            "operation": "getById"
+          },
+          {
+            "method": "PUT",
+            "path": "/tasks/:id",
+            "operation": "update"
+          },
+          {
+            "method": "DELETE",
+            "path": "/tasks/:id",
+            "operation": "delete"
+          },
+          {
+            "method": "PUT",
+            "path": "/tasks/:id/status",
+            "operation": "changeStatus"
+          },
+          {
+            "method": "PUT",
+            "path": "/tasks/:id/assign",
+            "operation": "assign"
+          },
+          {
+            "method": "GET",
+            "path": "/comments",
+            "operation": "getByTask"
+          },
+          {
+            "method": "POST",
+            "path": "/comments",
+            "operation": "create"
+          },
+          {
+            "method": "GET",
+            "path": "/comments/:id",
+            "operation": "getById"
+          },
+          {
+            "method": "DELETE",
+            "path": "/comments/:id",
+            "operation": "delete"
+          },
+          {
+            "method": "GET",
+            "path": "/notifications",
+            "operation": "getByUser"
+          },
+          {
+            "method": "PUT",
+            "path": "/notifications/:id/read",
+            "operation": "markAsRead"
+          }
+        ],
+        "extraRoutes": [],
+        "coveragePercent": 0
+      }
+    },
+    {
+      "model": "Gemini Flash",
+      "trialId": "openapi-2",
+      "specType": "openapi",
+      "coverage": {
+        "totalSpecRoutes": 25,
+        "coveredRoutes": 25,
+        "missingRoutes": [],
+        "extraRoutes": [],
+        "coveragePercent": 100
+      }
+    },
+    {
+      "model": "Gemini Flash",
+      "trialId": "openapi-3",
+      "specType": "openapi",
+      "coverage": {
+        "totalSpecRoutes": 25,
+        "coveredRoutes": 0,
+        "missingRoutes": [
+          {
+            "method": "GET",
+            "path": "/users",
+            "operation": "getAll"
+          },
+          {
+            "method": "POST",
+            "path": "/users",
+            "operation": "create"
+          },
+          {
+            "method": "GET",
+            "path": "/users/:id",
+            "operation": "getById"
+          },
+          {
+            "method": "PUT",
+            "path": "/users/:id",
+            "operation": "update"
+          },
+          {
+            "method": "DELETE",
+            "path": "/users/:id",
+            "operation": "delete"
+          },
+          {
+            "method": "GET",
+            "path": "/projects",
+            "operation": "getAll"
+          },
+          {
+            "method": "POST",
+            "path": "/projects",
+            "operation": "create"
+          },
+          {
+            "method": "GET",
+            "path": "/projects/:id",
+            "operation": "getById"
+          },
+          {
+            "method": "PUT",
+            "path": "/projects/:id",
+            "operation": "update"
+          },
+          {
+            "method": "DELETE",
+            "path": "/projects/:id",
+            "operation": "delete"
+          },
+          {
+            "method": "POST",
+            "path": "/projects/:id/members",
+            "operation": "addMember"
+          },
+          {
+            "method": "DELETE",
+            "path": "/projects/:id/members",
+            "operation": "removeMember"
+          },
+          {
+            "method": "GET",
+            "path": "/tasks",
+            "operation": "getByProject"
+          },
+          {
+            "method": "POST",
+            "path": "/tasks",
+            "operation": "create"
+          },
+          {
+            "method": "GET",
+            "path": "/tasks/:id",
+            "operation": "getById"
+          },
+          {
+            "method": "PUT",
+            "path": "/tasks/:id",
+            "operation": "update"
+          },
+          {
+            "method": "DELETE",
+            "path": "/tasks/:id",
+            "operation": "delete"
+          },
+          {
+            "method": "PUT",
+            "path": "/tasks/:id/status",
+            "operation": "changeStatus"
+          },
+          {
+            "method": "PUT",
+            "path": "/tasks/:id/assign",
+            "operation": "assign"
+          },
+          {
+            "method": "GET",
+            "path": "/comments",
+            "operation": "getByTask"
+          },
+          {
+            "method": "POST",
+            "path": "/comments",
+            "operation": "create"
+          },
+          {
+            "method": "GET",
+            "path": "/comments/:id",
+            "operation": "getById"
+          },
+          {
+            "method": "DELETE",
+            "path": "/comments/:id",
+            "operation": "delete"
+          },
+          {
+            "method": "GET",
+            "path": "/notifications",
+            "operation": "getByUser"
+          },
+          {
+            "method": "PUT",
+            "path": "/notifications/:id/read",
+            "operation": "markAsRead"
+          }
+        ],
+        "extraRoutes": [],
+        "coveragePercent": 0
+      }
+    },
+    {
+      "model": "Gemini Flash",
+      "trialId": "prose-1",
+      "specType": "prose",
+      "coverage": {
+        "totalSpecRoutes": 25,
+        "coveredRoutes": 0,
+        "missingRoutes": [
+          {
+            "method": "GET",
+            "path": "/users",
+            "operation": "getAll"
+          },
+          {
+            "method": "POST",
+            "path": "/users",
+            "operation": "create"
+          },
+          {
+            "method": "GET",
+            "path": "/users/:id",
+            "operation": "getById"
+          },
+          {
+            "method": "PUT",
+            "path": "/users/:id",
+            "operation": "update"
+          },
+          {
+            "method": "DELETE",
+            "path": "/users/:id",
+            "operation": "delete"
+          },
+          {
+            "method": "GET",
+            "path": "/projects",
+            "operation": "getAll"
+          },
+          {
+            "method": "POST",
+            "path": "/projects",
+            "operation": "create"
+          },
+          {
+            "method": "GET",
+            "path": "/projects/:id",
+            "operation": "getById"
+          },
+          {
+            "method": "PUT",
+            "path": "/projects/:id",
+            "operation": "update"
+          },
+          {
+            "method": "DELETE",
+            "path": "/projects/:id",
+            "operation": "delete"
+          },
+          {
+            "method": "POST",
+            "path": "/projects/:id/members",
+            "operation": "addMember"
+          },
+          {
+            "method": "DELETE",
+            "path": "/projects/:id/members",
+            "operation": "removeMember"
+          },
+          {
+            "method": "GET",
+            "path": "/tasks",
+            "operation": "getByProject"
+          },
+          {
+            "method": "POST",
+            "path": "/tasks",
+            "operation": "create"
+          },
+          {
+            "method": "GET",
+            "path": "/tasks/:id",
+            "operation": "getById"
+          },
+          {
+            "method": "PUT",
+            "path": "/tasks/:id",
+            "operation": "update"
+          },
+          {
+            "method": "DELETE",
+            "path": "/tasks/:id",
+            "operation": "delete"
+          },
+          {
+            "method": "PUT",
+            "path": "/tasks/:id/status",
+            "operation": "changeStatus"
+          },
+          {
+            "method": "PUT",
+            "path": "/tasks/:id/assign",
+            "operation": "assign"
+          },
+          {
+            "method": "GET",
+            "path": "/comments",
+            "operation": "getByTask"
+          },
+          {
+            "method": "POST",
+            "path": "/comments",
+            "operation": "create"
+          },
+          {
+            "method": "GET",
+            "path": "/comments/:id",
+            "operation": "getById"
+          },
+          {
+            "method": "DELETE",
+            "path": "/comments/:id",
+            "operation": "delete"
+          },
+          {
+            "method": "GET",
+            "path": "/notifications",
+            "operation": "getByUser"
+          },
+          {
+            "method": "PUT",
+            "path": "/notifications/:id/read",
+            "operation": "markAsRead"
+          }
+        ],
+        "extraRoutes": [],
+        "coveragePercent": 0
+      }
+    },
+    {
+      "model": "Gemini Flash",
+      "trialId": "prose-2",
+      "specType": "prose",
+      "coverage": {
+        "totalSpecRoutes": 25,
+        "coveredRoutes": 0,
+        "missingRoutes": [
+          {
+            "method": "GET",
+            "path": "/users",
+            "operation": "getAll"
+          },
+          {
+            "method": "POST",
+            "path": "/users",
+            "operation": "create"
+          },
+          {
+            "method": "GET",
+            "path": "/users/:id",
+            "operation": "getById"
+          },
+          {
+            "method": "PUT",
+            "path": "/users/:id",
+            "operation": "update"
+          },
+          {
+            "method": "DELETE",
+            "path": "/users/:id",
+            "operation": "delete"
+          },
+          {
+            "method": "GET",
+            "path": "/projects",
+            "operation": "getAll"
+          },
+          {
+            "method": "POST",
+            "path": "/projects",
+            "operation": "create"
+          },
+          {
+            "method": "GET",
+            "path": "/projects/:id",
+            "operation": "getById"
+          },
+          {
+            "method": "PUT",
+            "path": "/projects/:id",
+            "operation": "update"
+          },
+          {
+            "method": "DELETE",
+            "path": "/projects/:id",
+            "operation": "delete"
+          },
+          {
+            "method": "POST",
+            "path": "/projects/:id/members",
+            "operation": "addMember"
+          },
+          {
+            "method": "DELETE",
+            "path": "/projects/:id/members",
+            "operation": "removeMember"
+          },
+          {
+            "method": "GET",
+            "path": "/tasks",
+            "operation": "getByProject"
+          },
+          {
+            "method": "POST",
+            "path": "/tasks",
+            "operation": "create"
+          },
+          {
+            "method": "GET",
+            "path": "/tasks/:id",
+            "operation": "getById"
+          },
+          {
+            "method": "PUT",
+            "path": "/tasks/:id",
+            "operation": "update"
+          },
+          {
+            "method": "DELETE",
+            "path": "/tasks/:id",
+            "operation": "delete"
+          },
+          {
+            "method": "PUT",
+            "path": "/tasks/:id/status",
+            "operation": "changeStatus"
+          },
+          {
+            "method": "PUT",
+            "path": "/tasks/:id/assign",
+            "operation": "assign"
+          },
+          {
+            "method": "GET",
+            "path": "/comments",
+            "operation": "getByTask"
+          },
+          {
+            "method": "POST",
+            "path": "/comments",
+            "operation": "create"
+          },
+          {
+            "method": "GET",
+            "path": "/comments/:id",
+            "operation": "getById"
+          },
+          {
+            "method": "DELETE",
+            "path": "/comments/:id",
+            "operation": "delete"
+          },
+          {
+            "method": "GET",
+            "path": "/notifications",
+            "operation": "getByUser"
+          },
+          {
+            "method": "PUT",
+            "path": "/notifications/:id/read",
+            "operation": "markAsRead"
+          }
+        ],
+        "extraRoutes": [],
+        "coveragePercent": 0
+      }
+    },
+    {
+      "model": "Gemini Flash",
+      "trialId": "prose-3",
+      "specType": "prose",
+      "coverage": {
+        "totalSpecRoutes": 25,
+        "coveredRoutes": 25,
+        "missingRoutes": [],
+        "extraRoutes": [],
+        "coveragePercent": 100
+      }
+    },
+    {
+      "model": "Gemini Flash",
+      "trialId": "structured-1",
+      "specType": "structured",
+      "coverage": {
+        "totalSpecRoutes": 25,
+        "coveredRoutes": 0,
+        "missingRoutes": [
+          {
+            "method": "GET",
+            "path": "/users",
+            "operation": "getAll"
+          },
+          {
+            "method": "POST",
+            "path": "/users",
+            "operation": "create"
+          },
+          {
+            "method": "GET",
+            "path": "/users/:id",
+            "operation": "getById"
+          },
+          {
+            "method": "PUT",
+            "path": "/users/:id",
+            "operation": "update"
+          },
+          {
+            "method": "DELETE",
+            "path": "/users/:id",
+            "operation": "delete"
+          },
+          {
+            "method": "GET",
+            "path": "/projects",
+            "operation": "getAll"
+          },
+          {
+            "method": "POST",
+            "path": "/projects",
+            "operation": "create"
+          },
+          {
+            "method": "GET",
+            "path": "/projects/:id",
+            "operation": "getById"
+          },
+          {
+            "method": "PUT",
+            "path": "/projects/:id",
+            "operation": "update"
+          },
+          {
+            "method": "DELETE",
+            "path": "/projects/:id",
+            "operation": "delete"
+          },
+          {
+            "method": "POST",
+            "path": "/projects/:id/members",
+            "operation": "addMember"
+          },
+          {
+            "method": "DELETE",
+            "path": "/projects/:id/members",
+            "operation": "removeMember"
+          },
+          {
+            "method": "GET",
+            "path": "/tasks",
+            "operation": "getByProject"
+          },
+          {
+            "method": "POST",
+            "path": "/tasks",
+            "operation": "create"
+          },
+          {
+            "method": "GET",
+            "path": "/tasks/:id",
+            "operation": "getById"
+          },
+          {
+            "method": "PUT",
+            "path": "/tasks/:id",
+            "operation": "update"
+          },
+          {
+            "method": "DELETE",
+            "path": "/tasks/:id",
+            "operation": "delete"
+          },
+          {
+            "method": "PUT",
+            "path": "/tasks/:id/status",
+            "operation": "changeStatus"
+          },
+          {
+            "method": "PUT",
+            "path": "/tasks/:id/assign",
+            "operation": "assign"
+          },
+          {
+            "method": "GET",
+            "path": "/comments",
+            "operation": "getByTask"
+          },
+          {
+            "method": "POST",
+            "path": "/comments",
+            "operation": "create"
+          },
+          {
+            "method": "GET",
+            "path": "/comments/:id",
+            "operation": "getById"
+          },
+          {
+            "method": "DELETE",
+            "path": "/comments/:id",
+            "operation": "delete"
+          },
+          {
+            "method": "GET",
+            "path": "/notifications",
+            "operation": "getByUser"
+          },
+          {
+            "method": "PUT",
+            "path": "/notifications/:id/read",
+            "operation": "markAsRead"
+          }
+        ],
+        "extraRoutes": [],
+        "coveragePercent": 0
+      }
+    },
+    {
+      "model": "Gemini Flash",
+      "trialId": "structured-2",
+      "specType": "structured",
+      "coverage": {
+        "totalSpecRoutes": 25,
+        "coveredRoutes": 25,
+        "missingRoutes": [],
+        "extraRoutes": [],
+        "coveragePercent": 100
+      }
+    },
+    {
+      "model": "Gemini Flash",
+      "trialId": "structured-3",
+      "specType": "structured",
+      "coverage": {
+        "totalSpecRoutes": 25,
+        "coveredRoutes": 0,
+        "missingRoutes": [
+          {
+            "method": "GET",
+            "path": "/users",
+            "operation": "getAll"
+          },
+          {
+            "method": "POST",
+            "path": "/users",
+            "operation": "create"
+          },
+          {
+            "method": "GET",
+            "path": "/users/:id",
+            "operation": "getById"
+          },
+          {
+            "method": "PUT",
+            "path": "/users/:id",
+            "operation": "update"
+          },
+          {
+            "method": "DELETE",
+            "path": "/users/:id",
+            "operation": "delete"
+          },
+          {
+            "method": "GET",
+            "path": "/projects",
+            "operation": "getAll"
+          },
+          {
+            "method": "POST",
+            "path": "/projects",
+            "operation": "create"
+          },
+          {
+            "method": "GET",
+            "path": "/projects/:id",
+            "operation": "getById"
+          },
+          {
+            "method": "PUT",
+            "path": "/projects/:id",
+            "operation": "update"
+          },
+          {
+            "method": "DELETE",
+            "path": "/projects/:id",
+            "operation": "delete"
+          },
+          {
+            "method": "POST",
+            "path": "/projects/:id/members",
+            "operation": "addMember"
+          },
+          {
+            "method": "DELETE",
+            "path": "/projects/:id/members",
+            "operation": "removeMember"
+          },
+          {
+            "method": "GET",
+            "path": "/tasks",
+            "operation": "getByProject"
+          },
+          {
+            "method": "POST",
+            "path": "/tasks",
+            "operation": "create"
+          },
+          {
+            "method": "GET",
+            "path": "/tasks/:id",
+            "operation": "getById"
+          },
+          {
+            "method": "PUT",
+            "path": "/tasks/:id",
+            "operation": "update"
+          },
+          {
+            "method": "DELETE",
+            "path": "/tasks/:id",
+            "operation": "delete"
+          },
+          {
+            "method": "PUT",
+            "path": "/tasks/:id/status",
+            "operation": "changeStatus"
+          },
+          {
+            "method": "PUT",
+            "path": "/tasks/:id/assign",
+            "operation": "assign"
+          },
+          {
+            "method": "GET",
+            "path": "/comments",
+            "operation": "getByTask"
+          },
+          {
+            "method": "POST",
+            "path": "/comments",
+            "operation": "create"
+          },
+          {
+            "method": "GET",
+            "path": "/comments/:id",
+            "operation": "getById"
+          },
+          {
+            "method": "DELETE",
+            "path": "/comments/:id",
+            "operation": "delete"
+          },
+          {
+            "method": "GET",
+            "path": "/notifications",
+            "operation": "getByUser"
+          },
+          {
+            "method": "PUT",
+            "path": "/notifications/:id/read",
+            "operation": "markAsRead"
+          }
+        ],
+        "extraRoutes": [],
+        "coveragePercent": 0
+      }
+    },
+    {
+      "model": "Gemini Flash",
+      "trialId": "typescript-contracts-1",
+      "specType": "typescript-contracts",
+      "coverage": {
+        "totalSpecRoutes": 25,
+        "coveredRoutes": 25,
+        "missingRoutes": [],
+        "extraRoutes": [],
+        "coveragePercent": 100
+      }
+    },
+    {
+      "model": "Gemini Flash",
+      "trialId": "typescript-contracts-2",
+      "specType": "typescript-contracts",
+      "coverage": {
+        "totalSpecRoutes": 25,
+        "coveredRoutes": 25,
+        "missingRoutes": [],
+        "extraRoutes": [],
+        "coveragePercent": 100
+      }
+    },
+    {
+      "model": "Gemini Flash",
+      "trialId": "typescript-contracts-3",
+      "specType": "typescript-contracts",
+      "coverage": {
+        "totalSpecRoutes": 25,
+        "coveredRoutes": 25,
+        "missingRoutes": [],
+        "extraRoutes": [],
+        "coveragePercent": 100
+      }
+    },
+    {
+      "model": "Gemini Pro",
+      "trialId": "c4-1",
+      "specType": "c4",
+      "coverage": {
+        "totalSpecRoutes": 25,
+        "coveredRoutes": 0,
+        "missingRoutes": [
+          {
+            "method": "GET",
+            "path": "/users",
+            "operation": "getAll"
+          },
+          {
+            "method": "POST",
+            "path": "/users",
+            "operation": "create"
+          },
+          {
+            "method": "GET",
+            "path": "/users/:id",
+            "operation": "getById"
+          },
+          {
+            "method": "PUT",
+            "path": "/users/:id",
+            "operation": "update"
+          },
+          {
+            "method": "DELETE",
+            "path": "/users/:id",
+            "operation": "delete"
+          },
+          {
+            "method": "GET",
+            "path": "/projects",
+            "operation": "getAll"
+          },
+          {
+            "method": "POST",
+            "path": "/projects",
+            "operation": "create"
+          },
+          {
+            "method": "GET",
+            "path": "/projects/:id",
+            "operation": "getById"
+          },
+          {
+            "method": "PUT",
+            "path": "/projects/:id",
+            "operation": "update"
+          },
+          {
+            "method": "DELETE",
+            "path": "/projects/:id",
+            "operation": "delete"
+          },
+          {
+            "method": "POST",
+            "path": "/projects/:id/members",
+            "operation": "addMember"
+          },
+          {
+            "method": "DELETE",
+            "path": "/projects/:id/members",
+            "operation": "removeMember"
+          },
+          {
+            "method": "GET",
+            "path": "/tasks",
+            "operation": "getByProject"
+          },
+          {
+            "method": "POST",
+            "path": "/tasks",
+            "operation": "create"
+          },
+          {
+            "method": "GET",
+            "path": "/tasks/:id",
+            "operation": "getById"
+          },
+          {
+            "method": "PUT",
+            "path": "/tasks/:id",
+            "operation": "update"
+          },
+          {
+            "method": "DELETE",
+            "path": "/tasks/:id",
+            "operation": "delete"
+          },
+          {
+            "method": "PUT",
+            "path": "/tasks/:id/status",
+            "operation": "changeStatus"
+          },
+          {
+            "method": "PUT",
+            "path": "/tasks/:id/assign",
+            "operation": "assign"
+          },
+          {
+            "method": "GET",
+            "path": "/comments",
+            "operation": "getByTask"
+          },
+          {
+            "method": "POST",
+            "path": "/comments",
+            "operation": "create"
+          },
+          {
+            "method": "GET",
+            "path": "/comments/:id",
+            "operation": "getById"
+          },
+          {
+            "method": "DELETE",
+            "path": "/comments/:id",
+            "operation": "delete"
+          },
+          {
+            "method": "GET",
+            "path": "/notifications",
+            "operation": "getByUser"
+          },
+          {
+            "method": "PUT",
+            "path": "/notifications/:id/read",
+            "operation": "markAsRead"
+          }
+        ],
+        "extraRoutes": [],
+        "coveragePercent": 0
+      }
+    },
+    {
+      "model": "Gemini Pro",
+      "trialId": "c4-2",
+      "specType": "c4",
+      "coverage": {
+        "totalSpecRoutes": 25,
+        "coveredRoutes": 25,
+        "missingRoutes": [],
+        "extraRoutes": [],
+        "coveragePercent": 100
+      }
+    },
+    {
+      "model": "Gemini Pro",
+      "trialId": "c4-3",
+      "specType": "c4",
+      "coverage": {
+        "totalSpecRoutes": 25,
+        "coveredRoutes": 25,
+        "missingRoutes": [],
+        "extraRoutes": [],
+        "coveragePercent": 100
+      }
+    },
+    {
+      "model": "Gemini Pro",
+      "trialId": "openapi-1",
+      "specType": "openapi",
+      "coverage": {
+        "totalSpecRoutes": 25,
+        "coveredRoutes": 25,
+        "missingRoutes": [],
+        "extraRoutes": [],
+        "coveragePercent": 100
+      }
+    },
+    {
+      "model": "Gemini Pro",
+      "trialId": "openapi-2",
+      "specType": "openapi",
+      "coverage": {
+        "totalSpecRoutes": 25,
+        "coveredRoutes": 25,
+        "missingRoutes": [],
+        "extraRoutes": [],
+        "coveragePercent": 100
+      }
+    },
+    {
+      "model": "Gemini Pro",
+      "trialId": "openapi-3",
+      "specType": "openapi",
+      "coverage": {
+        "totalSpecRoutes": 25,
+        "coveredRoutes": 25,
+        "missingRoutes": [],
+        "extraRoutes": [],
+        "coveragePercent": 100
+      }
+    },
+    {
+      "model": "Gemini Pro",
+      "trialId": "prose-1",
+      "specType": "prose",
+      "coverage": {
+        "totalSpecRoutes": 25,
+        "coveredRoutes": 25,
+        "missingRoutes": [],
+        "extraRoutes": [],
+        "coveragePercent": 100
+      }
+    },
+    {
+      "model": "Gemini Pro",
+      "trialId": "prose-2",
+      "specType": "prose",
+      "coverage": {
+        "totalSpecRoutes": 25,
+        "coveredRoutes": 25,
+        "missingRoutes": [],
+        "extraRoutes": [],
+        "coveragePercent": 100
+      }
+    },
+    {
+      "model": "Gemini Pro",
+      "trialId": "prose-3",
+      "specType": "prose",
+      "coverage": {
+        "totalSpecRoutes": 25,
+        "coveredRoutes": 25,
+        "missingRoutes": [],
+        "extraRoutes": [],
+        "coveragePercent": 100
+      }
+    },
+    {
+      "model": "Gemini Pro",
+      "trialId": "structured-1",
+      "specType": "structured",
+      "coverage": {
+        "totalSpecRoutes": 25,
+        "coveredRoutes": 25,
+        "missingRoutes": [],
+        "extraRoutes": [],
+        "coveragePercent": 100
+      }
+    },
+    {
+      "model": "Gemini Pro",
+      "trialId": "structured-2",
+      "specType": "structured",
+      "coverage": {
+        "totalSpecRoutes": 25,
+        "coveredRoutes": 25,
+        "missingRoutes": [],
+        "extraRoutes": [],
+        "coveragePercent": 100
+      }
+    },
+    {
+      "model": "Gemini Pro",
+      "trialId": "structured-3",
+      "specType": "structured",
+      "coverage": {
+        "totalSpecRoutes": 25,
+        "coveredRoutes": 25,
+        "missingRoutes": [],
+        "extraRoutes": [],
+        "coveragePercent": 100
+      }
+    },
+    {
+      "model": "Gemini Pro",
+      "trialId": "typescript-contracts-1",
+      "specType": "typescript-contracts",
+      "coverage": {
+        "totalSpecRoutes": 25,
+        "coveredRoutes": 25,
+        "missingRoutes": [],
+        "extraRoutes": [],
+        "coveragePercent": 100
+      }
+    },
+    {
+      "model": "Gemini Pro",
+      "trialId": "typescript-contracts-2",
+      "specType": "typescript-contracts",
+      "coverage": {
+        "totalSpecRoutes": 25,
+        "coveredRoutes": 25,
+        "missingRoutes": [],
+        "extraRoutes": [],
+        "coveragePercent": 100
+      }
+    },
+    {
+      "model": "Gemini Pro",
+      "trialId": "typescript-contracts-3",
+      "specType": "typescript-contracts",
+      "coverage": {
+        "totalSpecRoutes": 25,
+        "coveredRoutes": 25,
+        "missingRoutes": [],
+        "extraRoutes": [],
+        "coveragePercent": 100
+      }
+    }
+  ],
+  "contract": []
+}

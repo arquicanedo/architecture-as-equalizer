@@ -1,0 +1,68 @@
+{
+  "trialId": "c4-3",
+  "specType": "c4",
+  "structural": {
+    "hasEventBus": true,
+    "hasUserService": true,
+    "hasProjectService": true,
+    "hasTaskService": true,
+    "hasCommentService": true,
+    "hasNotificationService": true,
+    "hasRouter": true,
+    "hasMainEntry": true,
+    "hasDemoScript": true,
+    "fileCount": 9,
+    "folderStructureScore": 10,
+    "details": [
+      "Each service in its own file: YES"
+    ]
+  },
+  "constraints": {
+    "directServiceCalls": [
+      {
+        "type": "direct-service-import",
+        "file": "src\\services\\comment-service.ts",
+        "line": 8,
+        "description": "Service file imports another service: task-service"
+      },
+      {
+        "type": "direct-service-import",
+        "file": "src\\services\\comment-service.ts",
+        "line": 9,
+        "description": "Service file imports another service: user-service"
+      }
+    ],
+    "sharedDataAccess": [],
+    "httpInServices": [],
+    "invalidStatusTransitions": [],
+    "externalDependencies": [],
+    "totalViolations": 2
+  },
+  "codeMetrics": {
+    "compiles": false,
+    "compilationErrors": [],
+    "totalLines": 1146,
+    "totalFiles": 9,
+    "linesPerFile": {
+      "src\\demo.ts": 280,
+      "src\\event-bus.ts": 37,
+      "src\\main.ts": 38,
+      "src\\router.ts": 325,
+      "src\\services\\comment-service.ts": 75,
+      "src\\services\\notification-service.ts": 89,
+      "src\\services\\project-service.ts": 98,
+      "src\\services\\task-service.ts": 138,
+      "src\\services\\user-service.ts": 66
+    }
+  },
+  "transcriptMetrics": {
+    "totalInputTokens": 611810,
+    "totalOutputTokens": 21392,
+    "totalTokens": 633202,
+    "messageCount": 35,
+    "toolCallCount": 35,
+    "errorCount": 5,
+    "retryCount": 0,
+    "durationMs": 255261
+  }
+}

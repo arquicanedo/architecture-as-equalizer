@@ -1,0 +1,112 @@
+{
+  "trialId": "openapi-1",
+  "specType": "openapi",
+  "messages": [
+    {
+      "role": "assistant",
+      "content": "",
+      "toolCalls": [
+        {
+          "name": "write_file",
+          "input": {
+            "path": "src/event-bus.ts",
+            "content": "\ntype EventCallback = (payload: any) => void;\n\nexport class EventBus {\n    private subscribers: Map<string, EventCallback[]>;\n\n    constructor() {\n        this.subscribers = new Map();\n    }\n\n    publish(event: string, payload: any): void {\n        const callbacks = this.subscribers.get(event);\n        if (callbacks) {\n            callbacks.forEach(callback => {\n                // Execute callbacks asynchronously to prevent blocking the publisher\n                // and to decouple services further.\n                setImmediate(() => callback(payload));\n            });\n        }\n    }\n\n    subscribe(event: string, callback: EventCallback): void {\n        if (!this.subscribers.has(event)) {\n            this.subscribers.set(event, []);\n        }\n        this.subscribers.get(event)?.push(callback);\n    }\n}\n"
+          },
+          "output": "File written: src/event-bus.ts (29 lines)",
+          "error": false
+        }
+      ],
+      "inputTokens": 4540,
+      "outputTokens": 210
+    },
+    {
+      "role": "assistant",
+      "content": "",
+      "toolCalls": [
+        {
+          "name": "write_file",
+          "input": {
+            "path": "src/types.ts",
+            "content": "\nimport { IncomingMessage, ServerResponse } from 'http';\n\nexport type UserId = string;\nexport type ProjectId = string;\nexport type TaskId = string;\nexport type CommentId = string;\nexport type NotificationId = string;\n\nexport interface User {\n    id: UserId;\n    name: string;\n    email: string;\n}\n\nexport interface CreateUserInput {\n    name: string;\n    email: string;\n}\n\nexport interface UpdateUserInput {\n    name?: string;\n    email?: string;\n}\n\nexport interface Project {\n    id: ProjectId;\n    name: string;\n    description: string;\n    memberIds: UserId[];\n}\n\nexport interface CreateProjectInput {\n    name: string;\n    description: string;\n}\n\nexport interface UpdateProjectInput {\n    name?: string;\n    description?: string;\n}\n\nexport enum TaskStatus {\n    TODO = 'todo',\n    IN_PROGRESS = 'in-progress',\n    DONE = 'done',\n}\n\nexport interface Task {\n    id: TaskId;\n    title: string;\n    description: string;\n    status: TaskStatus;\n    assigneeId: UserId | null;\n    projectId: ProjectId;\n}\n\nexport interface CreateTaskInput {\n    title: string;\n    description: string;\n    projectId: ProjectId;\n}\n\nexport interface UpdateTaskInput {\n    title?: string;\n    description?: string;\n}\n\nexport interface Comment {\n    id: CommentId;\n    taskId: TaskId;\n    authorId: UserId;\n    body: string;\n    createdAt: string; // ISO 8601 date string\n}\n\nexport interface CreateCommentInput {\n    taskId: TaskId;\n    authorId: UserId;\n    body: string;\n}\n\nexport interface Notification {\n    id: NotificationId;\n    userId: UserId;\n    message: string;\n    read: boolean;\n    createdAt: string; // ISO 8601 date string\n}\n\n// Router types\nexport type HttpMethod = 'GET' | 'POST' | 'PUT' | 'DELETE';\n\nexport interface RouteHandlerResult {\n    statusCode: number;\n    body?: object | string;\n    headers?: { [key: string]: string };\n}\n\nexport type RouteHandler = (\n    req: IncomingMessage,\n    res: ServerResponse,\n    params: { [key: string]: string },\n    query: { [key: string]: string },\n    body: any\n) => Promise<RouteHandlerResult>;\n\nexport interface Route {\n    method: HttpMethod;\n    path: RegExp; // Regex for path matching\n    handler: RouteHandler;\n    paramNames: string[]; // To extract named parameters from the path\n}\n"
+          },
+          "output": "File written: src/types.ts (114 lines)",
+          "error": false
+        }
+      ],
+      "inputTokens": 6206,
+      "outputTokens": 626
+    },
+    {
+      "role": "assistant",
+      "content": "",
+      "toolCalls": [
+        {
+          "name": "write_file",
+          "input": {
+            "content": "\nimport { User, CreateUserInput, UpdateUserInput, UserId } from '../types';\nimport * as crypto from 'crypto';\n\nexport class UserService {\n    private users: Map<UserId, User>;\n\n    constructor() {\n        this.users = new Map();\n    }\n\n    public async getAllUsers(): Promise<User[]> {\n        return Array.from(this.users.values());\n    }\n\n    public async getUserById(id: UserId): Promise<User | undefined> {\n        return this.users.get(id);\n    }\n\n    public async createUser(input: CreateUserInput): Promise<User> {\n        const newUser: User = {\n            id: crypto.randomUUID(),\n            name: input.name,\n            email: input.email,\n        };\n        this.users.set(newUser.id, newUser);\n        return newUser;\n    }\n\n    public async updateUser(id: UserId, input: UpdateUserInput): Promise<User | undefined> {\n        const user = this.users.get(id);\n        if (!user) {\n            return undefined;\n        }\n\n        if (input.name !== undefined) {\n            user.name = input.name;\n        }\n        if (input.email !== undefined) {\n            user.email = input.email;\n        }\n\n        this.users.set(id, user); // Re-set to ensure map updates if user object was copied\n        return user;\n    }\n\n    public async deleteUser(id: UserId): Promise<boolean> {\n        return this.users.delete(id);\n    }\n}\n",
+            "path": "src/services/user-service.ts"
+          },
+          "output": "File written: src/services/user-service.ts (51 lines)",
+          "error": false
+        }
+      ],
+      "inputTokens": 6894,
+      "outputTokens": 371
+    },
+    {
+      "role": "assistant",
+      "content": "",
+      "toolCalls": [
+        {
+          "name": "write_file",
+          "input": {
+            "path": "src/services/project-service.ts",
+            "content": "\nimport { Project, CreateProjectInput, UpdateProjectInput, ProjectId, UserId } from '../types';\nimport * as crypto from 'crypto';\n\nexport class ProjectService {\n    private projects: Map<ProjectId, Project>;\n\n    constructor() {\n        this.projects = new Map();\n    }\n\n    public async getAllProjects(): Promise<Project[]> {\n        return Array.from(this.projects.values());\n    }\n\n    public async getProjectById(id: ProjectId): Promise<Project | undefined> {\n        return this.projects.get(id);\n    }\n\n    public async createProject(input: CreateProjectInput): Promise<Project> {\n        const newProject: Project = {\n            id: crypto.randomUUID(),\n            name: input.name,\n            description: input.description,\n            memberIds: [],\n        };\n        this.projects.set(newProject.id, newProject);\n        return newProject;\n    }\n\n    public async updateProject(id: ProjectId, input: UpdateProjectInput): Promise<Project | undefined> {\n        const project = this.projects.get(id);\n        if (!project) {\n            return undefined;\n        }\n\n        if (input.name !== undefined) {\n            project.name = input.name;\n        }\n        if (input.description !== undefined) {\n            project.description = input.description;\n        }\n\n        this.projects.set(id, project);\n        return project;\n    }\n\n    public async deleteProject(id: ProjectId): Promise<boolean> {\n        return this.projects.delete(id);\n    }\n\n    public async addMember(projectId: ProjectId, userId: UserId): Promise<Project | undefined> {\n        const project = this.projects.get(projectId);\n        if (!project) {\n            return undefined;\n        }\n\n        if (!project.memberIds.includes(userId)) {\n            project.memberIds.push(userId);\n        }\n\n        this.projects.set(projectId, project);\n        return project;\n    }\n\n    public async removeMember(projectId: ProjectId, userId: UserId): Promise<Project | undefined> {\n        const project = this.projects.get(projectId);\n        if (!project) {\n            return undefined;\n        }\n\n        const initialLength = project.memberIds.length;\n        project.memberIds = project.memberIds.filter(id => id !== userId);\n\n        if (project.memberIds.length < initialLength) {\n            this.projects.set(projectId, project);\n            return project;\n        } else {\n            // Member not found, return the existing project without changes\n            return project;\n        }\n    }\n}\n"
+          },
+          "output": "File written: src/services/project-service.ts (84 lines)",
+          "error": false
+        }
+      ],
+      "inputTokens": 7405,
+      "outputTokens": 626
+    },
+    {
+      "role": "assistant",
+      "content": "",
+      "toolCalls": [
+        {
+          "name": "write_file",
+          "input": {
+            "path": "src/services/task-service.ts",
+            "content": "\nimport {\n    Task, CreateTaskInput, UpdateTaskInput, TaskId, UserId, ProjectId, TaskStatus\n} from '../types';\nimport { EventBus } from '../event-bus';\nimport * as crypto from 'crypto';\n\nexport class TaskService {\n    private tasks: Map<TaskId, Task>;\n    private eventBus: EventBus;\n\n    constructor(eventBus: EventBus) {\n        this.tasks = new Map();\n        this.eventBus = eventBus;\n    }\n\n    public async getTasksByProjectId(projectId: ProjectId): Promise<Task[]> {\n        return Array.from(this.tasks.values()).filter(task => task.projectId === projectId);\n    }\n\n    public async getTaskById(id: TaskId): Promise<Task | undefined> {\n        return this.tasks.get(id);\n    }\n\n    public async createTask(input: CreateTaskInput): Promise<Task> {\n        const newTask: Task = {\n            id: crypto.randomUUID(),\n            title: input.title,\n            description: input.description,\n            status: TaskStatus.TODO, // Default status\n            assigneeId: null,\n            projectId: input.projectId,\n        };\n        this.tasks.set(newTask.id, newTask);\n        return newTask;\n    }\n\n    public async updateTask(id: TaskId, input: UpdateTaskInput): Promise<Task | undefined> {\n        const task = this.tasks.get(id);\n        if (!task) {\n            return undefined;\n        }\n\n        if (input.title !== undefined) {\n            task.title = input.title;\n        }\n        if (input.description !== undefined) {\n            task.description = input.description;\n        }\n\n        this.tasks.set(id, task);\n        return task;\n    }\n\n    public async deleteTask(id: TaskId): Promise<boolean> {\n        return this.tasks.delete(id);\n    }\n\n    public async changeTaskStatus(id: TaskId, newStatus: TaskStatus): Promise<Task | 'invalid-transition' | undefined> {\n        const task = this.tasks.get(id);\n        if (!task) {\n            return undefined;\n        }\n\n        const oldStatus = task.status;\n\n        // Forward-only status transitions\n        if (oldStatus === TaskStatus.TODO && newStatus === TaskStatus.IN_PROGRESS) {\n            task.status = newStatus;\n        } else if (oldStatus === TaskStatus.IN_PROGRESS && newStatus === TaskStatus.DONE) {\n            task.status = newStatus;\n        } else if (oldStatus === newStatus) {\n            // Allow setting to current status (no change)\n        } else {\n            return 'invalid-transition';\n        }\n\n        this.tasks.set(id, task);\n        this.eventBus.publish('task.statusChanged', {\n            taskId: task.id,\n            taskTitle: task.title,\n            assigneeId: task.assigneeId,\n            oldStatus: oldStatus,\n            newStatus: newStatus,\n        });\n        return task;\n    }\n\n    public async assignTask(id: TaskId, assigneeId: UserId): Promise<Task | undefined> {\n        const task = this.tasks.get(id);\n        if (!task) {\n            return undefined;\n        }\n\n        task.assigneeId = assigneeId;\n\n        this.tasks.set(id, task);\n        this.eventBus.publish('task.assigned', {\n            taskId: task.id,\n            taskTitle: task.title,\n            assigneeId: task.assigneeId,\n        });\n        return task;\n    }\n}\n"
+          },
+          "output": "File written: src/services/task-service.ts (106 lines)",
+          "error": false
+        }
+      ],
+      "inputTokens": 8071,
+      "outputTokens": 858
+    },
+    {
+      "role": "assistant",
+      "content": "",
+      "toolCalls": [
+        {
+          "name": "write_file",
+          "input": {
+            "path": "src/services/comment-service.ts",
+            "content": "\nimport { Comment, CreateCommentInput, CommentId, TaskId, UserId } from '../types';\nimport { EventBus } from '../event-bus';\nimport * as crypto from 'crypto';\n\nexport class CommentService {\n    private comments: Map<CommentId, Comment>;\n    private eventBus: EventBus;\n\n    constructor(eventBus: EventBus) {\n        this.comments = new Map();\n        this.eventBus = eventBus;\n    }\n\n    public async getCommentsByTaskId(taskId: TaskId): Promise<Comment[]> {\n        return Array.from(this.comments.values()).filter(comment => comment.taskId === taskId);\n    }\n\n    public async getCommentById(id: CommentId): Promise<Comment | undefined> {\n        return this.comments.get(id);\n    }\n\n    public async createComment(input: CreateCommentInput, taskTitle: string, authorName: string): Promise<Comment> {\n        const newComment: Comment = {\n            id: crypto.randomUUID(),\n            taskId: input.taskId,\n            authorId: input.authorId,\n            body: input.body,\n            createdAt: new Date().toISOString(),\n        };\n        this.comments.set(newComment.id, newComment);\n        this.eventBus.publish('comment.added', {\n            commentId: newComment.id,\n            taskId: newComment.taskId,\n            taskTitle: taskTitle,\n            authorId: newComment.authorId,\n            authorName: authorName,\n        });\n        return newComment;\n    }\n\n    public async deleteComment(id: CommentId): Promise<boolean> {\n        return this.comments.delete(id);\n    }\n}\n"
+          },
+          "output": "File written: src/services/comment-service.ts (46 lines)",
+          "error": false
+        }
+      ],
+      "inputTokens": 8996,
+      "outputTokens": 401
+    }
+  ],
+  "startTime": "2026-08-19T03:58:11.737Z",
+  "endTime": "2026-08-19T03:59:34.692Z",
+  "totalInputTokens": 49866,
+  "totalOutputTokens": 3092
+}

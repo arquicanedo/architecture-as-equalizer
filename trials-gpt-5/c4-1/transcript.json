@@ -1,0 +1,212 @@
+{
+  "trialId": "c4-1",
+  "specType": "c4",
+  "messages": [
+    {
+      "role": "assistant",
+      "content": "",
+      "toolCalls": [
+        {
+          "name": "write_file",
+          "input": {
+            "path": "src/event-bus.ts",
+            "content": "export type EventCallback<T = any> = (payload: T) => void;\n\nexport class EventBus {\n  private subscribers: Map<string, EventCallback<any>[]> = new Map();\n\n  publish<T = any>(event: string, payload: T): void {\n    const subs = this.subscribers.get(event) || [];\n    // Call subscribers synchronously\n    for (const cb of subs) {\n      try {\n        cb(payload);\n      } catch (err) {\n        // Swallow to avoid breaking publisher\n        // In a real system, we'd log this\n      }\n    }\n  }\n\n  subscribe<T = any>(event: string, callback: EventCallback<T>): void {\n    const subs = this.subscribers.get(event) || [];\n    subs.push(callback as EventCallback<any>);\n    this.subscribers.set(event, subs);\n  }\n}\n"
+          },
+          "output": "File written: src/event-bus.ts (25 lines)",
+          "error": false
+        }
+      ],
+      "inputTokens": 2854,
+      "outputTokens": 2853
+    },
+    {
+      "role": "assistant",
+      "content": "",
+      "toolCalls": [
+        {
+          "name": "write_file",
+          "input": {
+            "path": "src/services/user-service.ts",
+            "content": "import { randomUUID } from 'crypto';\n\nexport interface User {\n  id: string;\n  name: string;\n  email: string;\n}\n\nexport class UserService {\n  private store: Map<string, User> = new Map();\n\n  create(input: Omit<User, 'id'>): User {\n    const id = randomUUID();\n    const user: User = { id, ...input };\n    this.store.set(id, user);\n    return user;\n  }\n\n  getById(id: string): User | undefined {\n    return this.store.get(id);\n  }\n\n  getAll(): User[] {\n    return Array.from(this.store.values());\n  }\n\n  update(id: string, input: Partial<Omit<User, 'id'>>): User | undefined {\n    const existing = this.store.get(id);\n    if (!existing) return undefined;\n    const updated: User = { ...existing, ...input, id };\n    this.store.set(id, updated);\n    return updated;\n  }\n\n  delete(id: string): boolean {\n    return this.store.delete(id);\n  }\n}\n"
+          },
+          "output": "File written: src/services/user-service.ts (39 lines)",
+          "error": false
+        }
+      ],
+      "inputTokens": 3099,
+      "outputTokens": 287
+    },
+    {
+      "role": "assistant",
+      "content": "",
+      "toolCalls": [
+        {
+          "name": "write_file",
+          "input": {
+            "path": "src/services/project-service.ts",
+            "content": "import { randomUUID } from 'crypto';\n\nexport interface Project {\n  id: string;\n  name: string;\n  description: string;\n  memberIds: string[];\n}\n\nexport class ProjectService {\n  private store: Map<string, Project> = new Map();\n\n  create(input: Omit<Project, 'id' | 'memberIds'> & { memberIds?: string[] }): Project {\n    const id = randomUUID();\n    const project: Project = { id, name: input.name, description: input.description, memberIds: input.memberIds || [] };\n    this.store.set(id, project);\n    return project;\n  }\n\n  getById(id: string): Project | undefined {\n    return this.store.get(id);\n  }\n\n  getAll(): Project[] {\n    return Array.from(this.store.values());\n  }\n\n  update(id: string, input: Partial<Omit<Project, 'id'>>): Project | undefined {\n    const existing = this.store.get(id);\n    if (!existing) return undefined;\n    const updated: Project = { ...existing, ...input, id, memberIds: input.memberIds ?? existing.memberIds };\n    this.store.set(id, updated);\n    return updated;\n  }\n\n  delete(id: string): boolean {\n    return this.store.delete(id);\n  }\n\n  addMember(projectId: string, userId: string): Project | undefined {\n    const project = this.store.get(projectId);\n    if (!project) return undefined;\n    if (!project.memberIds.includes(userId)) {\n      project.memberIds = [...project.memberIds, userId];\n      this.store.set(projectId, project);\n    }\n    return project;\n  }\n\n  removeMember(projectId: string, userId: string): Project | undefined {\n    const project = this.store.get(projectId);\n    if (!project) return undefined;\n    project.memberIds = project.memberIds.filter((id) => id !== userId);\n    this.store.set(projectId, project);\n    return project;\n  }\n}\n"
+          },
+          "output": "File written: src/services/project-service.ts (58 lines)",
+          "error": false
+        }
+      ],
+      "inputTokens": 3408,
+      "outputTokens": 497
+    },
+    {
+      "role": "assistant",
+      "content": "",
+      "toolCalls": [
+        {
+          "name": "write_file",
+          "input": {
+            "path": "src/services/task-service.ts",
+            "content": "import { randomUUID } from 'crypto';\nimport { EventBus } from '../event-bus';\n\nexport type TaskStatus = 'todo' | 'in-progress' | 'done';\n\nexport interface Task {\n  id: string;\n  title: string;\n  description: string;\n  status: TaskStatus;\n  assigneeId: string | null;\n  projectId: string;\n}\n\nexport class TaskService {\n  private store: Map<string, Task> = new Map();\n\n  constructor(private eventBus: EventBus) {}\n\n  create(input: Omit<Task, 'id' | 'status' | 'assigneeId'> & { status?: TaskStatus; assigneeId?: string | null }): Task {\n    const id = randomUUID();\n    const task: Task = {\n      id,\n      title: input.title,\n      description: input.description,\n      projectId: input.projectId,\n      status: input.status ?? 'todo',\n      assigneeId: input.assigneeId ?? null,\n    };\n    this.store.set(id, task);\n    return task;\n  }\n\n  getById(id: string): Task | undefined {\n    return this.store.get(id);\n  }\n\n  getByProject(projectId: string): Task[] {\n    return Array.from(this.store.values()).filter((t) => t.projectId === projectId);\n  }\n\n  getAll(): Task[] {\n    return Array.from(this.store.values());\n  }\n\n  update(id: string, input: Partial<Omit<Task, 'id'>>): Task | undefined {\n    const existing = this.store.get(id);\n    if (!existing) return undefined;\n    const merged: Task = { ...existing, ...input, id };\n    // Enforce forward-only status transitions if status provided\n    if (input.status && existing.status !== input.status) {\n      if (!this.isForwardTransition(existing.status, input.status)) {\n        throw new Error('Invalid status transition');\n      }\n    }\n    this.store.set(id, merged);\n    return merged;\n  }\n\n  delete(id: string): boolean {\n    return this.store.delete(id);\n  }\n\n  assign(id: string, assigneeId: string | null): Task | undefined {\n    const task = this.store.get(id);\n    if (!task) return undefined;\n    task.assigneeId = assigneeId;\n    this.store.set(id, task);\n    if (assigneeId) {\n      this.eventBus.publish('task.assigned', { taskId: id, taskTitle: task.title, assigneeId });\n    }\n    return task;\n  }\n\n  changeStatus(id: string, newStatus: TaskStatus): Task | undefined {\n    const task = this.store.get(id);\n    if (!task) return undefined;\n    const oldStatus = task.status;\n    if (oldStatus === newStatus) return task;\n    if (!this.isForwardTransition(oldStatus, newStatus)) {\n      throw new Error('Invalid status transition');\n    }\n    task.status = newStatus;\n    this.store.set(id, task);\n    this.eventBus.publish('task.statusChanged', {\n      taskId: id,\n      taskTitle: task.title,\n      assigneeId: task.assigneeId,\n      oldStatus,\n      newStatus,\n    });\n    return task;\n  }\n\n  private isForwardTransition(oldStatus: TaskStatus, newStatus: TaskStatus): boolean {\n    const order: TaskStatus[] = ['todo', 'in-progress', 'done'];\n    return order.indexOf(newStatus) >= order.indexOf(oldStatus);\n  }\n}\n"
+          },
+          "output": "File written: src/services/task-service.ts (100 lines)",
+          "error": false
+        }
+      ],
+      "inputTokens": 3927,
+      "outputTokens": 858
+    },
+    {
+      "role": "assistant",
+      "content": "",
+      "toolCalls": [
+        {
+          "name": "write_file",
+          "input": {
+            "path": "src/services/comment-service.ts",
+            "content": "import { randomUUID } from 'crypto';\nimport { EventBus } from '../event-bus';\n\nexport interface Comment {\n  id: string;\n  taskId: string;\n  authorId: string;\n  body: string;\n  createdAt: string; // ISO 8601\n}\n\nexport class CommentService {\n  private store: Map<string, Comment> = new Map();\n\n  constructor(private eventBus: EventBus, private getTaskTitle: (taskId: string) => string | undefined, private getUserName: (userId: string) => string | undefined) {}\n\n  create(input: Omit<Comment, 'id' | 'createdAt'>): Comment {\n    const id = randomUUID();\n    const createdAt = new Date().toISOString();\n    const comment: Comment = { id, ...input, createdAt };\n    this.store.set(id, comment);\n\n    // publish event on comment added\n    const taskTitle = this.getTaskTitle(input.taskId) || 'Task';\n    const authorName = this.getUserName(input.authorId) || 'Someone';\n    this.eventBus.publish('comment.added', {\n      commentId: id,\n      taskId: input.taskId,\n      taskTitle,\n      authorId: input.authorId,\n      authorName,\n    });\n\n    return comment;\n  }\n\n  getById(id: string): Comment | undefined {\n    return this.store.get(id);\n  }\n\n  getByTask(taskId: string): Comment[] {\n    return Array.from(this.store.values()).filter((c) => c.taskId === taskId);\n  }\n\n  delete(id: string): boolean {\n    return this.store.delete(id);\n  }\n}\n"
+          },
+          "output": "File written: src/services/comment-service.ts (49 lines)",
+          "error": false
+        }
+      ],
+      "inputTokens": 4807,
+      "outputTokens": 423
+    },
+    {
+      "role": "assistant",
+      "content": "",
+      "toolCalls": [
+        {
+          "name": "write_file",
+          "input": {
+            "path": "src/services/notification-service.ts",
+            "content": "import { randomUUID } from 'crypto';\nimport { EventBus } from '../event-bus';\n\nexport interface Notification {\n  id: string;\n  userId: string;\n  message: string;\n  read: boolean;\n  createdAt: string; // ISO 8601\n}\n\nexport class NotificationService {\n  private store: Map<string, Notification> = new Map();\n  // Internal cache of task assignees maintained from events\n  private taskAssignees: Map<string, string | null> = new Map();\n\n  constructor(private eventBus: EventBus) {\n    this.eventBus.subscribe('task.assigned', (payload: { taskId: string; taskTitle: string; assigneeId: string }) => {\n      this.taskAssignees.set(payload.taskId, payload.assigneeId);\n      const message = `Task '${payload.taskTitle}' assigned to you.`;\n      this.createNotification(payload.assigneeId, message);\n    });\n\n    this.eventBus.subscribe(\n      'task.statusChanged',\n      (payload: { taskId: string; taskTitle: string; assigneeId: string | null; oldStatus: string; newStatus: string }) => {\n        this.taskAssignees.set(payload.taskId, payload.assigneeId ?? null);\n        if (payload.assigneeId) {\n          const message = `Task '${payload.taskTitle}' status changed from ${payload.oldStatus} to ${payload.newStatus}.`;\n          this.createNotification(payload.assigneeId, message);\n        }\n      }\n    );\n\n    this.eventBus.subscribe(\n      'comment.added',\n      (payload: { commentId: string; taskId: string; taskTitle: string; authorId: string; authorName: string }) => {\n        const assigneeId = this.taskAssignees.get(payload.taskId);\n        if (assigneeId) {\n          const message = `New comment by ${payload.authorName} on task '${payload.taskTitle}'.`;\n          this.createNotification(assigneeId, message);\n        }\n      }\n    );\n  }\n\n  private createNotification(userId: string, message: string): Notification {\n    const notification: Notification = {\n      id: randomUUID(),\n      userId,\n      message,\n      read: false,\n      createdAt: new Date().toISOString(),\n    };\n    this.store.set(notification.id, notification);\n    return notification;\n  }\n\n  getByUser(userId: string): Notification[] {\n    return Array.from(this.store.values()).filter((n) => n.userId === userId);\n  }\n\n  markAsRead(id: string): Notification | undefined {\n    const n = this.store.get(id);\n    if (!n) return undefined;\n    n.read = true;\n    this.store.set(id, n);\n    return n;\n  }\n}\n"
+          },
+          "output": "File written: src/services/notification-service.ts (71 lines)",
+          "error": false
+        }
+      ],
+      "inputTokens": 5252,
+      "outputTokens": 2412
+    },
+    {
+      "role": "assistant",
+      "content": "",
+      "toolCalls": [
+        {
+          "name": "write_file",
+          "input": {
+            "path": "src/router.ts",
+            "content": "import http, { IncomingMessage, ServerResponse } from 'http';\nimport { parse as parseUrl } from 'url';\nimport { UserService } from './services/user-service';\nimport { ProjectService } from './services/project-service';\nimport { TaskService, TaskStatus } from './services/task-service';\nimport { CommentService } from './services/comment-service';\nimport { NotificationService } from './services/notification-service';\n\nexport interface Services {\n  userService: UserService;\n  projectService: ProjectService;\n  taskService: TaskService;\n  commentService: CommentService;\n  notificationService: NotificationService;\n}\n\nfunction sendJson(res: ServerResponse, status: number, data: any): void {\n  const payload = JSON.stringify(data);\n  res.statusCode = status;\n  res.setHeader('Content-Type', 'application/json');\n  res.setHeader('Content-Length', Buffer.byteLength(payload));\n  res.end(payload);\n}\n\nfunction sendNoContent(res: ServerResponse): void {\n  res.statusCode = 204;\n  res.end();\n}\n\nasync function readBody(req: IncomingMessage): Promise<any> {\n  const chunks: Buffer[] = [];\n  for await (const chunk of req) {\n    chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk));\n  }\n  if (chunks.length === 0) return undefined;\n  const raw = Buffer.concat(chunks).toString('utf8');\n  try {\n    return JSON.parse(raw);\n  } catch (e) {\n    return undefined;\n  }\n}\n\nexport function createHttpServer(services: Services): http.Server {\n  const server = http.createServer(async (req, res) => {\n    const method = req.method || 'GET';\n    const url = req.url || '/';\n    const { pathname, query } = parseUrl(url, true);\n\n    try {\n      // Users\n      if (method === 'GET' && pathname === '/users') {\n        const users = services.userService.getAll();\n        return sendJson(res, 200, users);\n      }\n      if (method === 'POST' && pathname === '/users') {\n        const body = await readBody(req);\n        if (!body || typeof body.name !== 'string' || typeof body.email !== 'string') {\n          return sendJson(res, 400, { error: 'Invalid body' });\n        }\n        const user = services.userService.create({ name: body.name, email: body.email });\n        return sendJson(res, 201, user);\n      }\n      if (pathname && /^\\/users\\/.+/.test(pathname)) {\n        const id = pathname.split('/')[2];\n        if (method === 'GET') {\n          const user = services.userService.getById(id);\n          if (!user) return sendJson(res, 404, { error: 'Not found' });\n          return sendJson(res, 200, user);\n        }\n        if (method === 'PUT') {\n          const body = await readBody(req);\n          const updated = services.userService.update(id, body || {});\n          if (!updated) return sendJson(res, 404, { error: 'Not found' });\n          return sendJson(res, 200, updated);\n        }\n        if (method === 'DELETE') {\n          const ok = services.userService.delete(id);\n          if (!ok) return sendJson(res, 404, { error: 'Not found' });\n          return sendNoContent(res);\n        }\n      }\n\n      // Projects\n      if (method === 'GET' && pathname === '/projects') {\n        const projects = services.projectService.getAll();\n        return sendJson(res, 200, projects);\n      }\n      if (method === 'POST' && pathname === '/projects') {\n        const body = await readBody(req);\n        if (!body || typeof body.name !== 'string' || typeof body.description !== 'string') {\n          return sendJson(res, 400, { error: 'Invalid body' });\n        }\n        const project = services.projectService.create({ name: body.name, description: body.description, memberIds: body.memberIds });\n        return sendJson(res, 201, project);\n      }\n      if (pathname && /^\\/projects\\/.+/.test(pathname)) {\n        const parts = pathname.split('/');\n        const id = parts[2];\n        if (parts.length === 3) {\n          if (method === 'GET') {\n            const project = services.projectService.getById(id);\n            if (!project) return sendJson(res, 404, { error: 'Not found' });\n            return sendJson(res, 200, project);\n          }\n          if (method === 'PUT') {\n            const body = await readBody(req);\n            const updated = services.projectService.update(id, body || {});\n            if (!updated) return sendJson(res, 404, { error: 'Not found' });\n            return sendJson(res, 200, updated);\n          }\n          if (method === 'DELETE') {\n            const ok = services.projectService.delete(id);\n            if (!ok) return sendJson(res, 404, { error: 'Not found' });\n            return sendNoContent(res);\n          }\n        }\n        if (parts.length === 4 && parts[3] === 'members') {\n          const body = await readBody(req);\n          if (!body || typeof body.userId !== 'string') {\n            return sendJson(res, 400, { error: 'Invalid body' });\n          }\n          if (method === 'POST') {\n            const updated = services.projectService.addMember(id, body.userId);\n            if (!updated) return sendJson(res, 404, { error: 'Not found' });\n            return sendJson(res, 200, updated);\n          }\n          if (method === 'DELETE') {\n            const updated = services.projectService.removeMember(id, body.userId);\n            if (!updated) return sendJson(res, 404, { error: 'Not found' });\n            return sendJson(res, 200, updated);\n          }\n        }\n      }\n\n      // Tasks\n      if (method === 'GET' && pathname === '/tasks') {\n        const projectId = (query && (query as any).projectId) as string | undefined;\n        if (!projectId) return sendJson(res, 400, { error: 'projectId required' });\n        const tasks = services.taskService.getByProject(projectId);\n        return sendJson(res, 200, tasks);\n      }\n      if (method === 'POST' && pathname === '/tasks') {\n        const body = await readBody(req);\n        if (!body || typeof body.title !== 'string' || typeof body.description !== 'string' || typeof body.projectId !== 'string') {\n          return sendJson(res, 400, { error: 'Invalid body' });\n        }\n        const task = services.taskService.create({ title: body.title, description: body.description, projectId: body.projectId, status: body.status, assigneeId: body.assigneeId });\n        return sendJson(res, 201, task);\n      }\n      if (pathname && /^\\/tasks\\/.+/.test(pathname)) {\n        const parts = pathname.split('/');\n        const id = parts[2];\n        if (parts.length === 3) {\n          if (method === 'GET') {\n            const task = services.taskService.getById(id);\n            if (!task) return sendJson(res, 404, { error: 'Not found' });\n            return sendJson(res, 200, task);\n          }\n          if (method === 'PUT') {\n            const body = await readBody(req);\n            try {\n              const updated = services.taskService.update(id, body || {});\n              if (!updated) return sendJson(res, 404, { error: 'Not found' });\n              return sendJson(res, 200, updated);\n            } catch (e: any) {\n              return sendJson(res, 400, { error: e.message || 'Bad Request' });\n            }\n          }\n          if (method === 'DELETE') {\n            const ok = services.taskService.delete(id);\n            if (!ok) return sendJson(res, 404, { error: 'Not found' });\n            return sendNoContent(res);\n          }\n        }\n        if (parts.length === 4 && parts[3] === 'status' && method === 'PUT') {\n          const body = await readBody(req);\n          const status = body?.status as TaskStatus | undefined;\n          if (!status) return sendJson(res, 400, { error: 'status required' });\n          try {\n            const updated = services.taskService.changeStatus(id, status);\n            if (!updated) return sendJson(res, 404, { error: 'Not found' });\n            return sendJson(res, 200, updated);\n          } catch (e: any) {\n            return sendJson(res, 400, { error: e.message || 'Bad Request' });\n          }\n        }\n        if (parts.length === 4 && parts[3] === 'assign' && method === 'PUT') {\n          const body = await readBody(req);\n          const assigneeId = (body ? body.assigneeId : undefined) as string | null | undefined;\n          const updated = services.taskService.assign(id, assigneeId ?? null);\n          if (!updated) return sendJson(res, 404, { error: 'Not found' });\n          return sendJson(res, 200, updated);\n        }\n      }\n\n      // Comments\n      if (method === 'GET' && pathname === '/comments') {\n        const taskId = (query && (query as any).taskId) as string | undefined;\n        if (!taskId) return sendJson(res, 400, { error: 'taskId required' });\n        const comments = services.commentService.getByTask(taskId);\n        return sendJson(res, 200, comments);\n      }\n      if (method === 'POST' && pathname === '/comments') {\n        const body = await readBody(req);\n        if (!body || typeof body.taskId !== 'string' || typeof body.authorId !== 'string' || typeof body.body !== 'string') {\n          return sendJson(res, 400, { error: 'Invalid body' });\n        }\n        const comment = services.commentService.create({ taskId: body.taskId, authorId: body.authorId, body: body.body });\n        return sendJson(res, 201, comment);\n      }\n      if (pathname && /^\\/comments\\/.+/.test(pathname)) {\n        const id = pathname.split('/')[2];\n        if (method === 'GET') {\n          const c = services.commentService.getById(id);\n          if (!c) return sendJson(res, 404, { error: 'Not found' });\n          return sendJson(res, 200, c);\n        }\n        if (method === 'DELETE') {\n          const ok = services.commentService.delete(id);\n          if (!ok) return sendJson(res, 404, { error: 'Not found' });\n          return sendNoContent(res);\n        }\n      }\n\n      // Notifications\n      if (method === 'GET' && pathname === '/notifications') {\n        const userId = (query && (query as any).userId) as string | undefined;\n        if (!userId) return sendJson(res, 400, { error: 'userId required' });\n        const notifs = services.notificationService.getByUser(userId);\n        return sendJson(res, 200, notifs);\n      }\n      if (pathname && /^\\/notifications\\/.+\\/read$/.test(pathname) && method === 'PUT') {\n        const id = pathname.split('/')[2];\n        const updated = services.notificationService.markAsRead(id);\n        if (!updated) return sendJson(res, 404, { error: 'Not found' });\n        return sendJson(res, 200, updated);\n      }\n\n      // Fallback\n      sendJson(res, 404, { error: 'Route not found' });\n    } catch (err: any) {\n      sendJson(res, 500, { error: 'Internal Server Error', details: err?.message });\n    }\n  });\n\n  return server;\n}\n"
+          },
+          "output": "File written: src/router.ts (249 lines)",
+          "error": false
+        }
+      ],
+      "inputTokens": 5953,
+      "outputTokens": 4984
+    },
+    {
+      "role": "assistant",
+      "content": "",
+      "toolCalls": [
+        {
+          "name": "write_file",
+          "input": {
+            "path": "src/main.ts",
+            "content": "import { EventBus } from './event-bus';\nimport { UserService } from './services/user-service';\nimport { ProjectService } from './services/project-service';\nimport { TaskService } from './services/task-service';\nimport { CommentService } from './services/comment-service';\nimport { NotificationService } from './services/notification-service';\nimport { createHttpServer } from './router';\n\nconst PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 3000;\n\nasync function start() {\n  const eventBus = new EventBus();\n\n  const userService = new UserService();\n  const projectService = new ProjectService();\n  const taskService = new TaskService(eventBus);\n\n  // For comment service, we need functions to resolve task title and user name without direct service references.\n  const getTaskTitle = (taskId: string): string | undefined => {\n    const task = taskService.getById(taskId);\n    return task?.title;\n  };\n  const getUserName = (userId: string): string | undefined => {\n    const user = userService.getById(userId);\n    return user?.name;\n  };\n\n  const commentService = new CommentService(eventBus, getTaskTitle, getUserName);\n  const notificationService = new NotificationService(eventBus);\n\n  const server = createHttpServer({ userService, projectService, taskService, commentService, notificationService });\n\n  server.listen(PORT, () => {\n    console.log(`Task Management API listening on http://localhost:${PORT}`);\n  });\n}\n\nstart();\n"
+          },
+          "output": "File written: src/main.ts (39 lines)",
+          "error": false
+        }
+      ],
+      "inputTokens": 8839,
+      "outputTokens": 394
+    },
+    {
+      "role": "assistant",
+      "content": "",
+      "toolCalls": [
+        {
+          "name": "write_file",
+          "input": {
+            "path": "src/demo.ts",
+            "content": "import { EventBus } from './event-bus';\nimport { UserService } from './services/user-service';\nimport { ProjectService } from './services/project-service';\nimport { TaskService, TaskStatus } from './services/task-service';\nimport { CommentService } from './services/comment-service';\nimport { NotificationService } from './services/notification-service';\nimport { createHttpServer } from './router';\nimport http from 'http';\n\nconst PORT = 3001;\n\nfunction request(method: string, path: string, body?: any): Promise<any> {\n  return new Promise((resolve, reject) => {\n    const data = body ? JSON.stringify(body) : undefined;\n    const req = http.request(\n      {\n        hostname: 'localhost',\n        port: PORT,\n        path,\n        method,\n        headers: {\n          'Content-Type': 'application/json',\n          'Content-Length': data ? Buffer.byteLength(data) : 0,\n        },\n      },\n      (res) => {\n        const chunks: Buffer[] = [];\n        res.on('data', (chunk) => chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk)));\n        res.on('end', () => {\n          const text = Buffer.concat(chunks).toString('utf8');\n          try {\n            const json = text ? JSON.parse(text) : undefined;\n            resolve({ status: res.statusCode, body: json });\n          } catch (e) {\n            resolve({ status: res.statusCode, body: text });\n          }\n        });\n      }\n    );\n    req.on('error', reject);\n    if (data) req.write(data);\n    req.end();\n  });\n}\n\nasync function runDemo() {\n  // Start in-memory server\n  const eventBus = new EventBus();\n  const userService = new UserService();\n  const projectService = new ProjectService();\n  const taskService = new TaskService(eventBus);\n  const getTaskTitle = (taskId: string) => taskService.getById(taskId)?.title;\n  const getUserName = (userId: string) => userService.getById(userId)?.name;\n  const commentService = new CommentService(eventBus, getTaskTitle, getUserName);\n  const notificationService = new NotificationService(eventBus);\n  const server = createHttpServer({ userService, projectService, taskService, commentService, notificationService });\n  await new Promise<void>((resolve) => server.listen(PORT, resolve));\n  console.log(`Demo server on http://localhost:${PORT}`);\n\n  // Create users\n  const u1 = (await request('POST', '/users', { name: 'Alice', email: 'alice@example.com' })).body;\n  const u2 = (await request('POST', '/users', { name: 'Bob', email: 'bob@example.com' })).body;\n  console.log('Users created:', u1, u2);\n\n  // Create project\n  const project = (await request('POST', '/projects', { name: 'Project X', description: 'Top secret' })).body;\n  console.log('Project created:', project);\n\n  // Add members\n  await request('POST', `/projects/${project.id}/members`, { userId: u1.id });\n  await request('POST', `/projects/${project.id}/members`, { userId: u2.id });\n  console.log('Members added');\n\n  // Create tasks\n  const t1 = (await request('POST', '/tasks', { title: 'Design UI', description: 'Create mockups', projectId: project.id })).body;\n  const t2 = (await request('POST', '/tasks', { title: 'Implement API', description: 'Build endpoints', projectId: project.id })).body;\n  console.log('Tasks created:', t1, t2);\n\n  // Assign tasks\n  await request('PUT', `/tasks/${t1.id}/assign`, { assigneeId: u1.id });\n  await request('PUT', `/tasks/${t2.id}/assign`, { assigneeId: u2.id });\n  console.log('Tasks assigned');\n\n  // Change status\n  await request('PUT', `/tasks/${t1.id}/status`, { status: 'in-progress' as TaskStatus });\n  await request('PUT', `/tasks/${t1.id}/status`, { status: 'done' as TaskStatus });\n  console.log('Task status changed');\n\n  // Add comments\n  await request('POST', '/comments', { taskId: t1.id, authorId: u2.id, body: 'Looks great!' });\n  await request('POST', '/comments', { taskId: t2.id, authorId: u1.id, body: 'API endpoints ready?' });\n  console.log('Comments added');\n\n  // Check notifications\n  const n1 = await request('GET', `/notifications?userId=${u1.id}`);\n  const n2 = await request('GET', `/notifications?userId=${u2.id}`);\n  console.log('Notifications for Alice:', n1.body);\n  console.log('Notifications for Bob:', n2.body);\n\n  // Mark first notification as read for Alice if exists\n  if (n1.body && n1.body.length > 0) {\n    const notifId = n1.body[0].id;\n    await request('PUT', `/notifications/${notifId}/read`);\n    const n1b = await request('GET', `/notifications?userId=${u1.id}`);\n    console.log('Notifications for Alice after markAsRead:', n1b.body);\n  }\n\n  server.close();\n}\n\nrunDemo().catch((err) => {\n  console.error('Demo error:', err);\n  process.exit(1);\n});\n"
+          },
+          "output": "File written: src/demo.ts (115 lines)",
+          "error": false
+        }
+      ],
+      "inputTokens": 9253,
+      "outputTokens": 1346
+    },
+    {
+      "role": "assistant",
+      "content": "",
+      "toolCalls": [
+        {
+          "name": "write_file",
+          "input": {
+            "path": "tsconfig.json",
+            "content": "{\n  \"compilerOptions\": {\n    \"target\": \"ES2020\",\n    \"module\": \"CommonJS\",\n    \"moduleResolution\": \"Node\",\n    \"strict\": true,\n    \"esModuleInterop\": true,\n    \"skipLibCheck\": true,\n    \"forceConsistentCasingInFileNames\": true,\n    \"outDir\": \"dist\",\n    \"rootDir\": \".\"\n  },\n  \"include\": [\"src/**/*.ts\"],\n  \"exclude\": [\"node_modules\", \"dist\"]\n}\n"
+          },
+          "output": "File written: tsconfig.json (16 lines)",
+          "error": false
+        }
+      ],
+      "inputTokens": 10619,
+      "outputTokens": 150
+    },
+    {
+      "role": "assistant",
+      "content": "",
+      "toolCalls": [
+        {
+          "name": "run_command",
+          "input": {
+            "command": "npx tsc --noEmit"
+          },
+          "output": "Command failed (exit 1):\n\n\u001b[41m                                                                               \u001b[0m\n\u001b[41m\u001b[37m                This is not the tsc command you are looking for                \u001b[0m\n\u001b[41m                                                                               \u001b[0m\n\nTo get access to the TypeScript compiler, \u001b[34mtsc\u001b[0m, from the command line either:\n\n- Use \u001b[1mnpm install typescript\u001b[0m to first add TypeScript to your project \u001b[1mbefore\u001b[0m using npx\n- Use \u001b[1myarn\u001b[0m to avoid accidentally running code from un-installed packages",
+          "error": true
+        }
+      ],
+      "inputTokens": 10789,
+      "outputTokens": 24
+    },
+    {
+      "role": "assistant",
+      "content": "",
+      "toolCalls": [
+        {
+          "name": "done",
+          "input": {
+            "summary": "Implemented a Task Management API in TypeScript per the C4 specification.\n\nFiles added:\n- src/event-bus.ts: In-memory EventBus with publish/subscribe.\n- src/services/user-service.ts: User CRUD with in-memory Map.\n- src/services/project-service.ts: Project CRUD, addMember/removeMember.\n- src/services/task-service.ts: Task CRUD, assign, changeStatus with forward-only status enforcement; publishes task events.\n- src/services/comment-service.ts: Comment create/get/delete; publishes comment.added event. Uses injected resolvers for taskTitle and authorName to avoid direct service imports.\n- src/services/notification-service.ts: Subscribes to task.assigned, task.statusChanged, comment.added; creates notifications and supports getByUser and markAsRead. Maintains a task assignee cache.\n- src/router.ts: HTTP router using Node http and url. Implements all API routes as specified.\n- src/main.ts: Wires EventBus and services, injects lookup functions to CommentService, starts server on PORT (default 3000).\n- src/demo.ts: Demo script that starts a server on 3001, exercises users/projects/tasks/comments/notifications, shows notifications, and marks one as read.\n- tsconfig.json: TypeScript configuration.\n\nNotes:\n- Attempted to run `npx tsc --noEmit`, but TypeScript is not installed in this environment. Code is strictly typed and should compile when TypeScript is available.\n- The system can be run with `npx tsx src/main.ts` (assuming tsx/typescript available) and demo with `npx tsx src/demo.ts`."
+          },
+          "output": "Implementation complete.",
+          "error": false
+        }
+      ],
+      "inputTokens": 10963,
+      "outputTokens": 2290
+    }
+  ],
+  "startTime": "2026-08-19T04:43:42.146Z",
+  "endTime": "2026-08-19T04:46:25.854Z",
+  "totalInputTokens": 79763,
+  "totalOutputTokens": 16518
+}

@@ -1,0 +1,10 @@
+{
+  "trialId": "structured-1",
+  "specType": "structured",
+  "architecturalAdherence": 7,
+  "completeness": 9,
+  "codeQuality": 8,
+  "constraintCompliance": 7,
+  "overall": 7.75,
+  "notes": "Overall architecture is well-separated with services, an in-memory event bus, and a router. Major issue: CommentService directly imports and calls TaskService and UserService (taskService.getById, userService.getById), violating the rule that services must communicate only via the Event Bus and undermining exclusive data ownership. NotificationService subscribes correctly to events but its comment.added handling only notifies the author, which is acceptable but arguably less useful than notifying the assignee. HTTP routing is centralized in the router, but some HTTP handling (CORS/preflight) occurs in main.ts/demo.ts rather than inside the router, which is a minor deviation from the “all HTTP handling in the router” rule. CRUD endpoints are implemented for users/projects/tasks/comments, project member add/remove, task assign/status transitions (forward-only enforced), and notifications (get by user, mark as read). Code is clean and idiomatic, with good error handling and statuses, though event payloads use any and there’s some mixed import/require usage in the demo."
+}

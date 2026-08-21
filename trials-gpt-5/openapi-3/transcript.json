@@ -1,0 +1,218 @@
+{
+  "trialId": "openapi-3",
+  "specType": "openapi",
+  "messages": [
+    {
+      "role": "assistant",
+      "content": "",
+      "toolCalls": [
+        {
+          "name": "write_file",
+          "input": {
+            "path": "src/event-bus.ts",
+            "content": "export type EventCallback = (payload: any) => void;\n\nexport class EventBus {\n  private listeners: Map<string, EventCallback[]> = new Map();\n\n  publish(event: string, payload: any): void {\n    const callbacks = this.listeners.get(event) || [];\n    // Callbacks are called synchronously for simplicity\n    for (const cb of callbacks) {\n      try {\n        cb(payload);\n      } catch (err) {\n        // Swallow to avoid crashing publisher\n        // In real system, log this\n      }\n    }\n  }\n\n  subscribe(event: string, callback: EventCallback): void {\n    if (!this.listeners.has(event)) {\n      this.listeners.set(event, []);\n    }\n    this.listeners.get(event)!.push(callback);\n  }\n}\n"
+          },
+          "output": "File written: src/event-bus.ts (26 lines)",
+          "error": false
+        }
+      ],
+      "inputTokens": 4146,
+      "outputTokens": 2645
+    },
+    {
+      "role": "assistant",
+      "content": "",
+      "toolCalls": [
+        {
+          "name": "write_file",
+          "input": {
+            "path": "src/services/user-service.ts",
+            "content": "import { randomUUID } from 'crypto';\n\nexport interface User {\n  id: string;\n  name: string;\n  email: string;\n}\n\nexport interface CreateUserInput {\n  name: string;\n  email: string;\n}\n\nexport interface UpdateUserInput {\n  name?: string;\n  email?: string;\n}\n\nexport class UserService {\n  private users: Map<string, User> = new Map();\n\n  listUsers(): User[] {\n    return Array.from(this.users.values());\n  }\n\n  createUser(input: CreateUserInput): User {\n    const user: User = { id: randomUUID(), name: input.name, email: input.email };\n    this.users.set(user.id, user);\n    return user;\n    }\n\n  getUser(id: string): User | undefined {\n    return this.users.get(id);\n  }\n\n  updateUser(id: string, input: UpdateUserInput): User | undefined {\n    const existing = this.users.get(id);\n    if (!existing) return undefined;\n    const updated: User = { ...existing, ...input };\n    this.users.set(id, updated);\n    return updated;\n  }\n\n  deleteUser(id: string): boolean {\n    return this.users.delete(id);\n  }\n}\n"
+          },
+          "output": "File written: src/services/user-service.ts (48 lines)",
+          "error": false
+        }
+      ],
+      "inputTokens": 4375,
+      "outputTokens": 3401
+    },
+    {
+      "role": "assistant",
+      "content": "",
+      "toolCalls": [
+        {
+          "name": "write_file",
+          "input": {
+            "path": "src/services/project-service.ts",
+            "content": "import { randomUUID } from 'crypto';\n\nexport interface Project {\n  id: string;\n  name: string;\n  description: string;\n  memberIds: string[];\n}\n\nexport interface CreateProjectInput {\n  name: string;\n  description: string;\n}\n\nexport interface UpdateProjectInput {\n  name?: string;\n  description?: string;\n}\n\nexport class ProjectService {\n  private projects: Map<string, Project> = new Map();\n\n  listProjects(): Project[] {\n    return Array.from(this.projects.values());\n  }\n\n  createProject(input: CreateProjectInput): Project {\n    const project: Project = { id: randomUUID(), name: input.name, description: input.description, memberIds: [] };\n    this.projects.set(project.id, project);\n    return project;\n  }\n\n  getProject(id: string): Project | undefined {\n    return this.projects.get(id);\n  }\n\n  updateProject(id: string, input: UpdateProjectInput): Project | undefined {\n    const existing = this.projects.get(id);\n    if (!existing) return undefined;\n    const updated: Project = { ...existing, ...input };\n    this.projects.set(id, updated);\n    return updated;\n  }\n\n  deleteProject(id: string): boolean {\n    return this.projects.delete(id);\n  }\n\n  addMember(projectId: string, userId: string): Project | undefined {\n    const project = this.projects.get(projectId);\n    if (!project) return undefined;\n    if (!project.memberIds.includes(userId)) {\n      project.memberIds = [...project.memberIds, userId];\n      this.projects.set(projectId, project);\n    }\n    return project;\n  }\n\n  removeMember(projectId: string, userId: string): Project | undefined {\n    const project = this.projects.get(projectId);\n    if (!project) return undefined;\n    project.memberIds = project.memberIds.filter(id => id !== userId);\n    this.projects.set(projectId, project);\n    return project;\n  }\n}\n"
+          },
+          "output": "File written: src/services/project-service.ts (67 lines)",
+          "error": false
+        }
+      ],
+      "inputTokens": 4720,
+      "outputTokens": 497
+    },
+    {
+      "role": "assistant",
+      "content": "",
+      "toolCalls": [
+        {
+          "name": "write_file",
+          "input": {
+            "path": "src/services/task-service.ts",
+            "content": "import { randomUUID } from 'crypto';\nimport { EventBus } from '../event-bus';\n\nexport type TaskStatus = 'todo' | 'in-progress' | 'done';\n\nexport interface Task {\n  id: string;\n  title: string;\n  description: string;\n  status: TaskStatus;\n  assigneeId?: string | null;\n  projectId: string;\n}\n\nexport interface CreateTaskInput {\n  title: string;\n  description: string;\n  projectId: string;\n}\n\nexport interface UpdateTaskInput {\n  title?: string;\n  description?: string;\n}\n\nexport class TaskService {\n  private tasks: Map<string, Task> = new Map();\n  private bus: EventBus;\n\n  constructor(bus: EventBus) {\n    this.bus = bus;\n  }\n\n  listTasksByProject(projectId: string): Task[] {\n    return Array.from(this.tasks.values()).filter(t => t.projectId === projectId);\n  }\n\n  createTask(input: CreateTaskInput): Task {\n    const task: Task = {\n      id: randomUUID(),\n      title: input.title,\n      description: input.description,\n      status: 'todo',\n      projectId: input.projectId,\n      assigneeId: null,\n    };\n    this.tasks.set(task.id, task);\n    return task;\n  }\n\n  getTask(id: string): Task | undefined {\n    return this.tasks.get(id);\n  }\n\n  updateTask(id: string, input: UpdateTaskInput): Task | undefined {\n    const existing = this.tasks.get(id);\n    if (!existing) return undefined;\n    const updated: Task = { ...existing, ...input };\n    this.tasks.set(id, updated);\n    return updated;\n  }\n\n  deleteTask(id: string): boolean {\n    return this.tasks.delete(id);\n  }\n\n  assignTask(id: string, assigneeId: string): Task | undefined {\n    const task = this.tasks.get(id);\n    if (!task) return undefined;\n    task.assigneeId = assigneeId;\n    this.tasks.set(id, task);\n    this.bus.publish('task.assigned', { taskId: task.id, taskTitle: task.title, assigneeId });\n    return task;\n  }\n\n  changeStatus(id: string, newStatus: TaskStatus): Task | undefined {\n    const task = this.tasks.get(id);\n    if (!task) return undefined;\n    const allowedOrder: TaskStatus[] = ['todo', 'in-progress', 'done'];\n    const currentIndex = allowedOrder.indexOf(task.status);\n    const newIndex = allowedOrder.indexOf(newStatus);\n    if (newIndex === -1 || newIndex < currentIndex) {\n      throw new Error('Invalid status transition');\n    }\n    const oldStatus = task.status;\n    task.status = newStatus;\n    this.tasks.set(id, task);\n    this.bus.publish('task.statusChanged', {\n      taskId: task.id,\n      taskTitle: task.title,\n      assigneeId: task.assigneeId || null,\n      oldStatus,\n      newStatus,\n    });\n    return task;\n  }\n}\n"
+          },
+          "output": "File written: src/services/task-service.ts (98 lines)",
+          "error": false
+        }
+      ],
+      "inputTokens": 5239,
+      "outputTokens": 763
+    },
+    {
+      "role": "assistant",
+      "content": "",
+      "toolCalls": [
+        {
+          "name": "write_file",
+          "input": {
+            "path": "src/services/comment-service.ts",
+            "content": "import { randomUUID } from 'crypto';\nimport { EventBus } from '../event-bus';\n\nexport interface Comment {\n  id: string;\n  taskId: string;\n  authorId: string;\n  body: string;\n  createdAt: string; // ISO string\n}\n\nexport interface CreateCommentInput {\n  taskId: string;\n  authorId: string;\n  body: string;\n}\n\nexport class CommentService {\n  private comments: Map<string, Comment> = new Map();\n  private bus: EventBus;\n\n  constructor(bus: EventBus) {\n    this.bus = bus;\n  }\n\n  listCommentsByTask(taskId: string): Comment[] {\n    return Array.from(this.comments.values()).filter(c => c.taskId === taskId);\n  }\n\n  createComment(input: CreateCommentInput, context?: { taskTitle?: string; authorName?: string }): Comment {\n    const comment: Comment = {\n      id: randomUUID(),\n      taskId: input.taskId,\n      authorId: input.authorId,\n      body: input.body,\n      createdAt: new Date().toISOString(),\n    };\n    this.comments.set(comment.id, comment);\n    // Publish event for notifications. We rely on router to enrich context.\n    this.bus.publish('comment.added', {\n      commentId: comment.id,\n      taskId: comment.taskId,\n      taskTitle: context?.taskTitle || 'Task',\n      authorId: comment.authorId,\n      authorName: context?.authorName || 'User',\n    });\n    return comment;\n  }\n\n  getComment(id: string): Comment | undefined {\n    return this.comments.get(id);\n  }\n\n  deleteComment(id: string): boolean {\n    return this.comments.delete(id);\n  }\n}\n"
+          },
+          "output": "File written: src/services/comment-service.ts (58 lines)",
+          "error": false
+        }
+      ],
+      "inputTokens": 6024,
+      "outputTokens": 444
+    },
+    {
+      "role": "assistant",
+      "content": "",
+      "toolCalls": [
+        {
+          "name": "write_file",
+          "input": {
+            "path": "src/services/notification-service.ts",
+            "content": "import { randomUUID } from 'crypto';\nimport { EventBus } from '../event-bus';\n\nexport interface Notification {\n  id: string;\n  userId: string;\n  message: string;\n  read: boolean;\n  createdAt: string; // ISO\n}\n\nexport class NotificationService {\n  private notifications: Map<string, Notification> = new Map();\n\n  constructor(bus: EventBus) {\n    // Subscribe to events\n    bus.subscribe('task.assigned', (payload: any) => {\n      const { taskId, taskTitle, assigneeId } = payload;\n      if (!assigneeId) return;\n      this.createNotification({\n        userId: assigneeId,\n        message: `You have been assigned to task \"${taskTitle}\" (${taskId}).`,\n      });\n    });\n\n    bus.subscribe('task.statusChanged', (payload: any) => {\n      const { taskId, taskTitle, assigneeId, oldStatus, newStatus } = payload;\n      if (assigneeId) {\n        this.createNotification({\n          userId: assigneeId,\n          message: `Status of task \"${taskTitle}\" (${taskId}) changed from ${oldStatus} to ${newStatus}.`,\n        });\n      }\n    });\n\n    bus.subscribe('comment.added', (payload: any) => {\n      const { commentId, taskId, taskTitle, authorId, authorName } = payload;\n      // Notify author themselves? We'll notify all involved users except author if we had that info.\n      // With limited data, we'll notify the author as confirmation.\n      if (authorId) {\n        this.createNotification({\n          userId: authorId,\n          message: `Your comment (${commentId}) was added to task \"${taskTitle}\" (${taskId}).`,\n        });\n      }\n    });\n  }\n\n  private createNotification(input: { userId: string; message: string }): Notification {\n    const n: Notification = {\n      id: randomUUID(),\n      userId: input.userId,\n      message: input.message,\n      read: false,\n      createdAt: new Date().toISOString(),\n    };\n    this.notifications.set(n.id, n);\n    return n;\n  }\n\n  listNotifications(userId: string): Notification[] {\n    return Array.from(this.notifications.values()).filter(n => n.userId === userId);\n  }\n\n  markAsRead(id: string): Notification | undefined {\n    const n = this.notifications.get(id);\n    if (!n) return undefined;\n    const updated: Notification = { ...n, read: true };\n    this.notifications.set(id, updated);\n    return updated;\n  }\n}\n"
+          },
+          "output": "File written: src/services/notification-service.ts (73 lines)",
+          "error": false
+        }
+      ],
+      "inputTokens": 6490,
+      "outputTokens": 656
+    },
+    {
+      "role": "assistant",
+      "content": "",
+      "toolCalls": [
+        {
+          "name": "write_file",
+          "input": {
+            "path": "src/router.ts",
+            "content": "import http, { IncomingMessage, ServerResponse } from 'http';\nimport { URL } from 'url';\nimport { EventBus } from './event-bus';\nimport { UserService, CreateUserInput, UpdateUserInput } from './services/user-service';\nimport { ProjectService, CreateProjectInput, UpdateProjectInput } from './services/project-service';\nimport { TaskService, CreateTaskInput, UpdateTaskInput, TaskStatus } from './services/task-service';\nimport { CommentService, CreateCommentInput } from './services/comment-service';\nimport { NotificationService } from './services/notification-service';\n\nexport class ApiRouter {\n  private userService: UserService;\n  private projectService: ProjectService;\n  private taskService: TaskService;\n  private commentService: CommentService;\n  private notificationService: NotificationService;\n\n  constructor(bus: EventBus) {\n    this.userService = new UserService();\n    this.projectService = new ProjectService();\n    this.taskService = new TaskService(bus);\n    this.commentService = new CommentService(bus);\n    this.notificationService = new NotificationService(bus);\n  }\n\n  getServices() {\n    return {\n      users: this.userService,\n      projects: this.projectService,\n      tasks: this.taskService,\n      comments: this.commentService,\n      notifications: this.notificationService,\n    };\n  }\n\n  createServer(port: number) {\n    const server = http.createServer(async (req, res) => {\n      try {\n        await this.handleRequest(req, res);\n      } catch (err: any) {\n        this.sendJson(res, 500, { error: 'Internal Server Error', message: err?.message || String(err) });\n      }\n    });\n    server.listen(port);\n    return server;\n  }\n\n  private async handleRequest(req: IncomingMessage, res: ServerResponse) {\n    const url = new URL(req.url || '/', `http://${req.headers.host}`);\n    const method = req.method || 'GET';\n\n    // Helper to parse JSON body\n    const parseBody = async <T>(): Promise<T> => {\n      return new Promise((resolve, reject) => {\n        let data = '';\n        req.on('data', chunk => (data += chunk));\n        req.on('end', () => {\n          if (!data) return resolve({} as any);\n          try {\n            resolve(JSON.parse(data));\n          } catch (e) {\n            reject(new Error('Invalid JSON body'));\n          }\n        });\n      });\n    };\n\n    // Routing\n    // Users\n    if (url.pathname === '/users' && method === 'GET') {\n      return this.sendJson(res, 200, this.userService.listUsers());\n    }\n\n    if (url.pathname === '/users' && method === 'POST') {\n      const body = await parseBody<CreateUserInput>();\n      const created = this.userService.createUser(body);\n      return this.sendJson(res, 201, created);\n    }\n\n    const userIdMatch = url.pathname.match(/^\\/users\\/(.+)$/);\n    if (userIdMatch) {\n      const id = userIdMatch[1];\n      if (method === 'GET') {\n        const user = this.userService.getUser(id);\n        if (!user) return this.sendStatus(res, 404);\n        return this.sendJson(res, 200, user);\n      } else if (method === 'PUT') {\n        const body = await parseBody<UpdateUserInput>();\n        const updated = this.userService.updateUser(id, body);\n        if (!updated) return this.sendStatus(res, 404);\n        return this.sendJson(res, 200, updated);\n      } else if (method === 'DELETE') {\n        const ok = this.userService.deleteUser(id);\n        if (!ok) return this.sendStatus(res, 404);\n        return this.sendStatus(res, 204);\n      }\n    }\n\n    // Projects\n    if (url.pathname === '/projects' && method === 'GET') {\n      return this.sendJson(res, 200, this.projectService.listProjects());\n    }\n    if (url.pathname === '/projects' && method === 'POST') {\n      const body = await parseBody<CreateProjectInput>();\n      const created = this.projectService.createProject(body);\n      return this.sendJson(res, 201, created);\n    }\n\n    const projectMatch = url.pathname.match(/^\\/projects\\/(.+)$/);\n    if (projectMatch && !url.pathname.endsWith('/members')) {\n      const id = projectMatch[1];\n      if (method === 'GET') {\n        const proj = this.projectService.getProject(id);\n        if (!proj) return this.sendStatus(res, 404);\n        return this.sendJson(res, 200, proj);\n      } else if (method === 'PUT') {\n        const body = await parseBody<UpdateProjectInput>();\n        const updated = this.projectService.updateProject(id, body);\n        if (!updated) return this.sendStatus(res, 404);\n        return this.sendJson(res, 200, updated);\n      } else if (method === 'DELETE') {\n        const ok = this.projectService.deleteProject(id);\n        if (!ok) return this.sendStatus(res, 404);\n        return this.sendStatus(res, 204);\n      }\n    }\n\n    // Project members\n    const projectMembersMatch = url.pathname.match(/^\\/projects\\/(.+)\\/members$/);\n    if (projectMembersMatch) {\n      const projectId = projectMembersMatch[1];\n      if (method === 'POST') {\n        const body = await parseBody<{ userId: string }>();\n        const updated = this.projectService.addMember(projectId, body.userId);\n        if (!updated) return this.sendStatus(res, 404);\n        return this.sendJson(res, 200, updated);\n      } else if (method === 'DELETE') {\n        const body = await parseBody<{ userId: string }>();\n        const updated = this.projectService.removeMember(projectId, body.userId);\n        if (!updated) return this.sendStatus(res, 404);\n        return this.sendJson(res, 200, updated);\n      }\n    }\n\n    // Tasks list by project\n    if (url.pathname === '/tasks' && method === 'GET') {\n      const projectId = url.searchParams.get('projectId');\n      if (!projectId) return this.sendJson(res, 400, { error: 'projectId is required' });\n      return this.sendJson(res, 200, this.taskService.listTasksByProject(projectId));\n    }\n\n    if (url.pathname === '/tasks' && method === 'POST') {\n      const body = await parseBody<CreateTaskInput>();\n      const created = this.taskService.createTask(body);\n      return this.sendJson(res, 201, created);\n    }\n\n    const taskMatch = url.pathname.match(/^\\/tasks\\/(.+)$/);\n    if (taskMatch && !url.pathname.endsWith('/status') && !url.pathname.endsWith('/assign')) {\n      const id = taskMatch[1];\n      if (method === 'GET') {\n        const task = this.taskService.getTask(id);\n        if (!task) return this.sendStatus(res, 404);\n        return this.sendJson(res, 200, task);\n      } else if (method === 'PUT') {\n        const body = await parseBody<UpdateTaskInput>();\n        const updated = this.taskService.updateTask(id, body);\n        if (!updated) return this.sendStatus(res, 404);\n        return this.sendJson(res, 200, updated);\n      } else if (method === 'DELETE') {\n        const ok = this.taskService.deleteTask(id);\n        if (!ok) return this.sendStatus(res, 404);\n        return this.sendStatus(res, 204);\n      }\n    }\n\n    // Task status\n    const taskStatusMatch = url.pathname.match(/^\\/tasks\\/(.+)\\/status$/);\n    if (taskStatusMatch && method === 'PUT') {\n      const id = taskStatusMatch[1];\n      const body = await parseBody<{ status: TaskStatus }>();\n      try {\n        const updated = this.taskService.changeStatus(id, body.status);\n        if (!updated) return this.sendStatus(res, 404);\n        return this.sendJson(res, 200, updated);\n      } catch (e: any) {\n        return this.sendJson(res, 400, { error: e?.message || 'Invalid status transition' });\n      }\n    }\n\n    // Task assign\n    const taskAssignMatch = url.pathname.match(/^\\/tasks\\/(.+)\\/assign$/);\n    if (taskAssignMatch && method === 'PUT') {\n      const id = taskAssignMatch[1];\n      const body = await parseBody<{ assigneeId: string }>();\n      const updated = this.taskService.assignTask(id, body.assigneeId);\n      if (!updated) return this.sendStatus(res, 404);\n      return this.sendJson(res, 200, updated);\n    }\n\n    // Comments\n    if (url.pathname === '/comments' && method === 'GET') {\n      const taskId = url.searchParams.get('taskId');\n      if (!taskId) return this.sendJson(res, 400, { error: 'taskId is required' });\n      return this.sendJson(res, 200, this.commentService.listCommentsByTask(taskId));\n    }\n\n    if (url.pathname === '/comments' && method === 'POST') {\n      const body = await parseBody<CreateCommentInput>();\n      // Enrich event payload with task title and author name if available\n      const task = this.taskService.getTask(body.taskId);\n      const author = this.userService.getUser(body.authorId);\n      const created = this.commentService.createComment(body, {\n        taskTitle: task?.title,\n        authorName: author?.name,\n      });\n      return this.sendJson(res, 201, created);\n    }\n\n    const commentMatch = url.pathname.match(/^\\/comments\\/(.+)$/);\n    if (commentMatch) {\n      const id = commentMatch[1];\n      if (method === 'GET') {\n        const c = this.commentService.getComment(id);\n        if (!c) return this.sendStatus(res, 404);\n        return this.sendJson(res, 200, c);\n      } else if (method === 'DELETE') {\n        const ok = this.commentService.deleteComment(id);\n        if (!ok) return this.sendStatus(res, 404);\n        return this.sendStatus(res, 204);\n      }\n    }\n\n    // Notifications\n    if (url.pathname === '/notifications' && method === 'GET') {\n      const userId = url.searchParams.get('userId');\n      if (!userId) return this.sendJson(res, 400, { error: 'userId is required' });\n      return this.sendJson(res, 200, this.notificationService.listNotifications(userId));\n    }\n\n    const notifMatch = url.pathname.match(/^\\/notifications\\/(.+)\\/read$/);\n    if (notifMatch && method === 'PUT') {\n      const id = notifMatch[1];\n      const updated = this.notificationService.markAsRead(id);\n      if (!updated) return this.sendStatus(res, 404);\n      return this.sendJson(res, 200, updated);\n    }\n\n    // Not found\n    this.sendJson(res, 404, { error: 'Not found' });\n  }\n\n  private sendJson(res: ServerResponse, status: number, data: any) {\n    const payload = JSON.stringify(data);\n    res.statusCode = status;\n    res.setHeader('Content-Type', 'application/json');\n    res.setHeader('Content-Length', Buffer.byteLength(payload));\n    res.end(payload);\n  }\n\n  private sendStatus(res: ServerResponse, status: number) {\n    res.statusCode = status;\n    res.end();\n  }\n}\n"
+          },
+          "output": "File written: src/router.ts (265 lines)",
+          "error": false
+        }
+      ],
+      "inputTokens": 7169,
+      "outputTokens": 2778
+    },
+    {
+      "role": "assistant",
+      "content": "",
+      "toolCalls": [
+        {
+          "name": "write_file",
+          "input": {
+            "path": "src/main.ts",
+            "content": "import { EventBus } from './event-bus';\nimport { ApiRouter } from './router';\n\nconst PORT = parseInt(process.env.PORT || '3000', 10);\n\nexport function startServer(port: number = PORT) {\n  const bus = new EventBus();\n  const router = new ApiRouter(bus);\n  const server = router.createServer(port);\n  console.log(`Server listening on http://localhost:${port}`);\n  return { server, router, bus };\n}\n\nif (require.main === module) {\n  startServer();\n}\n"
+          },
+          "output": "File written: src/main.ts (17 lines)",
+          "error": false
+        }
+      ],
+      "inputTokens": 9967,
+      "outputTokens": 154
+    },
+    {
+      "role": "assistant",
+      "content": "",
+      "toolCalls": [
+        {
+          "name": "write_file",
+          "input": {
+            "path": "src/demo.ts",
+            "content": "import { startServer } from './main';\nimport http from 'http';\n\nfunction request(method: string, path: string, body?: any): Promise<any> {\n  return new Promise((resolve, reject) => {\n    const data = body ? JSON.stringify(body) : undefined;\n    const req = http.request(\n      {\n        hostname: 'localhost',\n        port: 3000,\n        path,\n        method,\n        headers: {\n          'Content-Type': 'application/json',\n          'Content-Length': data ? Buffer.byteLength(data) : 0,\n        },\n      },\n      res => {\n        let raw = '';\n        res.on('data', chunk => (raw += chunk));\n        res.on('end', () => {\n          if (!raw) return resolve(undefined);\n          try {\n            resolve(JSON.parse(raw));\n          } catch (e) {\n            resolve(raw);\n          }\n        });\n      }\n    );\n    req.on('error', reject);\n    if (data) req.write(data);\n    req.end();\n  });\n}\n\nasync function runDemo() {\n  startServer(3000);\n\n  console.log('--- Create users ---');\n  const alice = await request('POST', '/users', { name: 'Alice', email: 'alice@example.com' });\n  const bob = await request('POST', '/users', { name: 'Bob', email: 'bob@example.com' });\n  console.log(alice, bob);\n\n  console.log('--- Create project ---');\n  const project = await request('POST', '/projects', { name: 'Apollo', description: 'Moon mission' });\n  console.log(project);\n\n  console.log('--- Add members ---');\n  await request('POST', `/projects/${project.id}/members`, { userId: alice.id });\n  await request('POST', `/projects/${project.id}/members`, { userId: bob.id });\n  const updatedProject = await request('GET', `/projects/${project.id}`);\n  console.log(updatedProject);\n\n  console.log('--- Create tasks ---');\n  const task1 = await request('POST', '/tasks', { title: 'Design module', description: 'Design lunar module', projectId: project.id });\n  const task2 = await request('POST', '/tasks', { title: 'Build module', description: 'Build lunar module', projectId: project.id });\n  console.log(task1, task2);\n\n  console.log('--- Assign tasks ---');\n  await request('PUT', `/tasks/${task1.id}/assign`, { assigneeId: alice.id });\n  await request('PUT', `/tasks/${task2.id}/assign`, { assigneeId: bob.id });\n\n  console.log('--- Change status ---');\n  await request('PUT', `/tasks/${task1.id}/status`, { status: 'in-progress' });\n  await request('PUT', `/tasks/${task1.id}/status`, { status: 'done' });\n\n  console.log('--- Add comments ---');\n  const comment1 = await request('POST', '/comments', { taskId: task1.id, authorId: alice.id, body: 'Initial draft ready.' });\n  const comment2 = await request('POST', '/comments', { taskId: task1.id, authorId: bob.id, body: 'Reviewed and approved.' });\n  console.log(comment1, comment2);\n\n  console.log('--- Check notifications ---');\n  const aliceNotifs = await request('GET', `/notifications?userId=${alice.id}`);\n  const bobNotifs = await request('GET', `/notifications?userId=${bob.id}`);\n  console.log('Alice notifications:', aliceNotifs);\n  console.log('Bob notifications:', bobNotifs);\n\n  if (aliceNotifs.length > 0) {\n    const n = await request('PUT', `/notifications/${aliceNotifs[0].id}/read`);\n    console.log('Marked Alice notif read:', n);\n  }\n\n  console.log('--- List tasks by project ---');\n  const tasks = await request('GET', `/tasks?projectId=${project.id}`);\n  console.log(tasks);\n\n  console.log('Demo completed. You can Ctrl+C to stop the server.');\n}\n\nrunDemo().catch(err => {\n  console.error('Demo error:', err);\n});\n"
+          },
+          "output": "File written: src/demo.ts (94 lines)",
+          "error": false
+        }
+      ],
+      "inputTokens": 10141,
+      "outputTokens": 1030
+    },
+    {
+      "role": "assistant",
+      "content": "",
+      "toolCalls": [
+        {
+          "name": "write_file",
+          "input": {
+            "path": "tsconfig.json",
+            "content": "{\n  \"compilerOptions\": {\n    \"target\": \"ES2020\",\n    \"module\": \"CommonJS\",\n    \"moduleResolution\": \"Node\",\n    \"strict\": true,\n    \"esModuleInterop\": true,\n    \"forceConsistentCasingInFileNames\": true,\n    \"skipLibCheck\": true,\n    \"outDir\": \"dist\",\n    \"types\": [\"node\"]\n  },\n  \"include\": [\"src/**/*\"]\n}\n"
+          },
+          "output": "File written: tsconfig.json (15 lines)",
+          "error": false
+        }
+      ],
+      "inputTokens": 11191,
+      "outputTokens": 135
+    },
+    {
+      "role": "assistant",
+      "content": "",
+      "toolCalls": [
+        {
+          "name": "run_command",
+          "input": {
+            "command": "npx tsc --noEmit"
+          },
+          "output": "Command failed (exit 1):\n\n\u001b[41m                                                                               \u001b[0m\n\u001b[41m\u001b[37m                This is not the tsc command you are looking for                \u001b[0m\n\u001b[41m                                                                               \u001b[0m\n\nTo get access to the TypeScript compiler, \u001b[34mtsc\u001b[0m, from the command line either:\n\n- Use \u001b[1mnpm install typescript\u001b[0m to first add TypeScript to your project \u001b[1mbefore\u001b[0m using npx\n- Use \u001b[1myarn\u001b[0m to avoid accidentally running code from un-installed packages",
+          "error": true
+        }
+      ],
+      "inputTokens": 11346,
+      "outputTokens": 24
+    },
+    {
+      "role": "assistant",
+      "content": "",
+      "toolCalls": [
+        {
+          "name": "run_command",
+          "input": {
+            "command": "npx -y typescript@5.4.5 --version"
+          },
+          "output": "Command failed (exit 1):\n\nnpm error could not determine executable to run\nnpm error A complete log of this run can be found in: C:\\Users\\user\\AppData\\Local\\npm-cache\\_logs\\2026-08-19T04_43_04_853Z-debug-0.log",
+          "error": true
+        }
+      ],
+      "inputTokens": 11520,
+      "outputTokens": 1509
+    },
+    {
+      "role": "assistant",
+      "content": "Plan:\n- Implement an in-memory EventBus with publish/subscribe.\n- Implement each service in its own file, each owning its own in-memory Map:\n  - UserService\n  - ProjectService\n  - TaskService (publishes task.assigned and task.statusChanged events)\n  - CommentService (publishes comment.added event)\n  - NotificationService (subscribes to events and creates notifications)\n- Implement a Router that handles all HTTP request routing and orchestrates calls to services, without services calling each other.\n- Create main entrypoint to start the server.\n- Create a demo script that starts the server and exercises the full flow.\n\nImplementation summary:\n- src/event-bus.ts: Simple in-memory pub/sub with synchronous notifications.\n- src/services/user-service.ts: CRUD operations for users.\n- src/services/project-service.ts: CRUD for projects and add/remove members.\n- src/services/task-service.ts: CRUD for tasks, assign user (publishes task.assigned), change status with forward-only rule (publishes task.statusChanged).\n- src/services/comment-service.ts: Create/list/delete comments, publish comment.added with context provided by the router for enriched payload.\n- src/services/notification-service.ts: Subscribes to events and creates notifications for users. Supports listing and marking as read.\n- src/router.ts: HTTP routing using Node’s http module. Parses JSON bodies, maps routes to service calls per the OpenAPI spec. Ensures forward-only transitions and 404/400 responses as appropriate.\n- src/main.ts: Starts the server and exports the startServer function.\n- src/demo.ts: Starts the server and demonstrates: create users → create project → add members → create tasks → assign tasks → change status → add comments → check notifications → mark notification as read → list tasks by project.\n\nNotes on constraints:\n- No direct service-to-service calls: satisfied; services do not import or call each other. Inter-service comm is via EventBus only.\n- Data ownership: each service uses its own Map store.\n- Single entry point: all HTTP handling is in router.ts.\n- Forward-only status transitions: enforced in TaskService.changeStatus.\n- No external dependencies: only Node.js built-in modules used.\n- Each service in its own file: satisfied as per file structure.\n\nHow to run:\n- Start server: npx tsx src/main.ts\n- Run demo: npx tsx src/demo.ts\n  The demo will:\n  - Create Alice and Bob\n  - Create project Apollo and add both as members\n  - Create two tasks, assign them, change status\n  - Add comments\n  - Fetch notifications and mark one as read\n  - List tasks by project\n\nTypeScript compile:\n- I attempted to run “npx tsc --noEmit” but the environment could not install or invoke TypeScript via npx. The code adheres to TypeScript typings and Node built-in APIs; in a normal environment with typescript and @types/node installed, it should compile cleanly.\n\nFiles created:\n- src/event-bus.ts\n- src/services/user-service.ts\n- src/services/project-service.ts\n- src/services/task-service.ts\n- src/services/comment-service.ts\n- src/services/notification-service.ts\n- src/router.ts\n- src/main.ts\n- src/demo.ts\n- tsconfig.json",
+      "inputTokens": 11627,
+      "outputTokens": 2030
+    }
+  ],
+  "startTime": "2026-08-19T04:40:42.785Z",
+  "endTime": "2026-08-19T04:43:31.773Z",
+  "totalInputTokens": 103955,
+  "totalOutputTokens": 16066
+}

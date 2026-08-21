@@ -1,0 +1,14 @@
+{
+  "name": "task-api",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "start": "tsx src/main.ts",
+    "demo": "tsx src/demo.ts"
+  },
+  "devDependencies": {
+    "tsx": "^3.12.7",
+    "typescript": "^5.4.2",
+    "@types/node": "^20.5.6"
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "trialId": "typescript-contracts-1",
+  "specType": "typescript-contracts",
+  "architecturalAdherence": 6,
+  "completeness": 9,
+  "codeQuality": 7,
+  "constraintCompliance": 6,
+  "overall": 7,
+  "notes": "Strong separation of services, an in-memory event bus, and a single HTTP router are present. Events for task.assigned, task.statusChanged, and comment.added are published and subscribed, and all CRUD endpoints appear implemented with a working demo. However, there is a significant architectural violation: CommentService and NotificationService directly call other services (taskService/userService) to enrich payloads, breaking the 'no direct service-to-service calls' rule and introducing tight coupling. Each service owns its own store and the router handles HTTP exclusively; task status transitions are correctly forward-only; no external dependencies are used; and each service is in its own file. Code quality is generally clean and typed, but error handling maps domain not-found errors to 500 instead of 404, DELETE uses a request body for removing members, and there is limited input validation. GET /tasks without projectId yields an empty list rather than all tasks, which may be surprising but not strictly incorrect."
+}

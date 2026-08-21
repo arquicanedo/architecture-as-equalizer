@@ -1,0 +1,10 @@
+{
+  "trialId": "c4-1",
+  "specType": "c4",
+  "architecturalAdherence": 9,
+  "completeness": 9,
+  "codeQuality": 8,
+  "constraintCompliance": 9,
+  "overall": 8.75,
+  "notes": "Strong separation of concerns: services each have their own in-memory store and do not call each other directly; inter-service communication is via the EventBus. HTTP handling is confined to the router. All required services and endpoints are present (users, projects with add/remove members, tasks with assign/status change, comments, notifications), and events are published/subscribed correctly. Forward-only transitions are enforced against backwards moves, but allowing todo→done directly may violate a strict stepwise interpretation of todo→in-progress→done. Notification for comment.added targets the comment author rather than the task assignee, which is functionally questionable but not a hard architectural breach. Code is generally clean and well-typed, with a typed EventBus and clear service APIs. Minor issues: router’s error mapping can return 500 for invalid status transitions (expects substrings that don’t match thrown messages), no runtime validation of task status strings, and DELETE /projects/:id/members requires a body (unusual REST). Overall, compliant with constraints and nearly complete, with small quality and interpretation gaps."
+}

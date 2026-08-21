@@ -1,0 +1,27 @@
+{
+  "name": "task-management-api",
+  "version": "1.0.0",
+  "description": "Task Management API with event-driven architecture",
+  "main": "dist/main.js",
+  "scripts": {
+    "start": "npx tsx src/main.ts",
+    "demo": "npx tsx src/demo.ts",
+    "build": "npx tsc",
+    "typecheck": "npx tsc --noEmit"
+  },
+  "keywords": [
+    "task",
+    "management",
+    "api",
+    "event-bus"
+  ],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/node": "^20.19.43",
+    "typescript": "^5.9.3"
+  },
+  "dependencies": {
+    "tsx": "^4.23.12"
+  }
+}

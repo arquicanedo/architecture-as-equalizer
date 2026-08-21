@@ -1,0 +1,24 @@
+{
+  "name": "task-management-api",
+  "version": "1.0.0",
+  "description": "Task Management API - An in-memory event-driven task management system",
+  "main": "dist/main.js",
+  "scripts": {
+    "start": "npx tsx src/main.ts",
+    "demo": "npx tsx src/demo.ts",
+    "build": "tsc",
+    "typecheck": "tsc --noEmit"
+  },
+  "keywords": [
+    "task-management",
+    "api",
+    "event-driven"
+  ],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/node": "^26.2.0",
+    "tsx": "^4.0.0",
+    "typescript": "^5.0.0"
+  }
+}

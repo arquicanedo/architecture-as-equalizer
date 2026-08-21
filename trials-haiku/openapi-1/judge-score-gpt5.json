@@ -1,0 +1,10 @@
+{
+  "trialId": "openapi-1",
+  "specType": "openapi",
+  "architecturalAdherence": 6,
+  "completeness": 7,
+  "codeQuality": 7,
+  "constraintCompliance": 6,
+  "overall": 6.5,
+  "notes": "Major violation: CommentService directly calls UserService and TaskService to enrich event payloads, breaking the 'no direct service-to-service calls' rule (should rely solely on Event Bus). Minor violation: Main handles CORS headers and OPTIONS responses instead of delegating all HTTP handling to the Router. Completeness gap: NotificationService subscribes to comment.added but only logs; it does not create notifications for comments as specified. Otherwise, services are separated with their own stores, event bus is used for task-assigned and status-changed events, and forward-only status transitions are enforced. Code quality is generally good and idiomatic, but event payloads use 'any' (weak typing), and parseBody JSON errors are not caught at the router level, potentially causing unhandled rejections instead of a clean 400 response."
+}

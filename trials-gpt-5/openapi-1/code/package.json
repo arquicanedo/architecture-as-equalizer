@@ -1,0 +1,19 @@
+{
+  "name": "task-management-api",
+  "version": "1.0.0",
+  "description": "In-memory multi-service Task Management API with event bus",
+  "main": "dist/main.js",
+  "scripts": {
+    "build": "tsc",
+    "start": "tsx src/main.ts",
+    "demo": "tsx src/demo.ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/node": "^22.7.5",
+    "typescript": "^7.0.2"
+  }
+}

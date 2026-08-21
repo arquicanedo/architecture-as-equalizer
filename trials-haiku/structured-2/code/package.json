@@ -1,0 +1,27 @@
+{
+  "name": "task-management-api",
+  "version": "1.0.0",
+  "description": "Task Management API - Architecture demonstration with Node.js",
+  "type": "module",
+  "main": "dist/main.js",
+  "scripts": {
+    "dev": "npx tsx src/main.ts",
+    "demo": "npx tsx src/demo.ts",
+    "build": "npx tsc",
+    "typecheck": "npx tsc --noEmit"
+  },
+  "keywords": [
+    "task-management",
+    "api",
+    "nodejs",
+    "typescript",
+    "architecture"
+  ],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/node": "^26.2.0",
+    "tsx": "^4.0.0",
+    "typescript": "^5.0.0"
+  }
+}

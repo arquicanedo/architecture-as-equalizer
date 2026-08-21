@@ -1,0 +1,10 @@
+{
+  "trialId": "openapi-3",
+  "specType": "openapi",
+  "architecturalAdherence": 7,
+  "completeness": 4,
+  "codeQuality": 7,
+  "constraintCompliance": 7,
+  "notes": "Architectural adherence is solid for what's shown: EventBus uses pub/sub correctly with setImmediate for async decoupling, services own their data stores, and TaskService properly communicates via EventBus rather than direct calls. However, the review is incomplete — only 5 of the required 6 files are shown (CommentService, NotificationService, and ApiRouter are entirely missing), which severely impacts completeness. Completeness scores low (4) because: CommentService (create/get/delete comments) is absent, NotificationService (in-memory, subscribing to task.assigned, task.statusChanged, comment.added) is absent, ApiRouter (HTTP entry point using Node.js http module) is absent, and no demo/index script is present. The 'comment.added' event is never published since CommentService is missing. Code quality is reasonable: TypeScript interfaces are well-defined in models.ts, async/await is used consistently, the forward-only status transition logic is correct and clean, UUID generation uses built-in crypto, and the union return type 'Task | undefined | invalid_transition' is functional but a thrown error or discriminated union would be more idiomatic. Minor issues: ProjectService does not validate that userId exists before adding as member (cross-service validation would require event-based query pattern or relaxed rule), the seeded default user in UserService is unexpected and untestable. ConstraintCompliance: no external npm dependencies visible, services are in separate files, EventBus is used for inter-service events, forward-only transitions are enforced — but cannot fully verify rule 3 (all HTTP handling in router only) or rule 1 (no direct service-to-service calls) since ApiRouter is missing. Score reflects partial compliance based on visible code.",
+  "overall": 6.25
+}

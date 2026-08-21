@@ -1,0 +1,24 @@
+{
+  "name": "task-management-api",
+  "version": "1.0.0",
+  "description": "Task Management API with Event Bus Architecture",
+  "type": "module",
+  "scripts": {
+    "start": "npx tsx src/main.ts",
+    "demo": "npx tsx src/demo.ts",
+    "typecheck": "npx tsc --noEmit"
+  },
+  "keywords": [
+    "task",
+    "management",
+    "api",
+    "event-bus"
+  ],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/node": "^26.2.0",
+    "tsx": "^4.7.0",
+    "typescript": "^5.2.0"
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "trialId": "typescript-contracts-1",
+  "specType": "typescript-contracts",
+  "architecturalAdherence": 7,
+  "completeness": 9,
+  "codeQuality": 7,
+  "constraintCompliance": 10,
+  "overall": 8.25,
+  "notes": "Good separation of services, exclusive in-memory stores, and event-driven communication via an in-memory bus. All HTTP is handled in the Router and no external deps are used. Task status transitions are forward-only (even stricter: single-step). However, the Router publishes an additional enriched 'comment.added' event and cross-reads User/Task services to do so, mixing HTTP layer with domain/event orchestration and causing duplicate events for the same action. NotificationService’s comment handling relies on loosely-typed payload ('any'), and GET-by-id errors return 400 instead of 404. Overall feature coverage is strong (CRUD for users/projects/tasks, member management, assign/status change, comments, notifications, demo), but the event enrichment in Router detracts from architectural purity."
+}

@@ -1,0 +1,10 @@
+{
+  "trialId": "openapi-1",
+  "specType": "openapi",
+  "architecturalAdherence": 5,
+  "completeness": 8,
+  "codeQuality": 7,
+  "constraintCompliance": 5,
+  "notes": "Completeness is strong: all five services exist, full CRUD is present, status transitions are forward-only, events are published and consumed, and a working demo is included. Code quality is solid overall — types are well-defined, Map-based stores are clean, error handling exists at the router level, and the code is readable. However, several significant issues drag down the architectural and constraint scores. (1) Rule 1 violated: CommentService receives two callback lambdas from the router — '(taskId) => this.taskService.get(taskId)?.title' and '(userId) => this.userService.get(userId)?.name' — which are direct cross-service data reads disguised as constructor injection. This is a service-to-service call through a thin wrapper; it bypasses the event bus entirely and tightly couples the router to inter-service data flow. (2) Rule 2 partially violated: by passing those callbacks, the router is acting as a data bridge between TaskService/UserService and CommentService, meaning CommentService is reading data from other services' stores indirectly. (3) Rule 3 is respected — all HTTP handling is in the router. (4) The comment.added notification notifies only the author ('your comment was added'), not other relevant parties such as the task assignee or project members, which is semantically weak and arguably incorrect for a notification system. (5) No input validation beyond type expectations — missing required-field checks (e.g., creating a task without title/projectId silently succeeds). (6) The EventBus is synchronous, which is acceptable for in-memory but subscriber errors are silently swallowed with no logging, which could hide bugs. (7) No unsubscribe mechanism on EventBus, minor but notable. (8) 'update' on tasks exposes a generic patch that could overwrite status/assigneeId if UpdateTaskInput were extended, though currently constrained by type. (9) Demo uses a hardcoded port 3001 separate from main.ts port 3000 — acceptable but slightly messy.",
+  "overall": 6.25
+}

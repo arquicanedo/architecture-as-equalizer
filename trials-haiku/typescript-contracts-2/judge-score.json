@@ -1,0 +1,10 @@
+{
+  "trialId": "typescript-contracts-2",
+  "specType": "typescript-contracts",
+  "architecturalAdherence": 5,
+  "completeness": 8,
+  "codeQuality": 7,
+  "constraintCompliance": 5,
+  "notes": "Several architectural and constraint violations found: (1) CRITICAL - Rule 1 violated: The 'comment.added' event subscription in main.ts directly calls 'this.taskService.getById()' to look up the task's assigneeId, which is a direct service-to-service call disguised inside the event handler. The NotificationService should receive all needed data in the event payload, not query another service. (2) CRITICAL - Rule 1 violated: The router directly calls 'userServiceGetById' and 'taskServiceGetById' before publishing the comment.added event, performing cross-service data fetching in the HTTP layer rather than having services communicate exclusively via the event bus. (3) Rule 3 partially violated: The Router has logic to fetch user/task data and orchestrate the comment publish flow - this is business logic that shouldn't live in the HTTP layer. (4) The commentServicePublish callback pattern is an awkward workaround that exposes an internal service method through the router's dependency interface, muddying the separation of concerns. The CommentService should publish its own event with the data it has at creation time, but it lacks access to user names and task titles, which is a design gap. (5) Rule 2 is nominally followed - each service has its own Map store. (6) Forward-only transitions are correctly implemented. (7) No external npm dependencies used. (8) Services are in separate files. (9) All CRUD operations present, all three events defined. (10) Error handling is basic but functional - all errors return 500 regardless of type (404 errors from getById throw and become 500 responses, not proper 404 HTTP responses). (11) The 'unused variable' pattern in delete methods (const comment = this.getById(id)) is minor but sloppy. (12) Type safety is reasonable but 'as any' cast appears in status handling. (13) Demo script is thorough and well-structured.",
+  "overall": 6.25
+}

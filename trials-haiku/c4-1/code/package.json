@@ -1,0 +1,25 @@
+{
+  "name": "task-management-api",
+  "version": "1.0.0",
+  "description": "Task Management API - Event-driven microservices architecture with Node.js",
+  "main": "dist/main.js",
+  "scripts": {
+    "start": "npx tsx src/main.ts",
+    "demo": "npx tsx src/demo.ts",
+    "build": "npx tsc",
+    "check": "npx tsc --noEmit"
+  },
+  "keywords": [
+    "task-management",
+    "event-driven",
+    "microservices",
+    "node.js"
+  ],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/node": "^26.2.0",
+    "tsx": "^4.23.12",
+    "typescript": "^7.0.2"
+  }
+}

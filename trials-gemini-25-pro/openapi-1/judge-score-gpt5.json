@@ -1,0 +1,10 @@
+{
+  "trialId": "openapi-1",
+  "specType": "openapi",
+  "architecturalAdherence": 6,
+  "completeness": 9,
+  "codeQuality": 8,
+  "constraintCompliance": 8,
+  "overall": 7.75,
+  "notes": "Good separation of services, in-memory stores per service, HTTP handling confined to the router, and event bus used for notifications. Forward-only task status transitions are correctly enforced. However, CommentService directly calls TaskService and UserService (via injected getters) to validate references, which violates the 'no direct service-to-service calls' rule—inter-service checks should be event-driven. All required CRUD endpoints and features are present, and the demo exercises them. Code is clean and well-typed with reasonable error handling, though JSON parsing errors result in 500 instead of 400, and comment notifications only notify the author (simplified but acceptable). No external dependencies and each service is in its own file."
+}

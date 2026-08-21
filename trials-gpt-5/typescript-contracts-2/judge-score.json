@@ -1,0 +1,10 @@
+{
+  "trialId": "typescript-contracts-2",
+  "specType": "typescript-contracts",
+  "architecturalAdherence": 6,
+  "completeness": 8,
+  "codeQuality": 8,
+  "constraintCompliance": 6,
+  "notes": "Overall a solid, well-structured implementation with good TypeScript typing, clean separation of files, and a working event bus. However, there are notable architectural violations: (1) Rule 1 (no direct service-to-service calls) is violated — CommentService receives UserService and TaskService instances directly via constructor injection and calls getUserName/getTaskTitle on them synchronously; NotificationService receives TaskService as ITaskLookup. Even wrapped in interfaces, this is direct cross-service coupling, not event-based communication. The justification via IUserLookup/ITaskLookup thin interfaces does not resolve the architectural violation. (2) Rule 2 (exclusive data ownership) is partially undermined by the same issue — NotificationService maintains its own taskAssignee map as a workaround, which is reasonable, but the direct lookup coupling remains. (3) The notification for comment.added only notifies the assignee, not the author or other stakeholders, which is a minor completeness gap. Positives: forward-only status transitions are correctly enforced, all CRUD endpoints are present, the event bus is properly pub/sub with error isolation, no external npm dependencies are used, each service is in its own file, the router correctly centralizes all HTTP handling, the demo script is thorough and exercises all major features. Code quality is high: consistent immutable update patterns, proper UUIDs, ISO timestamps, clean error propagation with appropriate HTTP status codes. The query parameter parsing has a minor redundancy (using both parseQuery and url.searchParams). The ITaskLookup/IUserLookup abstraction is a genuine attempt to soften the coupling but does not satisfy the architectural rule as stated.",
+  "overall": 7
+}

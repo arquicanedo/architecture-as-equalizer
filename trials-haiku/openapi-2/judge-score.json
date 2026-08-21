@@ -1,0 +1,10 @@
+{
+  "trialId": "openapi-2",
+  "specType": "openapi",
+  "architecturalAdherence": 8,
+  "completeness": 7,
+  "codeQuality": 8,
+  "constraintCompliance": 9,
+  "notes": "Overall a solid implementation with good separation of concerns. Architectural adherence is strong: event bus is used correctly for inter-service communication, each service owns its own data store, and HTTP handling is isolated in the router. Main violations: (1) The router directly calls taskService.getById() and userService.getById() inside the POST /comments handler to pass task title and author name to commentService.create() — this is a cross-service data lookup that should instead be resolved via event payload enrichment or by passing IDs and letting the notification service handle name resolution independently; it's a minor but real architectural smell. (2) The comment.added event handler in notification-service is a no-op stub — it subscribes but creates no notifications for task assignees or watchers, which is an incomplete feature. (3) GET /tasks requires a projectId query param and returns 400 without it — there is no way to list all tasks globally, which may be intentional but limits utility. (4) No email uniqueness validation in user creation. (5) The router's matchRoute returns handler functions typed as RouteHandler (synchronous) but all are async — the RouteHandler interface is slightly mistyped. (6) Error discrimination between 'not found' and 'invalid transition' in changeStatus both return undefined, making it impossible for the router to distinguish a missing task (404) from an invalid transition (422/400) — the router defaults to a generic 400 for both. (7) Sequential integer IDs (nextId) are predictable and would cause collisions after service restart, though acceptable for in-memory. (8) The demo script properly exercises the full flow. No external npm dependencies used. TypeScript types are clean and idiomatic. File-per-service rule is respected.",
+  "overall": 8
+}

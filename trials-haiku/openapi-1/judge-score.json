@@ -1,0 +1,10 @@
+{
+  "trialId": "openapi-1",
+  "specType": "openapi",
+  "architecturalAdherence": 6,
+  "completeness": 7,
+  "codeQuality": 7,
+  "constraintCompliance": 6,
+  "notes": "Architectural violation: comment-service.ts directly imports and calls userService and taskService to enrich event payloads — this breaks Rule 1 (no direct service-to-service calls). The notification service's handleCommentAdded only logs and never actually creates a notification for any user, making the comment.added event functionally useless for notifications. Rule 2 is otherwise respected. Rule 3 (HTTP handling only in router) is correctly followed. Rule 4 (forward-only transitions) is correctly implemented including same-status no-op. Rule 5 (no external npm deps) is respected. Rule 6 (each service in its own file) is followed. Additional issues: no input validation (missing fields like name/email/title silently produce undefined values in objects), no email uniqueness enforcement, the router only extracts a single 'id' capture group so multi-segment routes like /projects/:id/members and /notifications/:id/read work only by coincidence since params.id captures the first group — but for /notifications/:id/read the pattern would capture the notification id correctly. DELETE /projects/:id/members passes body.userId which requires body parsing on DELETE — the router only parses body for POST and PUT, so removeMember via DELETE would receive an empty body and userId would be undefined, silently returning the project unchanged rather than erroring. The demo script uses require('http') inside an ES module context which is inconsistent. The notificationService is imported in main.ts solely to trigger its constructor side-effects — this is a code smell. Overall the implementation is functional for the happy path but has meaningful architectural and correctness defects.",
+  "overall": 6.5
+}

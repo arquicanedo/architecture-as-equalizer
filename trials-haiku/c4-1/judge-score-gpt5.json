@@ -1,0 +1,10 @@
+{
+  "trialId": "c4-1",
+  "specType": "c4",
+  "architecturalAdherence": 8,
+  "completeness": 7,
+  "codeQuality": 7,
+  "constraintCompliance": 10,
+  "overall": 8,
+  "notes": "Good separation of services, exclusive in-memory stores, and proper Event Bus usage. The API Router is the sole HTTP entry point and task status transitions are enforced as forward-only. However, NotificationService does not create notifications for comment.added events (it only logs), which misses a specified feature. CommentService emits an incorrect payload field (authorName is set to authorId) and requires taskTitle from the router, introducing coupling to another service’s data shape via the router. Input validation is minimal and parseBody returns any. The forward-only status check is implemented, though it allows skipping directly from todo to done (likely acceptable). No external dependencies and each service is in its own file. Demo script exercises the workflow but uses arbitrary delays for event processing."
+}

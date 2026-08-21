@@ -1,0 +1,404 @@
+{
+  "messages": [
+    {
+      "role": "assistant",
+      "content": "I'll implement this step by step. Let me plan the structure first:\n\n- `src/types.ts` - All TypeScript interfaces\n- `src/store.ts` - In-memory data store\n- `src/router.ts` - Request routing utility\n- `src/handlers/users.ts` - User route handlers\n- `src/handlers/projects.ts` - Project route handlers\n- `src/handlers/tasks.ts` - Task route handlers\n- `src/handlers/comments.ts` - Comment route handlers\n- `src/handlers/notifications.ts` - Notification route handlers\n- `src/server.ts` - HTTP server setup\n- `src/main.ts` - Entry point\n- `src/demo.ts` - Demo script\n\nLet's start writing all the files:",
+      "toolCalls": [
+        {
+          "name": "write_file",
+          "input": {
+            "path": "src/types.ts",
+            "content": "export interface User {\n  id: string;\n  name: string;\n  email: string;\n}\n\nexport interface Project {\n  id: string;\n  name: string;\n  description: string;\n  memberIds: string[];\n}\n\nexport type TaskStatus = \"todo\" | \"in-progress\" | \"done\";\n\nexport interface Task {\n  id: string;\n  title: string;\n  description: string;\n  status: TaskStatus;\n  assigneeId: string | null;\n  projectId: string;\n}\n\nexport interface Comment {\n  id: string;\n  taskId: string;\n  authorId: string;\n  body: string;\n  createdAt: string;\n}\n\nexport interface Notification {\n  id: string;\n  userId: string;\n  message: string;\n  read: boolean;\n  createdAt: string;\n}\n\n// HTTP utility types\nexport type RouteHandler = (\n  req: ParsedRequest,\n  res: ResponseHelper\n) => Promise<void> | void;\n\nexport interface ParsedRequest {\n  method: string;\n  pathname: string;\n  segments: string[];\n  query: Record<string, string>;\n  body: unknown;\n}\n\nexport interface ResponseHelper {\n  json: (statusCode: number, data: unknown) => void;\n  error: (statusCode: number, message: string) => void;\n}\n\nexport interface Route {\n  method: string;\n  pattern: string[]; // e.g. [\"users\", \":id\"] or [\"projects\", \":id\", \"members\"]\n  handler: RouteHandler;\n}\n"
+          },
+          "output": "File written: src/types.ts (65 lines)",
+          "error": false
+        }
+      ],
+      "inputTokens": 1696,
+      "outputTokens": 632
+    },
+    {
+      "role": "assistant",
+      "content": "",
+      "toolCalls": [
+        {
+          "name": "write_file",
+          "input": {
+            "path": "src/store.ts",
+            "content": "import { User, Project, Task, Comment, Notification } from \"./types\";\n\nclass Store {\n  users: Map<string, User> = new Map();\n  projects: Map<string, Project> = new Map();\n  tasks: Map<string, Task> = new Map();\n  comments: Map<string, Comment> = new Map();\n  notifications: Map<string, Notification> = new Map();\n}\n\nexport const store = new Store();\n"
+          },
+          "output": "File written: src/store.ts (12 lines)",
+          "error": false
+        }
+      ],
+      "inputTokens": 2352,
+      "outputTokens": 176
+    },
+    {
+      "role": "assistant",
+      "content": "",
+      "toolCalls": [
+        {
+          "name": "write_file",
+          "input": {
+            "path": "src/utils.ts",
+            "content": "import { randomUUID } from \"crypto\";\nimport { store } from \"./store\";\nimport { Notification } from \"./types\";\n\nexport function generateId(): string {\n  return randomUUID();\n}\n\nexport function now(): string {\n  return new Date().toISOString();\n}\n\nexport function createNotification(userId: string, message: string): void {\n  const notification: Notification = {\n    id: generateId(),\n    userId,\n    message,\n    read: false,\n    createdAt: now(),\n  };\n  store.notifications.set(notification.id, notification);\n}\n"
+          },
+          "output": "File written: src/utils.ts (23 lines)",
+          "error": false
+        }
+      ],
+      "inputTokens": 2552,
+      "outputTokens": 214
+    },
+    {
+      "role": "assistant",
+      "content": "",
+      "toolCalls": [
+        {
+          "name": "write_file",
+          "input": {
+            "path": "src/router.ts",
+            "content": "import { IncomingMessage, ServerResponse } from \"http\";\nimport { URL } from \"url\";\nimport { Route, ParsedRequest, ResponseHelper, RouteHandler } from \"./types\";\n\nconst routes: Route[] = [];\n\n/**\n * Register a route.\n * Pattern segments starting with \":\" are treated as named wildcards.\n * e.g. register(\"GET\", [\"users\", \":id\"], handler)\n */\nexport function register(\n  method: string,\n  pattern: string[],\n  handler: RouteHandler\n): void {\n  routes.push({ method: method.toUpperCase(), pattern, handler });\n}\n\n/**\n * Attempt to match URL segments against a route pattern.\n * Returns true if they match (segments length must equal pattern length).\n */\nfunction matchPattern(\n  segments: string[],\n  pattern: string[]\n): boolean {\n  if (segments.length !== pattern.length) return false;\n  for (let i = 0; i < pattern.length; i++) {\n    if (!pattern[i].startsWith(\":\") && pattern[i] !== segments[i]) {\n      return false;\n    }\n  }\n  return true;\n}\n\n/**\n * Read and parse the request body as JSON. Returns null on empty body.\n */\nfunction readBody(req: IncomingMessage): Promise<unknown> {\n  return new Promise((resolve, reject) => {\n    const chunks: Buffer[] = [];\n    req.on(\"data\", (chunk: Buffer) => chunks.push(chunk));\n    req.on(\"end\", () => {\n      const raw = Buffer.concat(chunks).toString(\"utf8\").trim();\n      if (!raw) {\n        resolve(null);\n        return;\n      }\n      try {\n        resolve(JSON.parse(raw));\n      } catch {\n        reject(new Error(\"Invalid JSON body\"));\n      }\n    });\n    req.on(\"error\", reject);\n  });\n}\n\n/**\n * Build a ResponseHelper that writes JSON to the ServerResponse.\n */\nfunction makeResponseHelper(res: ServerResponse): ResponseHelper {\n  return {\n    json(statusCode: number, data: unknown): void {\n      const body = JSON.stringify(data, null, 2);\n      res.writeHead(statusCode, {\n        \"Content-Type\": \"application/json\",\n        \"Content-Length\": Buffer.byteLength(body),\n      });\n      res.end(body);\n    },\n    error(statusCode: number, message: string): void {\n      this.json(statusCode, { error: message });\n    },\n  };\n}\n\n/**\n * Main request dispatcher. Call this from the http.createServer callback.\n */\nexport async function dispatch(\n  req: IncomingMessage,\n  res: ServerResponse\n): Promise<void> {\n  const helper = makeResponseHelper(res);\n\n  let body: unknown = null;\n  try {\n    body = await readBody(req);\n  } catch {\n    helper.error(400, \"Invalid JSON body\");\n    return;\n  }\n\n  const baseUrl = `http://localhost${req.url ?? \"/\"}`;\n  const parsed = new URL(baseUrl);\n\n  // Strip trailing slash and split into segments (ignore empty strings)\n  const pathname = parsed.pathname.replace(/\\/+$/, \"\") || \"/\";\n  const segments = pathname === \"/\"\n    ? []\n    : pathname.split(\"/\").filter((s) => s.length > 0);\n\n  const query: Record<string, string> = {};\n  parsed.searchParams.forEach((value, key) => {\n    query[key] = value;\n  });\n\n  const method = (req.method ?? \"GET\").toUpperCase();\n\n  const parsedRequest: ParsedRequest = {\n    method,\n    pathname,\n    segments,\n    query,\n    body,\n  };\n\n  // Find matching route\n  for (const route of routes) {\n    if (route.method !== method) continue;\n    if (!matchPattern(segments, route.pattern)) continue;\n\n    try {\n      await route.handler(parsedRequest, helper);\n    } catch (err) {\n      console.error(\"Unhandled handler error:\", err);\n      helper.error(500, \"Internal server error\");\n    }\n    return;\n  }\n\n  helper.error(404, `Cannot ${method} /${segments.join(\"/\")}`);\n}\n"
+          },
+          "output": "File written: src/router.ts (136 lines)",
+          "error": false
+        }
+      ],
+      "inputTokens": 2790,
+      "outputTokens": 1121
+    },
+    {
+      "role": "assistant",
+      "content": "",
+      "toolCalls": [
+        {
+          "name": "write_file",
+          "input": {
+            "path": "src/handlers/users.ts",
+            "content": "import { ParsedRequest, ResponseHelper, User } from \"../types\";\nimport { store } from \"../store\";\nimport { generateId } from \"../utils\";\n\n// GET /users\nexport function listUsers(_req: ParsedRequest, res: ResponseHelper): void {\n  res.json(200, Array.from(store.users.values()));\n}\n\n// POST /users\nexport function createUser(req: ParsedRequest, res: ResponseHelper): void {\n  const body = req.body as Record<string, unknown>;\n\n  if (!body || typeof body.name !== \"string\" || typeof body.email !== \"string\") {\n    res.error(400, \"Fields 'name' and 'email' are required strings\");\n    return;\n  }\n\n  const name = body.name.trim();\n  const email = body.email.trim();\n\n  if (!name || !email) {\n    res.error(400, \"Fields 'name' and 'email' must not be empty\");\n    return;\n  }\n\n  // Email uniqueness check\n  for (const user of store.users.values()) {\n    if (user.email.toLowerCase() === email.toLowerCase()) {\n      res.error(409, `A user with email '${email}' already exists`);\n      return;\n    }\n  }\n\n  const user: User = { id: generateId(), name, email };\n  store.users.set(user.id, user);\n  res.json(201, user);\n}\n\n// GET /users/:id\nexport function getUser(req: ParsedRequest, res: ResponseHelper): void {\n  const id = req.segments[1];\n  const user = store.users.get(id);\n  if (!user) {\n    res.error(404, `User '${id}' not found`);\n    return;\n  }\n  res.json(200, user);\n}\n\n// PUT /users/:id\nexport function updateUser(req: ParsedRequest, res: ResponseHelper): void {\n  const id = req.segments[1];\n  const user = store.users.get(id);\n  if (!user) {\n    res.error(404, `User '${id}' not found`);\n    return;\n  }\n\n  const body = req.body as Record<string, unknown>;\n  if (!body) {\n    res.error(400, \"Request body is required\");\n    return;\n  }\n\n  if (body.name !== undefined) {\n    if (typeof body.name !== \"string\" || !body.name.trim()) {\n      res.error(400, \"Field 'name' must be a non-empty string\");\n      return;\n    }\n    user.name = body.name.trim();\n  }\n\n  if (body.email !== undefined) {\n    if (typeof body.email !== \"string\" || !body.email.trim()) {\n      res.error(400, \"Field 'email' must be a non-empty string\");\n      return;\n    }\n    const newEmail = body.email.trim();\n    // Uniqueness check (exclude self)\n    for (const u of store.users.values()) {\n      if (u.id !== id && u.email.toLowerCase() === newEmail.toLowerCase()) {\n        res.error(409, `A user with email '${newEmail}' already exists`);\n        return;\n      }\n    }\n    user.email = newEmail;\n  }\n\n  store.users.set(id, user);\n  res.json(200, user);\n}\n\n// DELETE /users/:id\nexport function deleteUser(req: ParsedRequest, res: ResponseHelper): void {\n  const id = req.segments[1];\n  if (!store.users.has(id)) {\n    res.error(404, `User '${id}' not found`);\n    return;\n  }\n  store.users.delete(id);\n  res.json(200, { message: `User '${id}' deleted` });\n}\n"
+          },
+          "output": "File written: src/handlers/users.ts (104 lines)",
+          "error": false
+        }
+      ],
+      "inputTokens": 3935,
+      "outputTokens": 1018
+    },
+    {
+      "role": "assistant",
+      "content": "",
+      "toolCalls": [
+        {
+          "name": "write_file",
+          "input": {
+            "path": "src/handlers/projects.ts",
+            "content": "import { ParsedRequest, ResponseHelper, Project } from \"../types\";\nimport { store } from \"../store\";\nimport { generateId } from \"../utils\";\n\n// GET /projects\nexport function listProjects(_req: ParsedRequest, res: ResponseHelper): void {\n  res.json(200, Array.from(store.projects.values()));\n}\n\n// POST /projects\nexport function createProject(req: ParsedRequest, res: ResponseHelper): void {\n  const body = req.body as Record<string, unknown>;\n\n  if (!body || typeof body.name !== \"string\") {\n    res.error(400, \"Field 'name' is required and must be a string\");\n    return;\n  }\n\n  const name = body.name.trim();\n  if (!name) {\n    res.error(400, \"Field 'name' must not be empty\");\n    return;\n  }\n\n  const description =\n    typeof body.description === \"string\" ? body.description.trim() : \"\";\n\n  const project: Project = {\n    id: generateId(),\n    name,\n    description,\n    memberIds: [],\n  };\n\n  store.projects.set(project.id, project);\n  res.json(201, project);\n}\n\n// GET /projects/:id\nexport function getProject(req: ParsedRequest, res: ResponseHelper): void {\n  const id = req.segments[1];\n  const project = store.projects.get(id);\n  if (!project) {\n    res.error(404, `Project '${id}' not found`);\n    return;\n  }\n  res.json(200, project);\n}\n\n// PUT /projects/:id\nexport function updateProject(req: ParsedRequest, res: ResponseHelper): void {\n  const id = req.segments[1];\n  const project = store.projects.get(id);\n  if (!project) {\n    res.error(404, `Project '${id}' not found`);\n    return;\n  }\n\n  const body = req.body as Record<string, unknown>;\n  if (!body) {\n    res.error(400, \"Request body is required\");\n    return;\n  }\n\n  if (body.name !== undefined) {\n    if (typeof body.name !== \"string\" || !body.name.trim()) {\n      res.error(400, \"Field 'name' must be a non-empty string\");\n      return;\n    }\n    project.name = body.name.trim();\n  }\n\n  if (body.description !== undefined) {\n    if (typeof body.description !== \"string\") {\n      res.error(400, \"Field 'description' must be a string\");\n      return;\n    }\n    project.description = body.description.trim();\n  }\n\n  store.projects.set(id, project);\n  res.json(200, project);\n}\n\n// DELETE /projects/:id\nexport function deleteProject(req: ParsedRequest, res: ResponseHelper): void {\n  const id = req.segments[1];\n  if (!store.projects.has(id)) {\n    res.error(404, `Project '${id}' not found`);\n    return;\n  }\n  store.projects.delete(id);\n\n  // Cascade: remove tasks belonging to this project\n  for (const [taskId, task] of store.tasks.entries()) {\n    if (task.projectId === id) {\n      store.tasks.delete(taskId);\n      // Cascade: remove comments on deleted tasks\n      for (const [commentId, comment] of store.comments.entries()) {\n        if (comment.taskId === taskId) {\n          store.comments.delete(commentId);\n        }\n      }\n    }\n  }\n\n  res.json(200, { message: `Project '${id}' deleted` });\n}\n\n// POST /projects/:id/members  — body: { userId }\nexport function addMember(req: ParsedRequest, res: ResponseHelper): void {\n  const id = req.segments[1];\n  const project = store.projects.get(id);\n  if (!project) {\n    res.error(404, `Project '${id}' not found`);\n    return;\n  }\n\n  const body = req.body as Record<string, unknown>;\n  if (!body || typeof body.userId !== \"string\") {\n    res.error(400, \"Field 'userId' is required and must be a string\");\n    return;\n  }\n\n  const userId = body.userId.trim();\n  if (!store.users.has(userId)) {\n    res.error(404, `User '${userId}' not found`);\n    return;\n  }\n\n  if (project.memberIds.includes(userId)) {\n    res.error(409, `User '${userId}' is already a member of this project`);\n    return;\n  }\n\n  project.memberIds.push(userId);\n  store.projects.set(id, project);\n  res.json(200, project);\n}\n\n// DELETE /projects/:id/members  — body: { userId }\nexport function removeMember(req: ParsedRequest, res: ResponseHelper): void {\n  const id = req.segments[1];\n  const project = store.projects.get(id);\n  if (!project) {\n    res.error(404, `Project '${id}' not found`);\n    return;\n  }\n\n  const body = req.body as Record<string, unknown>;\n  if (!body || typeof body.userId !== \"string\") {\n    res.error(400, \"Field 'userId' is required and must be a string\");\n    return;\n  }\n\n  const userId = body.userId.trim();\n  const index = project.memberIds.indexOf(userId);\n  if (index === -1) {\n    res.error(404, `User '${userId}' is not a member of this project`);\n    return;\n  }\n\n  project.memberIds.splice(index, 1);\n  store.projects.set(id, project);\n  res.json(200, project);\n}\n"
+          },
+          "output": "File written: src/handlers/projects.ts (167 lines)",
+          "error": false
+        }
+      ],
+      "inputTokens": 4979,
+      "outputTokens": 1517
+    },
+    {
+      "role": "assistant",
+      "content": "",
+      "toolCalls": [
+        {
+          "name": "write_file",
+          "input": {
+            "path": "src/handlers/tasks.ts",
+            "content": "import { ParsedRequest, ResponseHelper, Task, TaskStatus } from \"../types\";\nimport { store } from \"../store\";\nimport { generateId, createNotification } from \"../utils\";\n\nconst VALID_STATUSES: TaskStatus[] = [\"todo\", \"in-progress\", \"done\"];\n\n// Allowed transitions: from -> to[]\nconst STATUS_TRANSITIONS: Record<TaskStatus, TaskStatus[]> = {\n  todo: [\"in-progress\"],\n  \"in-progress\": [\"done\"],\n  done: [],\n};\n\nfunction isValidStatus(s: unknown): s is TaskStatus {\n  return typeof s === \"string\" && VALID_STATUSES.includes(s as TaskStatus);\n}\n\n// GET /tasks  (optional query: ?projectId=xxx)\nexport function listTasks(req: ParsedRequest, res: ResponseHelper): void {\n  let tasks = Array.from(store.tasks.values());\n  const { projectId } = req.query;\n  if (projectId) {\n    tasks = tasks.filter((t) => t.projectId === projectId);\n  }\n  res.json(200, tasks);\n}\n\n// POST /tasks\nexport function createTask(req: ParsedRequest, res: ResponseHelper): void {\n  const body = req.body as Record<string, unknown>;\n\n  if (!body || typeof body.title !== \"string\" || typeof body.projectId !== \"string\") {\n    res.error(400, \"Fields 'title' and 'projectId' are required strings\");\n    return;\n  }\n\n  const title = body.title.trim();\n  const projectId = body.projectId.trim();\n\n  if (!title || !projectId) {\n    res.error(400, \"Fields 'title' and 'projectId' must not be empty\");\n    return;\n  }\n\n  if (!store.projects.has(projectId)) {\n    res.error(404, `Project '${projectId}' not found`);\n    return;\n  }\n\n  const description =\n    typeof body.description === \"string\" ? body.description.trim() : \"\";\n\n  let assigneeId: string | null = null;\n  if (body.assigneeId !== undefined && body.assigneeId !== null) {\n    if (typeof body.assigneeId !== \"string\") {\n      res.error(400, \"Field 'assigneeId' must be a string or null\");\n      return;\n    }\n    const aid = body.assigneeId.trim();\n    if (!store.users.has(aid)) {\n      res.error(404, `User '${aid}' not found`);\n      return;\n    }\n    assigneeId = aid;\n  }\n\n  let status: TaskStatus = \"todo\";\n  if (body.status !== undefined) {\n    if (!isValidStatus(body.status)) {\n      res.error(400, `Field 'status' must be one of: ${VALID_STATUSES.join(\", \")}`);\n      return;\n    }\n    status = body.status;\n  }\n\n  const task: Task = {\n    id: generateId(),\n    title,\n    description,\n    status,\n    assigneeId,\n    projectId,\n  };\n\n  store.tasks.set(task.id, task);\n\n  // Notify assignee if set\n  if (assigneeId) {\n    const assignee = store.users.get(assigneeId);\n    if (assignee) {\n      createNotification(\n        assigneeId,\n        `You have been assigned to task '${title}'`\n      );\n    }\n  }\n\n  res.json(201, task);\n}\n\n// GET /tasks/:id\nexport function getTask(req: ParsedRequest, res: ResponseHelper): void {\n  const id = req.segments[1];\n  const task = store.tasks.get(id);\n  if (!task) {\n    res.error(404, `Task '${id}' not found`);\n    return;\n  }\n  res.json(200, task);\n}\n\n// PUT /tasks/:id\nexport function updateTask(req: ParsedRequest, res: ResponseHelper): void {\n  const id = req.segments[1];\n  const task = store.tasks.get(id);\n  if (!task) {\n    res.error(404, `Task '${id}' not found`);\n    return;\n  }\n\n  const body = req.body as Record<string, unknown>;\n  if (!body) {\n    res.error(400, \"Request body is required\");\n    return;\n  }\n\n  if (body.title !== undefined) {\n    if (typeof body.title !== \"string\" || !body.title.trim()) {\n      res.error(400, \"Field 'title' must be a non-empty string\");\n      return;\n    }\n    task.title = body.title.trim();\n  }\n\n  if (body.description !== undefined) {\n    if (typeof body.description !== \"string\") {\n      res.error(400, \"Field 'description' must be a string\");\n      return;\n    }\n    task.description = body.description.trim();\n  }\n\n  store.tasks.set(id, task);\n  res.json(200, task);\n}\n\n// DELETE /tasks/:id\nexport function deleteTask(req: ParsedRequest, res: ResponseHelper): void {\n  const id = req.segments[1];\n  if (!store.tasks.has(id)) {\n    res.error(404, `Task '${id}' not found`);\n    return;\n  }\n  store.tasks.delete(id);\n\n  // Cascade: remove comments on this task\n  for (const [commentId, comment] of store.comments.entries()) {\n    if (comment.taskId === id) {\n      store.comments.delete(commentId);\n    }\n  }\n\n  res.json(200, { message: `Task '${id}' deleted` });\n}\n\n// PUT /tasks/:id/status  — body: { status }\nexport function updateTaskStatus(\n  req: ParsedRequest,\n  res: ResponseHelper\n): void {\n  const id = req.segments[1];\n  const task = store.tasks.get(id);\n  if (!task) {\n    res.error(404, `Task '${id}' not found`);\n    return;\n  }\n\n  const body = req.body as Record<string, unknown>;\n  if (!body || !isValidStatus(body.status)) {\n    res.error(\n      400,\n      `Field 'status' is required and must be one of: ${VALID_STATUSES.join(\", \")}`\n    );\n    return;\n  }\n\n  const newStatus = body.status;\n  const allowed = STATUS_TRANSITIONS[task.status];\n\n  if (!allowed.includes(newStatus)) {\n    res.error(\n      422,\n      `Invalid status transition from '${task.status}' to '${newStatus}'. ` +\n        `Allowed: ${allowed.length ? allowed.join(\", \") : \"none\"}`\n    );\n    return;\n  }\n\n  task.status = newStatus;\n  store.tasks.set(id, task);\n\n  // Notify assignee about status change\n  if (task.assigneeId) {\n    createNotification(\n      task.assigneeId,\n      `Task '${task.title}' status changed to '${newStatus}'`\n    );\n  }\n\n  res.json(200, task);\n}\n\n// PUT /tasks/:id/assign  — body: { assigneeId } (null to unassign)\nexport function assignTask(req: ParsedRequest, res: ResponseHelper): void {\n  const id = req.segments[1];\n  const task = store.tasks.get(id);\n  if (!task) {\n    res.error(404, `Task '${id}' not found`);\n    return;\n  }\n\n  const body = req.body as Record<string, unknown>;\n  if (body === null || body === undefined) {\n    res.error(400, \"Request body is required\");\n    return;\n  }\n\n  if (!(\"assigneeId\" in body)) {\n    res.error(400, \"Field 'assigneeId' is required (use null to unassign)\");\n    return;\n  }\n\n  const rawAssigneeId = body.assigneeId;\n\n  if (rawAssigneeId === null) {\n    task.assigneeId = null;\n    store.tasks.set(id, task);\n    res.json(200, task);\n    return;\n  }\n\n  if (typeof rawAssigneeId !== \"string\" || !rawAssigneeId.trim()) {\n    res.error(400, \"Field 'assigneeId' must be a non-empty string or null\");\n    return;\n  }\n\n  const assigneeId = rawAssigneeId.trim();\n  if (!store.users.has(assigneeId)) {\n    res.error(404, `User '${assigneeId}' not found`);\n    return;\n  }\n\n  task.assigneeId = assigneeId;\n  store.tasks.set(id, task);\n\n  // Notify new assignee\n  const assignee = store.users.get(assigneeId);\n  if (assignee) {\n    createNotification(\n      assigneeId,\n      `You have been assigned to task '${task.title}'`\n    );\n  }\n\n  res.json(200, task);\n}\n"
+          },
+          "output": "File written: src/handlers/tasks.ts (267 lines)",
+          "error": false
+        }
+      ],
+      "inputTokens": 6522,
+      "outputTokens": 2351
+    },
+    {
+      "role": "assistant",
+      "content": "",
+      "toolCalls": [
+        {
+          "name": "write_file",
+          "input": {
+            "path": "src/handlers/comments.ts",
+            "content": "import { ParsedRequest, ResponseHelper, Comment } from \"../types\";\nimport { store } from \"../store\";\nimport { generateId, now, createNotification } from \"../utils\";\n\n// GET /comments  (optional query: ?taskId=xxx)\nexport function listComments(req: ParsedRequest, res: ResponseHelper): void {\n  let comments = Array.from(store.comments.values());\n  const { taskId } = req.query;\n  if (taskId) {\n    comments = comments.filter((c) => c.taskId === taskId);\n  }\n  res.json(200, comments);\n}\n\n// POST /comments\nexport function createComment(req: ParsedRequest, res: ResponseHelper): void {\n  const body = req.body as Record<string, unknown>;\n\n  if (\n    !body ||\n    typeof body.taskId !== \"string\" ||\n    typeof body.authorId !== \"string\" ||\n    typeof body.body !== \"string\"\n  ) {\n    res.error(\n      400,\n      \"Fields 'taskId', 'authorId', and 'body' are required strings\"\n    );\n    return;\n  }\n\n  const taskId = body.taskId.trim();\n  const authorId = body.authorId.trim();\n  const text = body.body.trim();\n\n  if (!taskId || !authorId || !text) {\n    res.error(\n      400,\n      \"Fields 'taskId', 'authorId', and 'body' must not be empty\"\n    );\n    return;\n  }\n\n  const task = store.tasks.get(taskId);\n  if (!task) {\n    res.error(404, `Task '${taskId}' not found`);\n    return;\n  }\n\n  if (!store.users.has(authorId)) {\n    res.error(404, `User '${authorId}' not found`);\n    return;\n  }\n\n  const comment: Comment = {\n    id: generateId(),\n    taskId,\n    authorId,\n    body: text,\n    createdAt: now(),\n  };\n\n  store.comments.set(comment.id, comment);\n\n  // Notify task assignee (if different from comment author)\n  if (task.assigneeId && task.assigneeId !== authorId) {\n    const author = store.users.get(authorId);\n    const authorName = author ? author.name : \"Someone\";\n    createNotification(\n      task.assigneeId,\n      `${authorName} commented on task '${task.title}'`\n    );\n  }\n\n  // Notify project members who are not the author and not already the assignee\n  const project = store.projects.get(task.projectId);\n  if (project) {\n    const alreadyNotified = new Set<string>();\n    if (task.assigneeId) alreadyNotified.add(task.assigneeId);\n    alreadyNotified.add(authorId);\n\n    for (const memberId of project.memberIds) {\n      if (!alreadyNotified.has(memberId)) {\n        const author = store.users.get(authorId);\n        const authorName = author ? author.name : \"Someone\";\n        createNotification(\n          memberId,\n          `${authorName} commented on task '${task.title}' in project '${project.name}'`\n        );\n        alreadyNotified.add(memberId);\n      }\n    }\n  }\n\n  res.json(201, comment);\n}\n\n// GET /comments/:id\nexport function getComment(req: ParsedRequest, res: ResponseHelper): void {\n  const id = req.segments[1];\n  const comment = store.comments.get(id);\n  if (!comment) {\n    res.error(404, `Comment '${id}' not found`);\n    return;\n  }\n  res.json(200, comment);\n}\n\n// DELETE /comments/:id\nexport function deleteComment(req: ParsedRequest, res: ResponseHelper): void {\n  const id = req.segments[1];\n  if (!store.comments.has(id)) {\n    res.error(404, `Comment '${id}' not found`);\n    return;\n  }\n  store.comments.delete(id);\n  res.json(200, { message: `Comment '${id}' deleted` });\n}\n"
+          },
+          "output": "File written: src/handlers/comments.ts (119 lines)",
+          "error": false
+        }
+      ],
+      "inputTokens": 8899,
+      "outputTokens": 1121
+    },
+    {
+      "role": "assistant",
+      "content": "",
+      "toolCalls": [
+        {
+          "name": "write_file",
+          "input": {
+            "path": "src/handlers/notifications.ts",
+            "content": "import { ParsedRequest, ResponseHelper } from \"../types\";\nimport { store } from \"../store\";\n\n// GET /notifications  (optional query: ?userId=xxx)\nexport function listNotifications(\n  req: ParsedRequest,\n  res: ResponseHelper\n): void {\n  let notifications = Array.from(store.notifications.values());\n  const { userId } = req.query;\n  if (userId) {\n    notifications = notifications.filter((n) => n.userId === userId);\n  }\n  res.json(200, notifications);\n}\n\n// PUT /notifications/:id/read\nexport function markNotificationRead(\n  req: ParsedRequest,\n  res: ResponseHelper\n): void {\n  const id = req.segments[1];\n  const notification = store.notifications.get(id);\n  if (!notification) {\n    res.error(404, `Notification '${id}' not found`);\n    return;\n  }\n  notification.read = true;\n  store.notifications.set(id, notification);\n  res.json(200, notification);\n}\n"
+          },
+          "output": "File written: src/handlers/notifications.ts (32 lines)",
+          "error": false
+        }
+      ],
+      "inputTokens": 10046,
+      "outputTokens": 328
+    },
+    {
+      "role": "assistant",
+      "content": "",
+      "toolCalls": [
+        {
+          "name": "write_file",
+          "input": {
+            "path": "src/server.ts",
+            "content": "import { createServer } from \"http\";\nimport { register, dispatch } from \"./router\";\n\n// User handlers\nimport {\n  listUsers,\n  createUser,\n  getUser,\n  updateUser,\n  deleteUser,\n} from \"./handlers/users\";\n\n// Project handlers\nimport {\n  listProjects,\n  createProject,\n  getProject,\n  updateProject,\n  deleteProject,\n  addMember,\n  removeMember,\n} from \"./handlers/projects\";\n\n// Task handlers\nimport {\n  listTasks,\n  createTask,\n  getTask,\n  updateTask,\n  deleteTask,\n  updateTaskStatus,\n  assignTask,\n} from \"./handlers/tasks\";\n\n// Comment handlers\nimport {\n  listComments,\n  createComment,\n  getComment,\n  deleteComment,\n} from \"./handlers/comments\";\n\n// Notification handlers\nimport {\n  listNotifications,\n  markNotificationRead,\n} from \"./handlers/notifications\";\n\nfunction registerRoutes(): void {\n  // ── Users ────────────────────────────────────────────\n  register(\"GET\",    [\"users\"],           listUsers);\n  register(\"POST\",   [\"users\"],           createUser);\n  register(\"GET\",    [\"users\", \":id\"],    getUser);\n  register(\"PUT\",    [\"users\", \":id\"],    updateUser);\n  register(\"DELETE\", [\"users\", \":id\"],    deleteUser);\n\n  // ── Projects ─────────────────────────────────────────\n  register(\"GET\",    [\"projects\"],                        listProjects);\n  register(\"POST\",   [\"projects\"],                        createProject);\n  register(\"GET\",    [\"projects\", \":id\"],                 getProject);\n  register(\"PUT\",    [\"projects\", \":id\"],                 updateProject);\n  register(\"DELETE\", [\"projects\", \":id\"],                 deleteProject);\n  register(\"POST\",   [\"projects\", \":id\", \"members\"],      addMember);\n  register(\"DELETE\", [\"projects\", \":id\", \"members\"],      removeMember);\n\n  // ── Tasks ─────────────────────────────────────────────\n  register(\"GET\",    [\"tasks\"],                 listTasks);\n  register(\"POST\",   [\"tasks\"],                 createTask);\n  register(\"GET\",    [\"tasks\", \":id\"],          getTask);\n  register(\"PUT\",    [\"tasks\", \":id\"],          updateTask);\n  register(\"DELETE\", [\"tasks\", \":id\"],          deleteTask);\n  register(\"PUT\",    [\"tasks\", \":id\", \"status\"],  updateTaskStatus);\n  register(\"PUT\",    [\"tasks\", \":id\", \"assign\"],  assignTask);\n\n  // ── Comments ──────────────────────────────────────────\n  register(\"GET\",    [\"comments\"],          listComments);\n  register(\"POST\",   [\"comments\"],          createComment);\n  register(\"GET\",    [\"comments\", \":id\"],   getComment);\n  register(\"DELETE\", [\"comments\", \":id\"],   deleteComment);\n\n  // ── Notifications ─────────────────────────────────────\n  register(\"GET\", [\"notifications\"],                     listNotifications);\n  register(\"PUT\", [\"notifications\", \":id\", \"read\"],      markNotificationRead);\n}\n\nexport function startServer(port: number): void {\n  registerRoutes();\n\n  const server = createServer((req, res) => {\n    dispatch(req, res).catch((err) => {\n      console.error(\"Unexpected error in dispatch:\", err);\n      res.writeHead(500, { \"Content-Type\": \"application/json\" });\n      res.end(JSON.stringify({ error: \"Internal server error\" }));\n    });\n  });\n\n  server.listen(port, () => {\n    console.log(`Task Management API listening on http://localhost:${port}`);\n  });\n}\n"
+          },
+          "output": "File written: src/server.ts (101 lines)",
+          "error": false
+        }
+      ],
+      "inputTokens": 10400,
+      "outputTokens": 985
+    },
+    {
+      "role": "assistant",
+      "content": "",
+      "toolCalls": [
+        {
+          "name": "write_file",
+          "input": {
+            "path": "src/main.ts",
+            "content": "import { startServer } from \"./server\";\n\nconst PORT = parseInt(process.env.PORT ?? \"3000\", 10);\nstartServer(PORT);\n"
+          },
+          "output": "File written: src/main.ts (5 lines)",
+          "error": false
+        }
+      ],
+      "inputTokens": 11409,
+      "outputTokens": 108
+    },
+    {
+      "role": "assistant",
+      "content": "Now let's write the comprehensive demo script:",
+      "toolCalls": [
+        {
+          "name": "write_file",
+          "input": {
+            "path": "src/demo.ts",
+            "content": "/**\n * Demo script — exercises every feature of the Task Management API.\n *\n * Run:  npx tsx src/demo.ts\n */\n\nimport { startServer } from \"./server\";\nimport { request, RequestOptions } from \"http\";\n\nconst PORT = 3999;\nconst BASE = `http://localhost:${PORT}`;\n\n// ── HTTP helper ───────────────────────────────────────────────────────────────\n\ninterface ApiResponse<T = unknown> {\n  status: number;\n  body: T;\n}\n\nfunction api<T = unknown>(\n  method: string,\n  path: string,\n  payload?: unknown\n): Promise<ApiResponse<T>> {\n  return new Promise((resolve, reject) => {\n    const bodyStr = payload !== undefined ? JSON.stringify(payload) : undefined;\n    const options: RequestOptions = {\n      hostname: \"localhost\",\n      port: PORT,\n      path,\n      method,\n      headers: {\n        \"Content-Type\": \"application/json\",\n        ...(bodyStr ? { \"Content-Length\": Buffer.byteLength(bodyStr) } : {}),\n      },\n    };\n\n    const req = request(options, (res) => {\n      const chunks: Buffer[] = [];\n      res.on(\"data\", (c: Buffer) => chunks.push(c));\n      res.on(\"end\", () => {\n        try {\n          const parsed = JSON.parse(Buffer.concat(chunks).toString(\"utf8\"));\n          resolve({ status: res.statusCode ?? 0, body: parsed as T });\n        } catch (e) {\n          reject(e);\n        }\n      });\n    });\n\n    req.on(\"error\", reject);\n    if (bodyStr) req.write(bodyStr);\n    req.end();\n  });\n}\n\n// ── Pretty printer ────────────────────────────────────────────────────────────\n\nlet stepNum = 0;\nfunction step(title: string): void {\n  stepNum++;\n  console.log(`\\n${\"─\".repeat(70)}`);\n  console.log(`Step ${stepNum}: ${title}`);\n  console.log(\"─\".repeat(70));\n}\n\nfunction show(label: string, res: ApiResponse): void {\n  const ok = res.status >= 200 && res.status < 300;\n  const icon = ok ? \"✅\" : \"❌\";\n  console.log(`${icon} [${res.status}] ${label}`);\n  console.log(JSON.stringify(res.body, null, 2));\n}\n\n// ── Main demo ─────────────────────────────────────────────────────────────────\n\nasync function demo(): Promise<void> {\n  console.log(\"═\".repeat(70));\n  console.log(\"  Task Management API — End-to-End Demo\");\n  console.log(\"═\".repeat(70));\n\n  // ── 1. Create Users ───────────────────────────────────────────────────────\n  step(\"Create three users\");\n  const u1 = await api(\"POST\", \"/users\", { name: \"Alice\",   email: \"alice@example.com\" });\n  const u2 = await api(\"POST\", \"/users\", { name: \"Bob\",     email: \"bob@example.com\"   });\n  const u3 = await api(\"POST\", \"/users\", { name: \"Charlie\", email: \"charlie@example.com\" });\n  show(\"Create user Alice\",   u1);\n  show(\"Create user Bob\",     u2);\n  show(\"Create user Charlie\", u3);\n\n  const alice   = (u1.body as { id: string });\n  const bob     = (u2.body as { id: string });\n  const charlie = (u3.body as { id: string });\n\n  // ── 2. Duplicate email rejection ──────────────────────────────────────────\n  step(\"Attempt duplicate email (should fail 409)\");\n  const dupUser = await api(\"POST\", \"/users\", { name: \"Alice2\", email: \"alice@example.com\" });\n  show(\"Duplicate email attempt\", dupUser);\n\n  // ── 3. List Users ─────────────────────────────────────────────────────────\n  step(\"List all users\");\n  show(\"GET /users\", await api(\"GET\", \"/users\"));\n\n  // ── 4. Update a User ─────────────────────────────────────────────────────\n  step(\"Update Alice's name\");\n  show(\"PUT /users/:id\", await api(\"PUT\", `/users/${alice.id}`, { name: \"Alice A.\" }));\n\n  // ── 5. Get a single User ─────────────────────────────────────────────────\n  step(\"Get Alice by ID\");\n  show(\"GET /users/:id\", await api(\"GET\", `/users/${alice.id}`));\n\n  // ── 6. Create a Project ───────────────────────────────────────────────────\n  step(\"Create a project\");\n  const p1 = await api(\"POST\", \"/projects\", {\n    name: \"Website Redesign\",\n    description: \"Redesign the company website\",\n  });\n  show(\"Create project\", p1);\n  const project = (p1.body as { id: string });\n\n  // ── 7. List Projects ──────────────────────────────────────────────────────\n  step(\"List all projects\");\n  show(\"GET /projects\", await api(\"GET\", \"/projects\"));\n\n  // ── 8. Update a Project ───────────────────────────────────────────────────\n  step(\"Update project description\");\n  show(\n    \"PUT /projects/:id\",\n    await api(\"PUT\", `/projects/${project.id}`, {\n      description: \"Complete overhaul of the company website\",\n    })\n  );\n\n  // ── 9. Add Members ────────────────────────────────────────────────────────\n  step(\"Add Alice, Bob, and Charlie as project members\");\n  show(\"Add Alice\",   await api(\"POST\", `/projects/${project.id}/members`, { userId: alice.id   }));\n  show(\"Add Bob\",     await api(\"POST\", `/projects/${project.id}/members`, { userId: bob.id     }));\n  show(\"Add Charlie\", await api(\"POST\", `/projects/${project.id}/members`, { userId: charlie.id }));\n\n  // ── 10. Duplicate member rejection ────────────────────────────────────────\n  step(\"Attempt to add Alice again (should fail 409)\");\n  show(\"Duplicate member\", await api(\"POST\", `/projects/${project.id}/members`, { userId: alice.id }));\n\n  // ── 11. Remove a Member ───────────────────────────────────────────────────\n  step(\"Remove Charlie from project, then re-add\");\n  show(\"Remove Charlie\", await api(\"DELETE\", `/projects/${project.id}/members`, { userId: charlie.id }));\n  show(\"Re-add Charlie\", await api(\"POST\",   `/projects/${project.id}/members`, { userId: charlie.id }));\n\n  // ── 12. Create Tasks ──────────────────────────────────────────────────────\n  step(\"Create tasks in the project\");\n  const t1 = await api(\"POST\", \"/tasks\", {\n    title: \"Design mockups\",\n    description: \"Create Figma mockups for all pages\",\n    projectId: project.id,\n  });\n  const t2 = await api(\"POST\", \"/tasks\", {\n    title: \"Set up CI/CD\",\n    description: \"Configure GitHub Actions\",\n    projectId: project.id,\n    assigneeId: bob.id,   // immediate assignment triggers notification\n  });\n  const t3 = await api(\"POST\", \"/tasks\", {\n    title: \"Write unit tests\",\n    description: \"Achieve 80 % coverage\",\n    projectId: project.id,\n  });\n  show(\"Task 1 – Design mockups\", t1);\n  show(\"Task 2 – Set up CI/CD (assigned to Bob)\", t2);\n  show(\"Task 3 – Write unit tests\", t3);\n\n  const task1 = (t1.body as { id: string });\n  const task2 = (t2.body as { id: string });\n  const task3 = (t3.body as { id: string });\n\n  // ── 13. List Tasks (all + filtered) ──────────────────────────────────────\n  step(\"List tasks\");\n  show(\"GET /tasks\",                        await api(\"GET\", \"/tasks\"));\n  show(\"GET /tasks?projectId=<id>\",         await api(\"GET\", `/tasks?projectId=${project.id}`));\n\n  // ── 14. Update a Task ────────────────────────────────────────────────────\n  step(\"Update task 1 title\");\n  show(\"PUT /tasks/:id\", await api(\"PUT\", `/tasks/${task1.id}`, { title: \"Design mockups v2\" }));\n\n  // ── 15. Assign tasks ─────────────────────────────────────────────────────\n  step(\"Assign task 1 to Alice (triggers notification)\");\n  show(\"PUT /tasks/:id/assign\", await api(\"PUT\", `/tasks/${task1.id}/assign`, { assigneeId: alice.id }));\n\n  step(\"Assign task 3 to Charlie (triggers notification)\");\n  show(\"PUT /tasks/:id/assign\", await api(\"PUT\", `/tasks/${task3.id}/assign`, { assigneeId: charlie.id }));\n\n  // ── 16. Status transitions ────────────────────────────────────────────────\n  step(\"Transition task statuses (valid transitions)\");\n  show(\n    \"task1: todo → in-progress\",\n    await api(\"PUT\", `/tasks/${task1.id}/status`, { status: \"in-progress\" })\n  );\n  show(\n    \"task1: in-progress → done\",\n    await api(\"PUT\", `/tasks/${task1.id}/status`, { status: \"done\" })\n  );\n  show(\n    \"task2: todo → in-progress\",\n    await api(\"PUT\", `/tasks/${task2.id}/status`, { status: \"in-progress\" })\n  );\n\n  step(\"Invalid status transitions (should fail 422)\");\n  show(\n    \"task2: in-progress → todo (invalid)\",\n    await api(\"PUT\", `/tasks/${task2.id}/status`, { status: \"todo\" })\n  );\n  show(\n    \"task1: done → in-progress (invalid, done is terminal)\",\n    await api(\"PUT\", `/tasks/${task1.id}/status`, { status: \"in-progress\" })\n  );\n\n  // ── 17. Get single Task ───────────────────────────────────────────────────\n  step(\"Get task 2 by ID\");\n  show(\"GET /tasks/:id\", await api(\"GET\", `/tasks/${task2.id}`));\n\n  // ── 18. Add Comments ─────────────────────────────────────────────────────\n  step(\"Add comments to tasks\");\n  const c1 = await api(\"POST\", \"/comments\", {\n    taskId:   task1.id,\n    authorId: alice.id,\n    body:     \"Mockups are complete, ready for review!\",\n  });\n  const c2 = await api(\"POST\", \"/comments\", {\n    taskId:   task2.id,\n    authorId: alice.id,\n    body:     \"Please add deployment to staging as well.\",\n  });\n  const c3 = await api(\"POST\", \"/comments\", {\n    taskId:   task2.id,\n    authorId: bob.id,\n    body:     \"Done — staging deploy is included.\",\n  });\n  show(\"Comment 1 on task1 by Alice\", c1);\n  show(\"Comment 2 on task2 by Alice\", c2);\n  show(\"Comment 3 on task2 by Bob\",   c3);\n\n  const comment1 = (c1.body as { id: string });\n  const comment2 = (c2.body as { id: string });\n\n  // ── 19. List & filter Comments ────────────────────────────────────────────\n  step(\"List comments\");\n  show(\"GET /comments\",                    await api(\"GET\", \"/comments\"));\n  show(\"GET /comments?taskId=<task2.id>\",  await api(\"GET\", `/comments?taskId=${task2.id}`));\n\n  // ── 20. Get single Comment ────────────────────────────────────────────────\n  step(\"Get comment 1 by ID\");\n  show(\"GET /comments/:id\", await api(\"GET\", `/comments/${comment1.id}`));\n\n  // ── 21. Delete a Comment ──────────────────────────────────────────────────\n  step(\"Delete comment 2\");\n  show(\"DELETE /comments/:id\", await api(\"DELETE\", `/comments/${comment2.id}`));\n  show(\"GET /comments (after delete)\", await api(\"GET\", \"/comments\"));\n\n  // ── 22. List Notifications (all) ─────────────────────────────────────────\n  step(\"List all notifications generated so far\");\n  const allNotifs = await api(\"GET\", \"/notifications\");\n  show(\"GET /notifications\", allNotifs);\n\n  // ── 23. Filter Notifications by user ─────────────────────────────────────\n  step(\"Filter notifications for Bob\");\n  const bobNotifs = await api<Array<{ id: string; message: string; read: boolean }>>(\n    \"GET\",\n    `/notifications?userId=${bob.id}`\n  );\n  show(\"GET /notifications?userId=<bob>\", bobNotifs);\n\n  step(\"Filter notifications for Alice\");\n  show(\"GET /notifications?userId=<alice>\", await api(\"GET\", `/notifications?userId=${alice.id}`));\n\n  step(\"Filter notifications for Charlie\");\n  show(\"GET /notifications?userId=<charlie>\", await api(\"GET\", `/notifications?userId=${charlie.id}`));\n\n  // ── 24. Mark Notifications as Read ───────────────────────────────────────\n  step(\"Mark Bob's first notification as read\");\n  const bobNotifsArr = bobNotifs.body;\n  if (Array.isArray(bobNotifsArr) && bobNotifsArr.length > 0) {\n    const firstId = bobNotifsArr[0].id;\n    show(\n      `PUT /notifications/${firstId}/read`,\n      await api(\"PUT\", `/notifications/${firstId}/read`)\n    );\n    // Verify it is now read\n    show(\"Bob's notifications after mark-read\", await api(\"GET\", `/notifications?userId=${bob.id}`));\n  } else {\n    console.log(\"⚠️  No notifications found for Bob — skipping mark-read step\");\n  }\n\n  // ── 25. Not-found / error cases ───────────────────────────────────────────\n  step(\"Error cases — 404s and bad input\");\n  show(\"GET /users/<bogus-id>\",            await api(\"GET\",    \"/users/nonexistent-id\"));\n  show(\"GET /tasks/<bogus-id>\",            await api(\"GET\",    \"/tasks/nonexistent-id\"));\n  show(\"POST /tasks missing projectId\",    await api(\"POST\",   \"/tasks\", { title: \"Oops\" }));\n  show(\"POST /users missing email\",        await api(\"POST\",   \"/users\", { name: \"Ghost\" }));\n  show(\"DELETE /notifications/:id/read (wrong route)\", await api(\"GET\", \"/notifications/bad-id/read\"));\n\n  // ── 26. Unassign a task ───────────────────────────────────────────────────\n  step(\"Unassign task 3 (set assigneeId to null)\");\n  show(\n    \"PUT /tasks/:id/assign { assigneeId: null }\",\n    await api(\"PUT\", `/tasks/${task3.id}/assign`, { assigneeId: null })\n  );\n\n  // ── 27. Delete a User ─────────────────────────────────────────────────────\n  step(\"Delete Charlie\");\n  show(\"DELETE /users/:id\", await api(\"DELETE\", `/users/${charlie.id}`));\n  show(\"GET /users (after delete)\", await api(\"GET\", \"/users\"));\n\n  // ── 28. Delete a Task ─────────────────────────────────────────────────────\n  step(\"Delete task 3\");\n  show(\"DELETE /tasks/:id\", await api(\"DELETE\", `/tasks/${task3.id}`));\n  show(\"GET /tasks (after delete)\", await api(\"GET\", \"/tasks\"));\n\n  // ── 29. Delete a Project (cascades tasks & comments) ─────────────────────\n  step(\"Create a throw-away project and delete it (cascade demo)\");\n  const tmpP = await api<{ id: string }>(\"POST\", \"/projects\", { name: \"Temp\", description: \"\" });\n  const tmpT = await api<{ id: string }>(\"POST\", \"/tasks\", { title: \"Temp task\", projectId: (tmpP.body as { id: string }).id });\n  await api(\"POST\", \"/comments\", { taskId: (tmpT.body as { id: string }).id, authorId: alice.id, body: \"Temp comment\" });\n  show(\"Tasks before project delete\", await api(\"GET\", \"/tasks\"));\n  show(\"Comments before project delete\", await api(\"GET\", \"/comments\"));\n  show(\"DELETE /projects/:id\", await api(\"DELETE\", `/projects/${(tmpP.body as { id: string }).id}`));\n  show(\"Tasks after project delete (cascaded)\", await api(\"GET\", \"/tasks\"));\n  show(\"Comments after project delete (cascaded)\", await api(\"GET\", \"/comments\"));\n\n  // ── 30. Final state ───────────────────────────────────────────────────────\n  step(\"Final system state\");\n  show(\"Users\",         await api(\"GET\", \"/users\"));\n  show(\"Projects\",      await api(\"GET\", \"/projects\"));\n  show(\"Tasks\",         await api(\"GET\", \"/tasks\"));\n  show(\"Comments\",      await api(\"GET\", \"/comments\"));\n  show(\"Notifications\", await api(\"GET\", \"/notifications\"));\n\n  console.log(\"\\n\" + \"═\".repeat(70));\n  console.log(\"  Demo complete!\");\n  console.log(\"═\".repeat(70) + \"\\n\");\n  process.exit(0);\n}\n\n// Start server then run demo after a short delay to let it bind\nstartServer(PORT);\nsetTimeout(demo, 200);\n"
+          },
+          "output": "File written: src/demo.ts (344 lines)",
+          "error": false
+        }
+      ],
+      "inputTokens": 11541,
+      "outputTokens": 4549
+    },
+    {
+      "role": "assistant",
+      "content": "Now let's create the `tsconfig.json` and run the TypeScript compiler:",
+      "toolCalls": [
+        {
+          "name": "write_file",
+          "input": {
+            "path": "tsconfig.json",
+            "content": "{\n  \"compilerOptions\": {\n    \"target\": \"ES2020\",\n    \"module\": \"CommonJS\",\n    \"lib\": [\"ES2020\"],\n    \"strict\": true,\n    \"esModuleInterop\": true,\n    \"forceConsistentCasingInFileNames\": true,\n    \"skipLibCheck\": true,\n    \"outDir\": \"dist\",\n    \"rootDir\": \"src\",\n    \"resolveJsonModule\": true\n  },\n  \"include\": [\"src/**/*\"],\n  \"exclude\": [\"node_modules\", \"dist\"]\n}\n"
+          },
+          "output": "File written: tsconfig.json (17 lines)",
+          "error": false
+        }
+      ],
+      "inputTokens": 16114,
+      "outputTokens": 229
+    },
+    {
+      "role": "assistant",
+      "content": "",
+      "toolCalls": [
+        {
+          "name": "run_command",
+          "input": {
+            "command": "npx tsc --noEmit 2>&1"
+          },
+          "output": "Command failed (exit 1):\n\n\u001b[41m                                                                               \u001b[0m\n\u001b[41m\u001b[37m                This is not the tsc command you are looking for                \u001b[0m\n\u001b[41m                                                                               \u001b[0m\n\nTo get access to the TypeScript compiler, \u001b[34mtsc\u001b[0m, from the command line either:\n\n- Use \u001b[1mnpm install typescript\u001b[0m to first add TypeScript to your project \u001b[1mbefore\u001b[0m using npx\n- Use \u001b[1myarn\u001b[0m to avoid accidentally running code from un-installed packages",
+          "error": true
+        }
+      ],
+      "inputTokens": 16366,
+      "outputTokens": 64
+    },
+    {
+      "role": "assistant",
+      "content": "",
+      "toolCalls": [
+        {
+          "name": "run_command",
+          "input": {
+            "command": "npm install --save-dev typescript @types/node 2>&1"
+          },
+          "output": "\nadded 4 packages in 5s\n",
+          "error": false
+        }
+      ],
+      "inputTokens": 16578,
+      "outputTokens": 67
+    },
+    {
+      "role": "assistant",
+      "content": "",
+      "toolCalls": [
+        {
+          "name": "run_command",
+          "input": {
+            "command": "npx tsc --noEmit 2>&1"
+          },
+          "output": "Command failed (exit 1):\nsrc/demo.ts(8,41): error TS2591: Cannot find name 'http'. Do you need to install type definitions for node? Try `npm i --save-dev @types/node` and then add 'node' to the types field in your tsconfig.\nsrc/demo.ts(34,43): error TS2591: Cannot find name 'Buffer'. Do you need to install type definitions for node? Try `npm i --save-dev @types/node` and then add 'node' to the types field in your tsconfig.\nsrc/demo.ts(38,35): error TS7006: Parameter 'res' implicitly has an 'any' type.\nsrc/demo.ts(39,21): error TS2591: Cannot find name 'Buffer'. Do you need to install type definitions for node? Try `npm i --save-dev @types/node` and then add 'node' to the types field in your tsconfig.\nsrc/demo.ts(40,26): error TS2591: Cannot find name 'Buffer'. Do you need to install type definitions for node? Try `npm i --save-dev @types/node` and then add 'node' to the types field in your tsconfig.\nsrc/demo.ts(43,37): error TS2591: Cannot find name 'Buffer'. Do you need to install type definitions for node? Try `npm i --save-dev @types/node` and then add 'node' to the types field in your tsconfig.\nsrc/demo.ts(62,3): error TS2584: Cannot find name 'console'. Do you need to change your target library? Try changing the 'lib' compiler option to include 'dom'.\nsrc/demo.ts(63,3): error TS2584: Cannot find name 'console'. Do you need to change your target library? Try changing the 'lib' compiler option to include 'dom'.\nsrc/demo.ts(64,3): error TS2584: Cannot find name 'console'. Do you need to change your target library? Try changing the 'lib' compiler option to include 'dom'.\nsrc/demo.ts(70,3): error TS2584: Cannot find name 'console'. Do you need to change your target library? Try changing the 'lib' compiler option to include 'dom'.\nsrc/demo.ts(71,3): error TS2584: Cannot find name 'console'. Do you need to change your target library? Try changing the 'lib' compiler option to include 'dom'.\nsrc/demo.ts(77,3): error TS2584: Cannot find name 'console'. Do you need to change your target library? Try changing the 'lib' compiler option to include 'dom'.\nsrc/demo.ts(78,3): error TS2584: Cannot find name 'console'. Do you need to change your target library? Try changing the 'lib' compiler option to include 'dom'.\nsrc/demo.ts(79,3): error TS2584: Cannot find name 'console'. Do you need to change your target library? Try changing the 'lib' compiler option to include 'dom'.\nsrc/demo.ts(288,5): error TS2584: Cannot find name 'console'. Do you need to change your target library? Try changing the 'lib' compiler option to include 'dom'.\nsrc/demo.ts(335,3): error TS2584: Cannot find name 'console'. Do you need to change your target library? Try changing the 'lib' compiler option to include 'dom'.\nsrc/demo.ts(336,3): error TS2584: Cannot find name 'console'. Do you need to change your target library? Try changing the 'lib' compiler option to include 'dom'.\nsrc/demo.ts(337,3): error TS2584: Cannot find name 'console'. Do you need to change your target library? Try changing the 'lib' compiler option to include 'dom'.\nsrc/demo.ts(338,3): error TS2591: Cannot find name 'process'. Do you need to install type definitions for node? Try `npm i --save-dev @types/node` and then add 'node' to the types field in your tsconfig.\nsrc/demo.ts(343,1): error TS2304: Cannot find name 'setTimeout'.\nsrc/main.ts(3,23): error TS2591: Cannot find name 'process'. Do you need to install type definitions for node? Try `npm i --save-dev @types/node` and then add 'node' to the types field in your tsconfig.\nsrc/router.ts(1,49): error TS2591: Cannot find name 'http'. Do you need to install type definitions for node? Try `npm i --save-dev @types/node` and then add 'node' to the types field in your tsconfig.\nsrc/router.ts(2,21): error TS2591: Cannot find name 'url'. Do you need to install type definitions for node? Try `npm i --save-dev @types/node` and then add 'node' to the types field in your tsconfig.\nsrc/router.ts(42,19): error TS2591: Cannot find name 'Buffer'. Do you ne\n...(truncated)",
+          "error": true
+        }
+      ],
+      "inputTokens": 16668,
+      "outputTokens": 64
+    },
+    {
+      "role": "assistant",
+      "content": "Need to update tsconfig to include Node.js types:",
+      "toolCalls": [
+        {
+          "name": "write_file",
+          "input": {
+            "path": "tsconfig.json",
+            "content": "{\n  \"compilerOptions\": {\n    \"target\": \"ES2020\",\n    \"module\": \"CommonJS\",\n    \"lib\": [\"ES2020\"],\n    \"types\": [\"node\"],\n    \"strict\": true,\n    \"esModuleInterop\": true,\n    \"forceConsistentCasingInFileNames\": true,\n    \"skipLibCheck\": true,\n    \"outDir\": \"dist\",\n    \"rootDir\": \"src\",\n    \"resolveJsonModule\": true\n  },\n  \"include\": [\"src/**/*\"],\n  \"exclude\": [\"node_modules\", \"dist\"]\n}\n"
+          },
+          "output": "File written: tsconfig.json (18 lines)",
+          "error": false
+        }
+      ],
+      "inputTokens": 17990,
+      "outputTokens": 231
+    },
+    {
+      "role": "assistant",
+      "content": "",
+      "toolCalls": [
+        {
+          "name": "run_command",
+          "input": {
+            "command": "npx tsc --noEmit 2>&1"
+          },
+          "output": "(command completed with no output)",
+          "error": false
+        }
+      ],
+      "inputTokens": 18244,
+      "outputTokens": 64
+    },
+    {
+      "role": "assistant",
+      "content": "Clean compilation. Now let's run the demo to verify everything works end-to-end:",
+      "toolCalls": [
+        {
+          "name": "run_command",
+          "input": {
+            "command": "npx tsx src/demo.ts 2>&1"
+          },
+          "output": "Task Management API listening on http://localhost:3999\n══════════════════════════════════════════════════════════════════════\n  Task Management API — End-to-End Demo\n══════════════════════════════════════════════════════════════════════\n\n──────────────────────────────────────────────────────────────────────\nStep 1: Create three users\n──────────────────────────────────────────────────────────────────────\n✅ [201] Create user Alice\n{\n  \"id\": \"5f3c2879-d171-4728-a23d-6ceb44cac9e0\",\n  \"name\": \"Alice\",\n  \"email\": \"alice@example.com\"\n}\n✅ [201] Create user Bob\n{\n  \"id\": \"71663a48-5fc1-44da-9b49-0e3e0e9fe347\",\n  \"name\": \"Bob\",\n  \"email\": \"bob@example.com\"\n}\n✅ [201] Create user Charlie\n{\n  \"id\": \"11e75d5f-4f22-4694-a7fc-4b692cbdadc5\",\n  \"name\": \"Charlie\",\n  \"email\": \"charlie@example.com\"\n}\n\n──────────────────────────────────────────────────────────────────────\nStep 2: Attempt duplicate email (should fail 409)\n──────────────────────────────────────────────────────────────────────\n❌ [409] Duplicate email attempt\n{\n  \"error\": \"A user with email 'alice@example.com' already exists\"\n}\n\n──────────────────────────────────────────────────────────────────────\nStep 3: List all users\n──────────────────────────────────────────────────────────────────────\n✅ [200] GET /users\n[\n  {\n    \"id\": \"5f3c2879-d171-4728-a23d-6ceb44cac9e0\",\n    \"name\": \"Alice\",\n    \"email\": \"alice@example.com\"\n  },\n  {\n    \"id\": \"71663a48-5fc1-44da-9b49-0e3e0e9fe347\",\n    \"name\": \"Bob\",\n    \"email\": \"bob@example.com\"\n  },\n  {\n    \"id\": \"11e75d5f-4f22-4694-a7fc-4b692cbdadc5\",\n    \"name\": \"Charlie\",\n    \"email\": \"charlie@example.com\"\n  }\n]\n\n──────────────────────────────────────────────────────────────────────\nStep 4: Update Alice's name\n──────────────────────────────────────────────────────────────────────\n✅ [200] PUT /users/:id\n{\n  \"id\": \"5f3c2879-d171-4728-a23d-6ceb44cac9e0\",\n  \"name\": \"Alice A.\",\n  \"email\": \"alice@example.com\"\n}\n\n──────────────────────────────────────────────────────────────────────\nStep 5: Get Alice by ID\n──────────────────────────────────────────────────────────────────────\n✅ [200] GET /users/:id\n{\n  \"id\": \"5f3c2879-d171-4728-a23d-6ceb44cac9e0\",\n  \"name\": \"Alice A.\",\n  \"email\": \"alice@example.com\"\n}\n\n──────────────────────────────────────────────────────────────────────\nStep 6: Create a project\n──────────────────────────────────────────────────────────────────────\n✅ [201] Create project\n{\n  \"id\": \"0f199813-7236-42e5-8403-439eaac0a2dc\",\n  \"name\": \"Website Redesign\",\n  \"description\": \"Redesign the company website\",\n  \"memberIds\": []\n}\n\n──────────────────────────────────────────────────────────────────────\nStep 7: List all projects\n──────────────────────────────────────────────────────────────────────\n✅ [200] GET /projects\n[\n  {\n    \"id\": \"0f199813-7236-42e5-8403-439eaac0a2dc\",\n    \"name\": \"Website Redesign\",\n    \"description\": \"Redesign the company website\",\n    \"memberIds\": []\n  }\n]\n\n──────────────────────────────────────────────────────────────────────\nStep 8: Update project description\n──────────────────────────────────────────────────────────────────────\n✅ [200] PUT /projects/:id\n{\n  \"id\": \"0f199813-7236-42e5-8403-439eaac0a2dc\",\n  \"name\": \"Website Redesign\",\n  \"description\": \"Complete overhaul of the company website\",\n  \"memberIds\": []\n}\n\n──────────────────────────────────────────────────────────────────────\nStep 9: Add Alice, Bob, and Charlie as project members\n──────────────────────────────────────────────────────────────────────\n✅ [200] Add Alice\n{\n  \"id\": \"0f199813-7236-42e5-8403-439eaac0a2dc\",\n  \"name\": \"Website Redesign\",\n  \"description\": \"Complete overhaul of the company website\",\n  \"memberIds\": [\n    \"5f3c2879-d171-4728-a23d-6ceb44cac9e0\"\n  ]\n}\n✅ [200] Add Bob\n{\n  \"id\": \"0f199813-7236-42e5-8403-439eaac0a2dc\",\n  \"name\": \"Website Redesign\",\n  \"description\": \"Complete overhaul of the company website\",\n  \"memberIds\": [\n    \"5f3c2879-d171-4728-a23d-6ceb44cac9e0\",\n    \"71663a48-5fc1-44da-9b49-0e3e0e9fe347\"\n  ]\n}\n✅ [200] Add Charlie\n{\n  \"id\": \"0f199813-72\n...(truncated)",
+          "error": false
+        }
+      ],
+      "inputTokens": 18325,
+      "outputTokens": 84
+    },
+    {
+      "role": "assistant",
+      "content": "The demo is running. Let me see the rest of the output:",
+      "toolCalls": [
+        {
+          "name": "run_command",
+          "input": {
+            "command": "npx tsx src/demo.ts 2>&1 | tail -200"
+          },
+          "output": "  }\n]\n✅ [200] DELETE /projects/:id\n{\n  \"message\": \"Project '0cb96577-2465-4ded-84df-99eca26e5f7e' deleted\"\n}\n✅ [200] Tasks after project delete (cascaded)\n[\n  {\n    \"id\": \"81755c55-5f5a-4028-b46f-d281f05be989\",\n    \"title\": \"Design mockups v2\",\n    \"description\": \"Create Figma mockups for all pages\",\n    \"status\": \"done\",\n    \"assigneeId\": \"353bde7b-3fa1-4e73-8d76-dbaefb68722d\",\n    \"projectId\": \"12ed786d-f845-4106-aabd-4b62b2a569cc\"\n  },\n  {\n    \"id\": \"c181c76f-4989-4a70-a0cc-588e0b63e1a1\",\n    \"title\": \"Set up CI/CD\",\n    \"description\": \"Configure GitHub Actions\",\n    \"status\": \"in-progress\",\n    \"assigneeId\": \"f5949aa8-c2bb-4ffe-aa43-a4288c3c14f4\",\n    \"projectId\": \"12ed786d-f845-4106-aabd-4b62b2a569cc\"\n  }\n]\n✅ [200] Comments after project delete (cascaded)\n[\n  {\n    \"id\": \"df6fc34d-4870-469c-a7e4-036bba66d30b\",\n    \"taskId\": \"81755c55-5f5a-4028-b46f-d281f05be989\",\n    \"authorId\": \"353bde7b-3fa1-4e73-8d76-dbaefb68722d\",\n    \"body\": \"Mockups are complete, ready for review!\",\n    \"createdAt\": \"2026-08-19T18:52:30.880Z\"\n  },\n  {\n    \"id\": \"fe073c90-5f1f-4f0b-af28-2aa87659a663\",\n    \"taskId\": \"c181c76f-4989-4a70-a0cc-588e0b63e1a1\",\n    \"authorId\": \"f5949aa8-c2bb-4ffe-aa43-a4288c3c14f4\",\n    \"body\": \"Done — staging deploy is included.\",\n    \"createdAt\": \"2026-08-19T18:52:30.881Z\"\n  }\n]\n\n──────────────────────────────────────────────────────────────────────\nStep 34: Final system state\n──────────────────────────────────────────────────────────────────────\n✅ [200] Users\n[\n  {\n    \"id\": \"353bde7b-3fa1-4e73-8d76-dbaefb68722d\",\n    \"name\": \"Alice A.\",\n    \"email\": \"alice@example.com\"\n  },\n  {\n    \"id\": \"f5949aa8-c2bb-4ffe-aa43-a4288c3c14f4\",\n    \"name\": \"Bob\",\n    \"email\": \"bob@example.com\"\n  }\n]\n✅ [200] Projects\n[\n  {\n    \"id\": \"12ed786d-f845-4106-aabd-4b62b2a569cc\",\n    \"name\": \"Website Redesign\",\n    \"description\": \"Complete overhaul of the company website\",\n    \"memberIds\": [\n      \"353bde7b-3fa1-4e73-8d76-dbaefb68722d\",\n      \"f5949aa8-c2bb-4ffe-aa43-a4288c3c14f4\",\n      \"2416ea2c-21a3-4974-b41c-75bb19c20ca7\"\n    ]\n  }\n]\n✅ [200] Tasks\n[\n  {\n    \"id\": \"81755c55-5f5a-4028-b46f-d281f05be989\",\n    \"title\": \"Design mockups v2\",\n    \"description\": \"Create Figma mockups for all pages\",\n    \"status\": \"done\",\n    \"assigneeId\": \"353bde7b-3fa1-4e73-8d76-dbaefb68722d\",\n    \"projectId\": \"12ed786d-f845-4106-aabd-4b62b2a569cc\"\n  },\n  {\n    \"id\": \"c181c76f-4989-4a70-a0cc-588e0b63e1a1\",\n    \"title\": \"Set up CI/CD\",\n    \"description\": \"Configure GitHub Actions\",\n    \"status\": \"in-progress\",\n    \"assigneeId\": \"f5949aa8-c2bb-4ffe-aa43-a4288c3c14f4\",\n    \"projectId\": \"12ed786d-f845-4106-aabd-4b62b2a569cc\"\n  }\n]\n✅ [200] Comments\n[\n  {\n    \"id\": \"df6fc34d-4870-469c-a7e4-036bba66d30b\",\n    \"taskId\": \"81755c55-5f5a-4028-b46f-d281f05be989\",\n    \"authorId\": \"353bde7b-3fa1-4e73-8d76-dbaefb68722d\",\n    \"body\": \"Mockups are complete, ready for review!\",\n    \"createdAt\": \"2026-08-19T18:52:30.880Z\"\n  },\n  {\n    \"id\": \"fe073c90-5f1f-4f0b-af28-2aa87659a663\",\n    \"taskId\": \"c181c76f-4989-4a70-a0cc-588e0b63e1a1\",\n    \"authorId\": \"f5949aa8-c2bb-4ffe-aa43-a4288c3c14f4\",\n    \"body\": \"Done — staging deploy is included.\",\n    \"createdAt\": \"2026-08-19T18:52:30.881Z\"\n  }\n]\n✅ [200] Notifications\n[\n  {\n    \"id\": \"d54d2fbd-474a-44b5-a03c-b3d2d8995856\",\n    \"userId\": \"f5949aa8-c2bb-4ffe-aa43-a4288c3c14f4\",\n    \"message\": \"You have been assigned to task 'Set up CI/CD'\",\n    \"read\": true,\n    \"createdAt\": \"2026-08-19T18:52:30.875Z\"\n  },\n  {\n    \"id\": \"2db94cf1-3283-4b4f-9882-260979988b32\",\n    \"userId\": \"353bde7b-3fa1-4e73-8d76-dbaefb68722d\",\n    \"message\": \"You have been assigned to task 'Design mockups v2'\",\n    \"read\": false,\n    \"createdAt\": \"2026-08-19T18:52:30.877Z\"\n  },\n  {\n    \"id\": \"63b6df2f-5398-4b03-ad67-5890cb7ea8e2\",\n    \"userId\": \"2416ea2c-21a3-4974-b41c-75bb19c20ca7\",\n    \"message\": \"You have been assigned to task 'Write unit tests'\",\n    \"read\": false,\n    \"createdAt\": \"2026-08-19T18:52:30.878Z\"\n  },\n  {\n    \"id\": \"f2b62277-26be-4d5b-9bd1-3b35a24710db\",\n    \"use\n...(truncated)",
+          "error": false
+        }
+      ],
+      "inputTokens": 19987,
+      "outputTokens": 84
+    },
+    {
+      "role": "assistant",
+      "content": "Everything works perfectly. Let me do one final verification of the complete file structure:",
+      "toolCalls": [
+        {
+          "name": "list_files",
+          "input": {},
+          "output": "package-lock.json\npackage.json\nsrc\\demo.ts\nsrc\\handlers\\comments.ts\nsrc\\handlers\\notifications.ts\nsrc\\handlers\\projects.ts\nsrc\\handlers\\tasks.ts\nsrc\\handlers\\users.ts\nsrc\\main.ts\nsrc\\router.ts\nsrc\\server.ts\nsrc\\store.ts\nsrc\\types.ts\nsrc\\utils.ts\ntsconfig.json",
+          "error": false
+        }
+      ],
+      "inputTokens": 22080,
+      "outputTokens": 53
+    },
+    {
+      "role": "assistant",
+      "content": "",
+      "toolCalls": [
+        {
+          "name": "run_command",
+          "input": {
+            "command": "npx tsc --noEmit 2>&1"
+          },
+          "output": "(command completed with no output)",
+          "error": false
+        }
+      ],
+      "inputTokens": 22241,
+      "outputTokens": 64
+    },
+    {
+      "role": "assistant",
+      "content": "Zero errors. Let me do a quick summary check of all the routes by reading the server file:",
+      "toolCalls": [
+        {
+          "name": "read_file",
+          "input": {
+            "path": "src/server.ts"
+          },
+          "output": "import { createServer } from \"http\";\nimport { register, dispatch } from \"./router\";\n\n// User handlers\nimport {\n  listUsers,\n  createUser,\n  getUser,\n  updateUser,\n  deleteUser,\n} from \"./handlers/users\";\n\n// Project handlers\nimport {\n  listProjects,\n  createProject,\n  getProject,\n  updateProject,\n  deleteProject,\n  addMember,\n  removeMember,\n} from \"./handlers/projects\";\n\n// Task handlers\nimport {\n  listTasks,\n  createTask,\n  getTask,\n  updateTask,\n  deleteTask,\n  updateTaskStatus,\n  assignTask,\n} from \"./handlers/tasks\";\n\n// Comment handlers\nimport {\n  listComments,\n  createComment,\n  getComment,\n  deleteComment,\n} from \"./handlers/comments\";\n\n// Notification handlers\nimport {\n  listNotifications,\n  markNotificationRead,\n} from \"./handlers/notifications\";\n\nfunction registerRoutes(): void {\n  // ── Users ────────────────────────────────────────────\n  register(\"GET\",    [\"users\"],           listUsers);\n  register(\"POST\",   [\"users\"],           createUser);\n  register(\"GET\",    [\"users\", \":id\"],    getUser);\n  register(\"PUT\",    [\"users\", \":id\"],    updateUser);\n  register(\"DELETE\", [\"users\", \":id\"],    deleteUser);\n\n  // ── Projects ─────────────────────────────────────────\n  register(\"GET\",    [\"projects\"],                        listProjects);\n  register(\"POST\",   [\"projects\"],                        createProject);\n  register(\"GET\",    [\"projects\", \":id\"],                 getProject);\n  register(\"PUT\",    [\"projects\", \":id\"],                 updateProject);\n  register(\"DELETE\", [\"projects\", \":id\"],                 deleteProject);\n  register(\"POST\",   [\"projects\", \":id\", \"members\"],      addMember);\n  register(\"DELETE\", [\"projects\", \":id\", \"members\"],      removeMember);\n\n  // ── Tasks ─────────────────────────────────────────────\n  register(\"GET\",    [\"tasks\"],                 listTasks);\n  register(\"POST\",   [\"tasks\"],                 createTask);\n  register(\"GET\",    [\"tasks\", \":id\"],          getTask);\n  register(\"PUT\",    [\"tasks\", \":id\"],          updateTask);\n  register(\"DELETE\", [\"tasks\", \":id\"],          deleteTask);\n  register(\"PUT\",    [\"tasks\", \":id\", \"status\"],  updateTaskStatus);\n  register(\"PUT\",    [\"tasks\", \":id\", \"assign\"],  assignTask);\n\n  // ── Comments ──────────────────────────────────────────\n  register(\"GET\",    [\"comments\"],          listComments);\n  register(\"POST\",   [\"comments\"],          createComment);\n  register(\"GET\",    [\"comments\", \":id\"],   getComment);\n  register(\"DELETE\", [\"comments\", \":id\"],   deleteComment);\n\n  // ── Notifications ─────────────────────────────────────\n  register(\"GET\", [\"notifications\"],                     listNotifications);\n  register(\"PUT\", [\"notifications\", \":id\", \"read\"],      markNotificationRead);\n}\n\nexport function startServer(port: number): void {\n  registerRoutes();\n\n  const server = createServer((req, res) => {\n    dispatch(req, res).catch((err) => {\n      console.error(\"Unexpected error in dispatch:\", err);\n      res.writeHead(500, { \"Content-Type\": \"application/json\" });\n      res.end(JSON.stringify({ error: \"Internal server error\" }));\n    });\n  });\n\n  server.listen(port, () => {\n    console.log(`Task Management API listening on http://localhost:${port}`);\n  });\n}\n",
+          "error": false
+        }
+      ],
+      "inputTokens": 22322,
+      "outputTokens": 78
+    },
+    {
+      "role": "assistant",
+      "content": "Everything is complete and compiles cleanly. Let me call done:",
+      "toolCalls": [
+        {
+          "name": "done",
+          "input": {
+            "summary": "Implemented a complete in-memory Task Management API in TypeScript using only Node.js built-in modules. Here's what was built:\n\n## File Structure\n- **src/types.ts** — All TypeScript interfaces: `User`, `Project`, `Task`, `Comment`, `Notification`, `TaskStatus`, and HTTP helper types (`RouteHandler`, `ParsedRequest`, `ResponseHelper`, `Route`)\n- **src/store.ts** — Singleton in-memory store using `Map<string, T>` for all five entity types\n- **src/utils.ts** — Helper utilities: `generateId()` (using `crypto.randomUUID`), `now()` (ISO timestamp), `createNotification()`\n- **src/router.ts** — Custom HTTP router with pattern-based route matching (`:param` wildcards), JSON body parsing, and a `ResponseHelper` abstraction\n- **src/handlers/users.ts** — CRUD handlers with email uniqueness enforcement\n- **src/handlers/projects.ts** — CRUD handlers with member add/remove and cascade-delete of tasks & comments\n- **src/handlers/tasks.ts** — CRUD handlers with strict status transitions (`todo → in-progress → done`), filtering by projectId, assignment with notifications\n- **src/handlers/comments.ts** — CRUD handlers with taskId filtering and notifications to assignees and project members\n- **src/handlers/notifications.ts** — List (with userId filter) and mark-as-read handlers\n- **src/server.ts** — Wires up all routes and creates the HTTP server\n- **src/main.ts** — Entry point reading PORT from env\n- **src/demo.ts** — 34-step end-to-end demo covering every feature including error cases, cascade deletes, status transition enforcement, and notification flows\n\n## Key Features\n- All 22 API routes implemented as specified\n- Status transitions enforced: `todo→in-progress→done` only (returns HTTP 422 on invalid)\n- Notifications generated for: task assignment (at creation and via assign endpoint), status changes, and new comments\n- Cascade deletes: deleting a project removes its tasks and comments; deleting a task removes its comments\n- Input validation with meaningful error messages (400 for bad input, 404 for not found, 409 for conflicts, 422 for invalid transitions)\n- Zero npm runtime dependencies — only Node.js built-ins (`http`, `crypto`, `url`)"
+          },
+          "output": "Implementation complete.",
+          "error": false
+        }
+      ],
+      "inputTokens": 23324,
+      "outputTokens": 622
+    }
+  ],
+  "startTime": "2026-08-19T18:48:58.608Z",
+  "endTime": "2026-08-19T18:52:56.648Z",
+  "totalInputTokens": 307360,
+  "totalOutputTokens": 15824
+}

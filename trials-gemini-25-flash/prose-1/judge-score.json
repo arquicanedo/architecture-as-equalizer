@@ -1,0 +1,10 @@
+{
+  "trialId": "prose-1",
+  "specType": "prose",
+  "architecturalAdherence": 5,
+  "completeness": 4,
+  "codeQuality": 6,
+  "constraintCompliance": 4,
+  "notes": "Several significant issues found: (1) CONSTRAINT VIOLATION - projectService.ts has 'import { v4 as uuidv4 } from uuid' (an external npm dependency) even though it's commented as a placeholder and a local function is used instead — the import itself is a violation and would cause a runtime error. (2) MISSING COMPONENTS - No API Router (HTTP entry point using Node.js built-in http module) is provided, which is a core architectural requirement. (3) MISSING SERVICE - NotificationService is entirely absent; no in-memory notification handling for task.assigned, task.statusChanged, or comment.added events. (4) ARCHITECTURAL VIOLATION - The spec says services should communicate only via EventBus, but the API Router (missing) would need to call services directly, and there are no cross-service event subscriptions shown (e.g., TaskService does not validate that a projectId exists, UserService not consulted for assigneeId — acceptable via event bus design, but Notification subscriptions are absent entirely). (5) Comment type uses 'text' field but spec says 'body' — type mismatch with spec. (6) TaskAssignedEvent has assigneeId typed as string but task.assigneeId is string|null — type inconsistency. (7) Status transition logic uses pairwise checks rather than an ordered array/map, which is functional but fragile. (8) ProjectService seeds data in constructor using its own createProject method, creating coupling to initialization order. (9) No demo/index script is present. (10) UserService has no EventBus dependency at all — fine per spec, but createUser accepts a full User (including id) rather than generating one. (11) memberIds serialized as Set will break JSON.stringify without custom handling in the missing router. Overall, the partial implementation shows reasonable TypeScript patterns but is missing ~40% of required components and has a rule-breaking import statement.",
+  "overall": 4.75
+}

@@ -1,0 +1,10 @@
+{
+  "trialId": "typescript-contracts-1",
+  "specType": "typescript-contracts",
+  "architecturalAdherence": 7,
+  "completeness": 10,
+  "codeQuality": 9,
+  "constraintCompliance": 8,
+  "overall": 8.5,
+  "notes": "Overall structure is clean and services are well-separated with an in-memory event bus. However, Rule 1 is violated: CommentService and NotificationService perform direct service-to-service lookups via injected resolver closures (calling TaskService/UserService). Inter-service communication should be exclusively via the Event Bus. All services own their own stores; the router centralizes HTTP handling; forward-only status transitions are enforced; no external dependencies are used; and each service is in its own file. Minor quality nit: 204 responses are sent with a JSON body (null), which is non-standard. Otherwise, the code is idiomatic, typed, and has reasonable error mapping, and the demo thoroughly exercises the system."
+}

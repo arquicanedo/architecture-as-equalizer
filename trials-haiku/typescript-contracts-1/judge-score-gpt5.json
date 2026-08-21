@@ -1,0 +1,10 @@
+{
+  "trialId": "typescript-contracts-1",
+  "specType": "typescript-contracts",
+  "architecturalAdherence": 6,
+  "completeness": 9,
+  "codeQuality": 7,
+  "constraintCompliance": 6,
+  "overall": 7,
+  "notes": "Uses an in-memory Event Bus and separates services/files as specified, with Router handling HTTP and forward-only task status enforced. However, there are notable violations of the no direct service-to-service rule: CommentService depends on a getUserName function that calls UserService, and Application’s event subscribers call TaskService.getById and then NotificationService directly, bypassing pure event-driven communication. CommentAddedPayload publishes taskTitle as an empty string, relying on a subsequent direct TaskService lookup, which is an architectural smell. Router returns 500 on service-thrown not found errors (should be 404), minimal validation, and DELETE uses a request body. No external npm dependencies are used; each service owns its own in-memory data and lives in its own file. Features/endpoints are largely complete (CRUD for users/projects/tasks/comments, assign, status change, notifications and events, demo). Overall solid but with strict rule #1 violations and some payload/HTTP handling issues."
+}

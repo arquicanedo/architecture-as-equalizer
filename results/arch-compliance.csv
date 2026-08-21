@@ -1,0 +1,94 @@
+model,trialId,specType,componentsPresent,componentsTotal,directServiceImports,exportedDataStores,httpInServices,externalDeps,servicePerFile,routeCoverage,routesImplemented,routesTotal,folderScore,totalViolations,complianceScore
+Sonnet 4.6,c4-1,c4,9,9,0,0,0,0,true,100,25,25,10,0,100
+Sonnet 4.6,c4-2,c4,9,9,2,0,0,0,true,100,25,25,10,2,90
+Sonnet 4.6,c4-3,c4,9,9,0,0,0,0,true,100,25,25,10,0,100
+Sonnet 4.6,openapi-1,openapi,9,9,0,0,0,0,true,100,25,25,10,0,100
+Sonnet 4.6,openapi-2,openapi,9,9,0,0,0,0,true,100,25,25,10,0,100
+Sonnet 4.6,openapi-3,openapi,9,9,0,0,0,0,true,100,25,25,10,0,100
+Sonnet 4.6,prose-1,prose,9,9,0,0,0,0,true,100,25,25,10,0,100
+Sonnet 4.6,prose-2,prose,9,9,0,0,0,0,true,100,25,25,10,0,100
+Sonnet 4.6,prose-3,prose,9,9,0,0,0,0,true,100,25,25,10,0,100
+Sonnet 4.6,structured-1,structured,9,9,1,0,0,0,true,100,25,25,10,1,95
+Sonnet 4.6,structured-2,structured,9,9,0,0,0,0,true,100,25,25,10,0,100
+Sonnet 4.6,structured-3,structured,9,9,1,0,0,0,true,100,25,25,10,1,95
+Sonnet 4.6,typescript-contracts-1,typescript-contracts,9,9,0,0,0,0,true,100,25,25,10,0,100
+Sonnet 4.6,typescript-contracts-2,typescript-contracts,9,9,0,0,0,0,true,100,25,25,10,0,100
+Sonnet 4.6,typescript-contracts-3,typescript-contracts,9,9,0,0,0,0,true,100,25,25,10,0,100
+Haiku 4.5,c4-1,c4,9,9,0,0,0,0,true,100,25,25,10,0,100
+Haiku 4.5,c4-2,c4,9,9,0,0,0,0,true,100,25,25,10,0,100
+Haiku 4.5,c4-3,c4,9,9,2,0,0,0,true,100,25,25,10,2,90
+Haiku 4.5,openapi-1,openapi,9,9,2,0,0,0,true,100,25,25,10,2,90
+Haiku 4.5,openapi-2,openapi,9,9,0,0,0,0,true,100,25,25,10,0,100
+Haiku 4.5,openapi-3,openapi,9,9,0,0,0,0,true,100,25,25,10,0,100
+Haiku 4.5,prose-1,prose,9,9,7,0,0,0,true,100,25,25,10,7,80
+Haiku 4.5,prose-2,prose,9,9,1,0,0,0,true,100,25,25,10,1,95
+Haiku 4.5,prose-3,prose,9,9,2,0,0,0,true,100,25,25,10,2,90
+Haiku 4.5,structured-1,structured,9,9,2,0,0,0,true,100,25,25,10,2,90
+Haiku 4.5,structured-2,structured,9,9,0,0,0,0,true,100,25,25,10,0,100
+Haiku 4.5,structured-3,structured,9,9,2,0,0,0,true,100,25,25,10,2,90
+Haiku 4.5,typescript-contracts-1,typescript-contracts,9,9,0,0,0,0,true,100,25,25,10,0,100
+Haiku 4.5,typescript-contracts-2,typescript-contracts,9,9,0,0,0,0,true,100,25,25,10,0,100
+Haiku 4.5,typescript-contracts-3,typescript-contracts,9,9,0,0,0,0,true,100,25,25,10,0,100
+GPT-5-mini,c4-1,c4,9,9,0,0,0,1,true,100,25,25,10,1,93.3
+GPT-5-mini,c4-2,c4,9,9,0,0,0,0,true,100,25,25,10,0,100
+GPT-5-mini,c4-3,c4,9,9,0,0,0,0,true,100,25,25,10,0,100
+GPT-5-mini,openapi-1,openapi,9,9,0,0,0,0,true,100,25,25,10,0,100
+GPT-5-mini,openapi-2,openapi,9,9,0,0,0,0,true,100,25,25,10,0,100
+GPT-5-mini,openapi-3,openapi,9,9,0,0,0,0,true,100,25,25,10,0,100
+GPT-5-mini,prose-1,prose,9,9,0,0,0,0,true,56.00000000000001,14,25,10,0,91.2
+GPT-5-mini,prose-2,prose,9,9,0,0,0,0,true,100,25,25,10,0,100
+GPT-5-mini,prose-3,prose,9,9,0,0,0,0,true,100,25,25,10,0,100
+GPT-5-mini,structured-1,structured,9,9,0,0,0,1,true,100,25,25,10,1,93.3
+GPT-5-mini,structured-2,structured,9,9,0,0,0,0,true,100,25,25,10,0,100
+GPT-5-mini,structured-3,structured,9,9,0,0,0,0,true,100,25,25,10,0,100
+GPT-5-mini,typescript-contracts-1,typescript-contracts,9,9,0,0,0,0,true,100,25,25,10,0,100
+GPT-5-mini,typescript-contracts-2,typescript-contracts,9,9,0,0,0,0,true,100,25,25,10,0,100
+GPT-5-mini,typescript-contracts-3,typescript-contracts,9,9,0,0,0,0,true,100,25,25,10,0,100
+GPT-5,c4-1,c4,9,9,0,0,0,0,true,100,25,25,10,0,100
+GPT-5,c4-2,c4,9,9,0,0,0,0,true,100,25,25,10,0,100
+GPT-5,c4-3,c4,9,9,0,0,0,0,true,100,25,25,10,0,100
+GPT-5,openapi-1,openapi,9,9,0,0,0,0,true,100,25,25,10,0,100
+GPT-5,openapi-2,openapi,9,9,0,0,0,0,true,100,25,25,10,0,100
+GPT-5,openapi-3,openapi,9,9,0,0,0,0,true,100,25,25,10,0,100
+GPT-5,prose-1,prose,9,9,0,0,0,0,true,100,25,25,10,0,100
+GPT-5,prose-2,prose,9,9,0,0,0,0,true,100,25,25,10,0,100
+GPT-5,prose-3,prose,9,9,0,0,0,0,true,100,25,25,10,0,100
+GPT-5,structured-1,structured,9,9,0,0,0,0,true,100,25,25,10,0,100
+GPT-5,structured-2,structured,9,9,0,0,0,0,true,100,25,25,10,0,100
+GPT-5,structured-3,structured,9,9,0,0,0,0,true,100,25,25,10,0,100
+GPT-5,typescript-contracts-1,typescript-contracts,9,9,0,0,0,0,true,100,25,25,10,0,100
+GPT-5,typescript-contracts-2,typescript-contracts,9,9,0,0,0,0,true,100,25,25,10,0,100
+GPT-5,typescript-contracts-3,typescript-contracts,9,9,0,0,0,0,true,100,25,25,10,0,100
+Gemini Flash,c4-1,c4,9,9,0,0,0,0,true,100,25,25,10,0,100
+Gemini Flash,c4-2,c4,5,9,0,0,0,0,false,0,0,25,5,0,59.4
+Gemini Flash,c4-3,c4,8,9,0,0,0,0,true,100,25,25,9,0,96.8
+Gemini Flash,openapi-1,openapi,5,9,0,0,0,0,false,0,0,25,5,0,59.4
+Gemini Flash,openapi-2,openapi,9,9,0,0,0,0,true,100,25,25,10,0,100
+Gemini Flash,openapi-3,openapi,4,9,0,0,0,0,false,0,0,25,4,0,56.2
+Gemini Flash,prose-1,prose,5,9,0,0,0,1,false,0,0,25,5,1,52.8
+Gemini Flash,prose-2,prose,5,9,0,0,0,0,false,0,0,25,5,0,59.4
+Gemini Flash,prose-3,prose,9,9,0,0,0,0,true,100,25,25,10,0,100
+Gemini Flash,structured-1,structured,5,9,0,0,0,0,false,0,0,25,5,0,59.4
+Gemini Flash,structured-2,structured,9,9,0,0,0,0,true,100,25,25,10,0,100
+Gemini Flash,structured-3,structured,5,9,0,0,0,0,false,0,0,25,5,0,59.4
+Gemini Flash,typescript-contracts-1,typescript-contracts,9,9,0,0,0,0,true,100,25,25,10,0,100
+Gemini Flash,typescript-contracts-2,typescript-contracts,9,9,0,0,0,0,true,100,25,25,10,0,100
+Gemini Flash,typescript-contracts-3,typescript-contracts,9,9,0,0,0,0,true,100,25,25,10,0,100
+Gemini Pro,c4-1,c4,5,9,0,0,0,0,false,0,0,25,5,0,59.4
+Gemini Pro,c4-2,c4,9,9,0,0,0,0,true,100,25,25,10,0,100
+Gemini Pro,c4-3,c4,9,9,1,0,0,0,true,100,25,25,10,1,95
+Gemini Pro,openapi-1,openapi,9,9,0,0,0,0,true,100,25,25,10,0,100
+Gemini Pro,openapi-2,openapi,9,9,0,0,0,0,true,100,25,25,10,0,100
+Gemini Pro,openapi-3,openapi,9,9,0,0,0,0,true,100,25,25,10,0,100
+Gemini Pro,prose-1,prose,9,9,2,0,0,0,true,100,25,25,10,2,90
+Gemini Pro,prose-2,prose,9,9,1,0,0,0,true,100,25,25,10,1,95
+Gemini Pro,prose-3,prose,9,9,1,0,0,0,true,100,25,25,10,1,95
+Gemini Pro,structured-1,structured,9,9,0,0,0,0,true,100,25,25,10,0,100
+Gemini Pro,structured-2,structured,9,9,0,0,0,0,true,100,25,25,10,0,100
+Gemini Pro,structured-3,structured,9,9,3,0,0,0,true,100,25,25,10,3,85
+Gemini Pro,typescript-contracts-1,typescript-contracts,9,9,0,0,0,0,true,100,25,25,10,0,100
+Gemini Pro,typescript-contracts-2,typescript-contracts,9,9,0,0,0,0,true,100,25,25,10,0,100
+Gemini Pro,typescript-contracts-3,typescript-contracts,9,9,0,0,0,0,true,100,25,25,10,0,100
+Sonnet 4.6 (no arch),functional-only-1,functional-only,8,9,0,0,0,0,true,100,25,25,9,0,96.8
+Sonnet 4.6 (no arch),functional-only-2,functional-only,8,9,0,0,0,0,true,100,25,25,9,0,96.8
+Sonnet 4.6 (no arch),functional-only-3,functional-only,8,9,0,0,0,0,true,100,25,25,9,0,96.8

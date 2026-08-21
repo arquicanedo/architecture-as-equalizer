@@ -1,0 +1,10 @@
+{
+  "trialId": "openapi-3",
+  "specType": "openapi",
+  "architecturalAdherence": 6,
+  "completeness": 7,
+  "codeQuality": 8,
+  "constraintCompliance": 6,
+  "notes": "Architectural rule #1 is violated in router.ts: the router directly calls this.taskService.getTask() and this.userService.getUser() inside the comment creation handler to enrich event context before passing to CommentService. This is a service-to-service data flow mediated by the router rather than the event bus, which circumvents the intent of the rule. Rule #3 is also borderline violated since the router is doing cross-service data enrichment logic that belongs elsewhere. The comment.added notification notifies only the author (a confirmation message), not relevant parties like the task assignee or project members — this is semantically weak and misses the spirit of the notification requirement. The status transition check allows same-status transitions (newIndex === currentIndex passes), which is a logic bug — setting 'todo' to 'todo' or 'done' to 'done' would succeed silently. The GET /tasks endpoint requires projectId, making it impossible to list all tasks without a project filter — this is a design limitation not required by the spec. Input validation is minimal (no checks for missing required fields like name/email on user creation, title on task creation). No email uniqueness enforcement. The EventBus is synchronous which is noted but acceptable per spec. No unsubscribe mechanism on EventBus. Code is otherwise clean, well-structured TypeScript with proper interfaces, immutable-style updates, and good separation of files. The demo script is thorough and functional. Each service correctly owns its own data store.",
+  "overall": 6.75
+}

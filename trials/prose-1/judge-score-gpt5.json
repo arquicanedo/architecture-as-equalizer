@@ -1,0 +1,10 @@
+{
+  "trialId": "prose-1",
+  "specType": "prose",
+  "architecturalAdherence": 10,
+  "completeness": 9,
+  "codeQuality": 9,
+  "constraintCompliance": 10,
+  "overall": 9.5,
+  "notes": "Strong separation of concerns: services are decoupled and communicate via the EventBus; the router is the only HTTP layer; each service owns its datastore; forward-only task status enforced. All required services and routes are implemented, events are published and subscribed correctly, and the demo exercises the main features. Notable issue: deleting a project cascades tasks but does not remove their comments, leaving orphaned comments (router calls deleteTasksByProject but never deletes comments for those tasks), which contradicts the demo’s claim of cascading comments. Minor nits: naive query parsing and general 400 handling for validation errors are acceptable but could be more granular. No external dependencies used in application code and each service is in its own file."
+}

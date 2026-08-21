@@ -1,0 +1,10 @@
+{
+  "trialId": "prose-3",
+  "specType": "prose",
+  "architecturalAdherence": 5,
+  "completeness": 7,
+  "codeQuality": 6,
+  "constraintCompliance": 5,
+  "notes": "Architectural rule #1 (no direct service-to-service calls) is violated in router.ts: after creating a comment, the router directly calls `this.tasks.getById()` to enrich the event payload, then re-emits 'comment.added' — this means the event is emitted twice (once in CommentService.create(), once in the router), and the router is acting as an inter-service mediator rather than a pure HTTP layer, which violates rule #3 (all HTTP handling in router only, not business logic). Rule #2 is mostly respected but the double-emit of 'comment.added' means the NotificationService receives the event twice. The event name mismatch is also notable: TaskService emits 'task.status_changed' (with underscore) while the spec says 'task.statusChanged' (camelCase), and NotificationService subscribes to 'task.status_changed' — internally consistent but deviates from spec. The Task type uses 'assignee' instead of 'assigneeId' and Project uses 'members' instead of 'memberIds', mismatching the data model spec. Notification route parsing has dead code (the commented-out block around '/read' detection is confusing and partially duplicated). The markRead endpoint extracts the wrong path segment — for '/notifications/:id/read', splitting by '/' gives index [2] as the id but index [3] as 'read', yet the code uses split('/')[2] which would give the id correctly only if the path is exactly two segments, which it isn't here — this is a bug. No input validation is present (missing fields, invalid types). UserService and ProjectService don't receive the EventBus, so member add/remove and user CRUD emit no events — acceptable per spec but limits extensibility. The demo script is functional and covers the main flows. Overall the implementation is a reasonable attempt but has meaningful architectural violations and a few bugs.",
+  "overall": 5.75
+}

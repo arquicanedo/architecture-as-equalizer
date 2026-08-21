@@ -1,0 +1,10 @@
+{
+  "trialId": "structured-1",
+  "specType": "structured",
+  "architecturalAdherence": 6,
+  "completeness": 9,
+  "codeQuality": 8,
+  "constraintCompliance": 8,
+  "overall": 7.75,
+  "notes": "Overall structure matches the intended architecture with separate services, an in-memory event bus, and a single HTTP router. However, rule #1 is violated: CommentService and NotificationService call into other services via injected helper functions (getTaskTitle, getUserName, getTaskAssignee), which are direct cross-service reads instead of event-driven communication. Data stores are kept private in each service, and HTTP handling is confined to the router. Task status transitions are enforced as forward-only. No external dependencies are used and each service is in its own file. Code is clean and idiomatic TypeScript, but event payloads are typed as any and there’s limited validation. TaskService.update allows changing status/assignee if misused outside the router, which could bypass the transition rule; the router mitigates this by only allowing title/description updates. Demo script is present and exercises the system well."
+}

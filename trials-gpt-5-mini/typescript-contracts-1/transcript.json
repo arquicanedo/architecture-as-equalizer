@@ -1,0 +1,345 @@
+{
+  "trialId": "typescript-contracts-1",
+  "specType": "typescript-contracts",
+  "messages": [
+    {
+      "role": "assistant",
+      "content": "",
+      "toolCalls": [
+        {
+          "name": "write_file",
+          "input": {
+            "path": "src/types.ts",
+            "content": "// Shared type definitions exactly as specified\n\n// ============================================================\n// Data Models\n// ============================================================\n\nexport interface User {\n  id: string;\n  name: string;\n  email: string;\n}\n\nexport interface Project {\n  id: string;\n  name: string;\n  description: string;\n  memberIds: string[];\n}\n\nexport type TaskStatus = \"todo\" | \"in-progress\" | \"done\";\n\nexport interface Task {\n  id: string;\n  title: string;\n  description: string;\n  status: TaskStatus;\n  assigneeId: string | null;\n  projectId: string;\n}\n\nexport interface Comment {\n  id: string;\n  taskId: string;\n  authorId: string;\n  body: string;\n  createdAt: string; // ISO 8601\n}\n\nexport interface Notification {\n  id: string;\n  userId: string;\n  message: string;\n  read: boolean;\n  createdAt: string; // ISO 8601\n}\n\n// ============================================================\n// Event Bus Contract\n// ============================================================\n\nexport interface IEventBus {\n  publish(event: string, payload: unknown): void;\n  subscribe(event: string, callback: (payload: unknown) => void): void;\n}\n\n// Event payloads\nexport interface TaskAssignedPayload {\n  taskId: string;\n  taskTitle: string;\n  assigneeId: string;\n}\n\nexport interface TaskStatusChangedPayload {\n  taskId: string;\n  taskTitle: string;\n  assigneeId: string | null;\n  oldStatus: TaskStatus;\n  newStatus: TaskStatus;\n}\n\nexport interface CommentAddedPayload {\n  commentId: string;\n  taskId: string;\n  taskTitle: string;\n  authorId: string;\n  authorName: string;\n}\n\n// ============================================================\n// Service Contracts\n// ============================================================\n\nexport interface IUserService {\n  create(input: { name: string; email: string }): User;\n  getById(id: string): User;\n  getAll(): User[];\n  update(id: string, input: Partial<{ name: string; email: string }>): User;\n  delete(id: string): void;\n}\n\nexport interface IProjectService {\n  create(input: { name: string; description: string }): Project;\n  getById(id: string): Project;\n  getAll(): Project[];\n  update(id: string, input: Partial<{ name: string; description: string }>): Project;\n  delete(id: string): void;\n  addMember(projectId: string, userId: string): Project;\n  removeMember(projectId: string, userId: string): Project;\n}\n\nexport interface ITaskService {\n  create(input: { title: string; description: string; projectId: string }): Task;\n  getById(id: string): Task;\n  getByProject(projectId: string): Task[];\n  update(id: string, input: Partial<{ title: string; description: string }>): Task;\n  delete(id: string): void;\n  assign(taskId: string, assigneeId: string): Task;\n  changeStatus(taskId: string, newStatus: TaskStatus): Task;\n}\n\nexport interface ICommentService {\n  create(input: { taskId: string; authorId: string; body: string }): Comment;\n  getById(id: string): Comment;\n  getByTask(taskId: string): Comment[];\n  delete(id: string): void;\n}\n\nexport interface INotificationService {\n  getByUser(userId: string): Notification[];\n  markAsRead(notificationId: string): Notification;\n}\n"
+          },
+          "output": "File written: src/types.ts (122 lines)",
+          "error": false
+        }
+      ],
+      "inputTokens": 2636,
+      "outputTokens": 3313
+    },
+    {
+      "role": "assistant",
+      "content": "",
+      "toolCalls": [
+        {
+          "name": "write_file",
+          "input": {
+            "path": "src/event-bus.ts",
+            "content": "import { IEventBus } from \"./types\";\n\ntype Callback = (payload: unknown) => void;\n\nexport class EventBus implements IEventBus {\n  private handlers: Map<string, Callback[]> = new Map();\n\n  publish(event: string, payload: unknown): void {\n    const h = this.handlers.get(event) || [];\n    // call synchronously\n    for (const cb of h) {\n      try {\n        cb(payload);\n      } catch (err) {\n        // swallow errors to not affect publisher\n        // console.error(\"Event handler error\", err);\n      }\n    }\n  }\n\n  subscribe(event: string, callback: Callback): void {\n    const arr = this.handlers.get(event) || [];\n    arr.push(callback);\n    this.handlers.set(event, arr);\n  }\n}\n"
+          },
+          "output": "File written: src/event-bus.ts (27 lines)",
+          "error": false
+        }
+      ],
+      "inputTokens": 3531,
+      "outputTokens": 2460
+    },
+    {
+      "role": "assistant",
+      "content": "",
+      "toolCalls": [
+        {
+          "name": "write_file",
+          "input": {
+            "path": "src/services/user-service.ts",
+            "content": "import { IUserService, User } from \"../types\";\nimport { randomUUID } from \"crypto\";\n\nexport class UserService implements IUserService {\n  // exclusive private store\n  private store: Map<string, User> = new Map();\n\n  create(input: { name: string; email: string }): User {\n    const id = randomUUID();\n    const user: User = { id, name: input.name, email: input.email };\n    this.store.set(id, user);\n    return user;\n  }\n\n  getById(id: string): User {\n    const user = this.store.get(id);\n    if (!user) throw new Error(\"User not found\");\n    return user;\n  }\n\n  getAll(): User[] {\n    return Array.from(this.store.values());\n  }\n\n  update(id: string, input: Partial<{ name: string; email: string }>): User {\n    const user = this.getById(id);\n    const updated: User = { ...user, ...input };\n    this.store.set(id, updated);\n    return updated;\n  }\n\n  delete(id: string): void {\n    if (!this.store.has(id)) throw new Error(\"User not found\");\n    this.store.delete(id);\n  }\n}\n"
+          },
+          "output": "File written: src/services/user-service.ts (37 lines)",
+          "error": false
+        }
+      ],
+      "inputTokens": 3768,
+      "outputTokens": 320
+    },
+    {
+      "role": "assistant",
+      "content": "",
+      "toolCalls": [
+        {
+          "name": "write_file",
+          "input": {
+            "path": "src/services/project-service.ts",
+            "content": "import { IProjectService, Project } from \"../types\";\nimport { randomUUID } from \"crypto\";\n\nexport class ProjectService implements IProjectService {\n  private store: Map<string, Project> = new Map();\n\n  create(input: { name: string; description: string }): Project {\n    const id = randomUUID();\n    const project: Project = { id, name: input.name, description: input.description, memberIds: [] };\n    this.store.set(id, project);\n    return project;\n  }\n\n  getById(id: string): Project {\n    const p = this.store.get(id);\n    if (!p) throw new Error(\"Project not found\");\n    return p;\n  }\n\n  getAll(): Project[] {\n    return Array.from(this.store.values());\n  }\n\n  update(id: string, input: Partial<{ name: string; description: string }>): Project {\n    const p = this.getById(id);\n    const updated: Project = { ...p, ...input } as Project;\n    this.store.set(id, updated);\n    return updated;\n  }\n\n  delete(id: string): void {\n    if (!this.store.has(id)) throw new Error(\"Project not found\");\n    this.store.delete(id);\n  }\n\n  addMember(projectId: string, userId: string): Project {\n    const p = this.getById(projectId);\n    if (!p.memberIds.includes(userId)) {\n      p.memberIds.push(userId);\n      this.store.set(projectId, p);\n    }\n    return p;\n  }\n\n  removeMember(projectId: string, userId: string): Project {\n    const p = this.getById(projectId);\n    p.memberIds = p.memberIds.filter((id) => id !== userId);\n    this.store.set(projectId, p);\n    return p;\n  }\n}\n"
+          },
+          "output": "File written: src/services/project-service.ts (52 lines)",
+          "error": false
+        }
+      ],
+      "inputTokens": 4110,
+      "outputTokens": 460
+    },
+    {
+      "role": "assistant",
+      "content": "",
+      "toolCalls": [
+        {
+          "name": "write_file",
+          "input": {
+            "path": "src/services/task-service.ts",
+            "content": "import { ITaskService, Task, TaskStatus, TaskAssignedPayload, TaskStatusChangedPayload } from \"../types\";\nimport { randomUUID } from \"crypto\";\nimport { IEventBus } from \"../types\";\n\nexport class TaskService implements ITaskService {\n  private store: Map<string, Task> = new Map();\n  private eventBus: IEventBus;\n\n  constructor(eventBus: IEventBus) {\n    this.eventBus = eventBus;\n  }\n\n  create(input: { title: string; description: string; projectId: string }): Task {\n    const id = randomUUID();\n    const task: Task = { id, title: input.title, description: input.description, status: \"todo\", assigneeId: null, projectId: input.projectId };\n    this.store.set(id, task);\n    return task;\n  }\n\n  getById(id: string): Task {\n    const t = this.store.get(id);\n    if (!t) throw new Error(\"Task not found\");\n    return t;\n  }\n\n  getByProject(projectId: string): Task[] {\n    return Array.from(this.store.values()).filter((t) => t.projectId === projectId);\n  }\n\n  update(id: string, input: Partial<{ title: string; description: string }>): Task {\n    const t = this.getById(id);\n    const updated: Task = { ...t, ...input } as Task;\n    this.store.set(id, updated);\n    return updated;\n  }\n\n  delete(id: string): void {\n    if (!this.store.has(id)) throw new Error(\"Task not found\");\n    this.store.delete(id);\n  }\n\n  assign(taskId: string, assigneeId: string): Task {\n    const t = this.getById(taskId);\n    t.assigneeId = assigneeId;\n    this.store.set(taskId, t);\n    const payload: TaskAssignedPayload = { taskId: t.id, taskTitle: t.title, assigneeId };\n    this.eventBus.publish(\"task.assigned\", payload);\n    return t;\n  }\n\n  changeStatus(taskId: string, newStatus: TaskStatus): Task {\n    const t = this.getById(taskId);\n    const order: TaskStatus[] = [\"todo\", \"in-progress\", \"done\"];\n    const oldIndex = order.indexOf(t.status);\n    const newIndex = order.indexOf(newStatus);\n    if (newIndex === -1) throw new Error(\"Invalid status\");\n    if (newIndex === oldIndex) return t; // no change\n    if (newIndex === oldIndex + 1) {\n      // forward by one - allowed\n      const oldStatus = t.status;\n      t.status = newStatus;\n      this.store.set(taskId, t);\n      const payload: TaskStatusChangedPayload = { taskId: t.id, taskTitle: t.title, assigneeId: t.assigneeId, oldStatus, newStatus };\n      this.eventBus.publish(\"task.statusChanged\", payload);\n      return t;\n    }\n    // any other transition is invalid\n    throw new Error(\"Invalid status transition\");\n  }\n}\n"
+          },
+          "output": "File written: src/services/task-service.ts (71 lines)",
+          "error": false
+        }
+      ],
+      "inputTokens": 4592,
+      "outputTokens": 756
+    },
+    {
+      "role": "assistant",
+      "content": "",
+      "toolCalls": [
+        {
+          "name": "write_file",
+          "input": {
+            "path": "src/services/comment-service.ts",
+            "content": "import { ICommentService, Comment, CommentAddedPayload } from \"../types\";\nimport { randomUUID } from \"crypto\";\nimport { IEventBus } from \"../types\";\n\nexport class CommentService implements ICommentService {\n  private store: Map<string, Comment> = new Map();\n  private eventBus: IEventBus;\n\n  constructor(eventBus: IEventBus) {\n    this.eventBus = eventBus;\n  }\n\n  create(input: { taskId: string; authorId: string; body: string }): Comment {\n    const id = randomUUID();\n    const createdAt = new Date().toISOString();\n    const comment: Comment = { id, taskId: input.taskId, authorId: input.authorId, body: input.body, createdAt };\n    this.store.set(id, comment);\n    const payload: CommentAddedPayload = { commentId: id, taskId: input.taskId, taskTitle: \"\", authorId: input.authorId, authorName: \"\" };\n    // Note: taskTitle/authorName can be enriched by subscribers if needed\n    this.eventBus.publish(\"comment.added\", payload);\n    return comment;\n  }\n\n  getById(id: string): Comment {\n    const c = this.store.get(id);\n    if (!c) throw new Error(\"Comment not found\");\n    return c;\n  }\n\n  getByTask(taskId: string): Comment[] {\n    return Array.from(this.store.values()).filter((c) => c.taskId === taskId);\n  }\n\n  delete(id: string): void {\n    if (!this.store.has(id)) throw new Error(\"Comment not found\");\n    this.store.delete(id);\n  }\n}\n"
+          },
+          "output": "File written: src/services/comment-service.ts (39 lines)",
+          "error": false
+        }
+      ],
+      "inputTokens": 5370,
+      "outputTokens": 419
+    },
+    {
+      "role": "assistant",
+      "content": "",
+      "toolCalls": [
+        {
+          "name": "write_file",
+          "input": {
+            "path": "src/services/notification-service.ts",
+            "content": "import { INotificationService, Notification, TaskAssignedPayload, TaskStatusChangedPayload, CommentAddedPayload } from \"../types\";\nimport { randomUUID } from \"crypto\";\nimport { IEventBus } from \"../types\";\n\nexport class NotificationService implements INotificationService {\n  private store: Map<string, Notification> = new Map();\n  private eventBus: IEventBus;\n\n  constructor(eventBus: IEventBus) {\n    this.eventBus = eventBus;\n    this.eventBus.subscribe(\"task.assigned\", (payload) => this.onTaskAssigned(payload));\n    this.eventBus.subscribe(\"task.statusChanged\", (payload) => this.onTaskStatusChanged(payload));\n    this.eventBus.subscribe(\"comment.added\", (payload) => this.onCommentAdded(payload));\n  }\n\n  private onTaskAssigned(payload: unknown) {\n    const p = payload as TaskAssignedPayload;\n    const message = `Task '${p.taskTitle}' assigned to you`;\n    const n: Notification = { id: randomUUID(), userId: p.assigneeId, message, read: false, createdAt: new Date().toISOString() };\n    this.store.set(n.id, n);\n  }\n\n  private onTaskStatusChanged(payload: unknown) {\n    const p = payload as TaskStatusChangedPayload;\n    if (!p.assigneeId) return;\n    const message = `Task '${p.taskTitle}' status changed to ${p.newStatus}`;\n    const n: Notification = { id: randomUUID(), userId: p.assigneeId, message, read: false, createdAt: new Date().toISOString() };\n    this.store.set(n.id, n);\n  }\n\n  private onCommentAdded(payload: unknown) {\n    const p = payload as CommentAddedPayload;\n    // CommentAddedPayload does not include assignee; responsibility of router/main to publish enriched payload if needed\n    // We'll treat authorName/taskTitle maybe empty; subscribers expect task assignee id in another service. For now, can't resolve — so no-op unless payload has authorName and taskTitle and target userId encoded. But spec requires: creates notification for task assignee about new comment\n    // To satisfy spec, expect payload to include authorName and taskTitle and also include a field 'assigneeId' optionally. We'll check any extra fields.\n    const anyP = p as any;\n    if (anyP.assigneeId) {\n      const message = `New comment on '${p.taskTitle}' by ${p.authorName}`;\n      const n: Notification = { id: randomUUID(), userId: anyP.assigneeId, message, read: false, createdAt: new Date().toISOString() };\n      this.store.set(n.id, n);\n    }\n  }\n\n  getByUser(userId: string): Notification[] {\n    return Array.from(this.store.values()).filter((n) => n.userId === userId).sort((a, b) => a.createdAt.localeCompare(b.createdAt));\n  }\n\n  markAsRead(notificationId: string): Notification {\n    const n = this.store.get(notificationId);\n    if (!n) throw new Error(\"Notification not found\");\n    n.read = true;\n    this.store.set(notificationId, n);\n    return n;\n  }\n}\n"
+          },
+          "output": "File written: src/services/notification-service.ts (56 lines)",
+          "error": false
+        }
+      ],
+      "inputTokens": 5811,
+      "outputTokens": 760
+    },
+    {
+      "role": "assistant",
+      "content": "",
+      "toolCalls": [
+        {
+          "name": "write_file",
+          "input": {
+            "path": "src/router.ts",
+            "content": "import http from \"http\";\nimport { parse as parseUrl } from \"url\";\nimport { EventBus } from \"./event-bus\";\nimport { UserService } from \"./services/user-service\";\nimport { ProjectService } from \"./services/project-service\";\nimport { TaskService } from \"./services/task-service\";\nimport { CommentService } from \"./services/comment-service\";\nimport { NotificationService } from \"./services/notification-service\";\nimport { IEventBus } from \"./types\";\n\nexport class Router {\n  private server: http.Server;\n  private eventBus: IEventBus;\n  private userService: UserService;\n  private projectService: ProjectService;\n  private taskService: TaskService;\n  private commentService: CommentService;\n  private notificationService: NotificationService;\n\n  constructor() {\n    this.eventBus = new EventBus();\n    this.userService = new UserService();\n    this.projectService = new ProjectService();\n    this.taskService = new TaskService(this.eventBus);\n    this.commentService = new CommentService(this.eventBus);\n    this.notificationService = new NotificationService(this.eventBus);\n\n    this.server = http.createServer((req, res) => this.handle(req, res));\n  }\n\n  listen(port: number) {\n    return new Promise<void>((resolve) => {\n      this.server.listen(port, () => resolve());\n    });\n  }\n\n  close() {\n    this.server.close();\n  }\n\n  private async handle(req: http.IncomingMessage, res: http.ServerResponse) {\n    try {\n      const method = req.method || \"GET\";\n      const parsed = parseUrl(req.url || \"\", true);\n      const pathname = parsed.pathname || \"/\";\n      const query = parsed.query;\n\n      const body = await this.readBody(req);\n\n      // Routing\n      // Users\n      if (method === \"GET\" && pathname === \"/users\") return this.ok(res, this.userService.getAll());\n      if (method === \"POST\" && pathname === \"/users\") return this.ok(res, this.userService.create(body));\n      if (pathname.startsWith(\"/users/\")) {\n        const id = pathname.split(\"/\")[2];\n        if (method === \"GET\") return this.ok(res, this.userService.getById(id));\n        if (method === \"PUT\") return this.ok(res, this.userService.update(id, body));\n        if (method === \"DELETE\") return this.noContent(res, () => this.userService.delete(id));\n      }\n\n      // Projects\n      if (method === \"GET\" && pathname === \"/projects\") return this.ok(res, this.projectService.getAll());\n      if (method === \"POST\" && pathname === \"/projects\") return this.ok(res, this.projectService.create(body));\n      if (pathname.startsWith(\"/projects/\")) {\n        const parts = pathname.split(\"/\");\n        const id = parts[2];\n        if (parts.length === 3) {\n          if (method === \"GET\") return this.ok(res, this.projectService.getById(id));\n          if (method === \"PUT\") return this.ok(res, this.projectService.update(id, body));\n          if (method === \"DELETE\") return this.noContent(res, () => this.projectService.delete(id));\n        }\n        if (parts.length === 4 && parts[3] === \"members\") {\n          if (method === \"POST\") return this.ok(res, this.projectService.addMember(id, body.userId));\n          if (method === \"DELETE\") return this.ok(res, this.projectService.removeMember(id, body.userId));\n        }\n      }\n\n      // Tasks\n      if (method === \"GET\" && pathname === \"/tasks\" && query.projectId) return this.ok(res, this.taskService.getByProject(String(query.projectId)));\n      if (method === \"POST\" && pathname === \"/tasks\") return this.ok(res, this.taskService.create(body));\n      if (pathname.startsWith(\"/tasks/\")) {\n        const parts = pathname.split(\"/\");\n        const id = parts[2];\n        if (parts.length === 3) {\n          if (method === \"GET\") return this.ok(res, this.taskService.getById(id));\n          if (method === \"PUT\") return this.ok(res, this.taskService.update(id, body));\n          if (method === \"DELETE\") return this.noContent(res, () => this.taskService.delete(id));\n        }\n        if (parts.length === 4 && parts[3] === \"status\" && method === \"PUT\") return this.ok(res, this.taskService.changeStatus(id, body.status));\n        if (parts.length === 4 && parts[3] === \"assign\" && method === \"PUT\") return this.ok(res, this.taskService.assign(id, body.assigneeId));\n      }\n\n      // Comments\n      if (method === \"GET\" && pathname === \"/comments\" && query.taskId) return this.ok(res, this.commentService.getByTask(String(query.taskId)));\n      if (method === \"POST\" && pathname === \"/comments\") {\n        const comment = this.commentService.create(body);\n        // Enrich comment.added event with taskTitle and authorName and assigneeId if possible by reading task and user services\n        // Need to access task and user stores via services here\n        // We'll manually publish an enriched event\n        const task = (() => {\n          try { return this.taskService.getById(comment.taskId); } catch { return null; }\n        })();\n        const author = (() => {\n          try { return this.userService.getById(comment.authorId); } catch { return null; }\n        })();\n        const enriched: any = { commentId: comment.id, taskId: comment.taskId, taskTitle: task?.title || \"\", authorId: comment.authorId, authorName: author?.name || \"\" };\n        if (task?.assigneeId) enriched.assigneeId = task.assigneeId;\n        this.eventBus.publish(\"comment.added\", enriched);\n        return this.ok(res, comment);\n      }\n      if (pathname.startsWith(\"/comments/\")) {\n        const id = pathname.split(\"/\")[2];\n        if (method === \"GET\") return this.ok(res, this.commentService.getById(id));\n        if (method === \"DELETE\") return this.noContent(res, () => this.commentService.delete(id));\n      }\n\n      // Notifications\n      if (method === \"GET\" && pathname === \"/notifications\" && query.userId) return this.ok(res, this.notificationService.getByUser(String(query.userId)));\n      if (pathname.startsWith(\"/notifications/\")) {\n        const parts = pathname.split(\"/\");\n        const id = parts[2];\n        if (parts.length === 4 && parts[3] === \"read\" && method === \"PUT\") return this.ok(res, this.notificationService.markAsRead(id));\n      }\n\n      this.notFound(res);\n    } catch (err: any) {\n      this.error(res, err);\n    }\n  }\n\n  private readBody(req: http.IncomingMessage): Promise<any> {\n    return new Promise((resolve, reject) => {\n      const chunks: Buffer[] = [];\n      req.on(\"data\", (c) => chunks.push(Buffer.from(c)));\n      req.on(\"end\", () => {\n        if (chunks.length === 0) return resolve({});\n        try {\n          const s = Buffer.concat(chunks).toString();\n          const obj = JSON.parse(s);\n          resolve(obj);\n        } catch (e) {\n          reject(e);\n        }\n      });\n      req.on(\"error\", (e) => reject(e));\n    });\n  }\n\n  private ok(res: http.ServerResponse, data: unknown) {\n    res.writeHead(200, { \"Content-Type\": \"application/json\" });\n    res.end(JSON.stringify(data));\n  }\n\n  private noContent(res: http.ServerResponse, fn: () => void) {\n    fn();\n    res.writeHead(204);\n    res.end();\n  }\n\n  private notFound(res: http.ServerResponse) {\n    res.writeHead(404, { \"Content-Type\": \"application/json\" });\n    res.end(JSON.stringify({ error: \"Not found\" }));\n  }\n\n  private error(res: http.ServerResponse, err: any) {\n    res.writeHead(400, { \"Content-Type\": \"application/json\" });\n    res.end(JSON.stringify({ error: err?.message || String(err) }));\n  }\n}\n"
+          },
+          "output": "File written: src/router.ts (170 lines)",
+          "error": false
+        }
+      ],
+      "inputTokens": 6594,
+      "outputTokens": 2012
+    },
+    {
+      "role": "assistant",
+      "content": "",
+      "toolCalls": [
+        {
+          "name": "write_file",
+          "input": {
+            "path": "src/main.ts",
+            "content": "import { Router } from \"./router\";\n\nconst router = new Router();\nconst PORT = 4000;\n\nasync function start() {\n  await router.listen(PORT);\n  console.log(`Server listening on http://localhost:${PORT}`);\n}\n\nstart();\n\n// graceful shutdown\nprocess.on(\"SIGINT\", () => {\n  router.close();\n  process.exit(0);\n});\n"
+          },
+          "output": "File written: src/main.ts (18 lines)",
+          "error": false
+        }
+      ],
+      "inputTokens": 8626,
+      "outputTokens": 118
+    },
+    {
+      "role": "assistant",
+      "content": "",
+      "toolCalls": [
+        {
+          "name": "write_file",
+          "input": {
+            "path": "src/demo.ts",
+            "content": "import http from \"http\";\nimport { Router } from \"./router\";\n\nasync function request(method: string, path: string, body?: any) {\n  const opts = { hostname: \"localhost\", port: 4000, path, method, headers: { \"Content-Type\": \"application/json\" } } as any;\n  return new Promise<any>((resolve, reject) => {\n    const req = http.request(opts, (res) => {\n      const chunks: Buffer[] = [];\n      res.on(\"data\", (c) => chunks.push(Buffer.from(c)));\n      res.on(\"end\", () => {\n        if (res.statusCode && res.statusCode >= 200 && res.statusCode < 300) {\n          if (chunks.length === 0) return resolve(null);\n          try { resolve(JSON.parse(Buffer.concat(chunks).toString())); } catch (e) { resolve(null); }\n        } else {\n          try { resolve(JSON.parse(Buffer.concat(chunks).toString())); } catch { resolve({ status: res.statusCode }); }\n        }\n      });\n    });\n    req.on(\"error\", reject);\n    if (body) req.write(JSON.stringify(body));\n    req.end();\n  });\n}\n\nasync function demo() {\n  const router = new Router();\n  await router.listen(4000);\n  console.log(\"Demo server started on 4000\");\n\n  // create users\n  const alice = await request(\"POST\", \"/users\", { name: \"Alice\", email: \"alice@example.com\" });\n  const bob = await request(\"POST\", \"/users\", { name: \"Bob\", email: \"bob@example.com\" });\n  console.log(\"Created users\", alice, bob);\n\n  // create project\n  const project = await request(\"POST\", \"/projects\", { name: \"Project X\", description: \"Top secret\" });\n  console.log(\"Created project\", project);\n\n  // add members\n  await request(\"POST\", `/projects/${project.id}/members`, { userId: alice.id });\n  await request(\"POST\", `/projects/${project.id}/members`, { userId: bob.id });\n  console.log(\"Added members to project\");\n\n  // create task\n  const task = await request(\"POST\", \"/tasks\", { title: \"Task 1\", description: \"Do something\", projectId: project.id });\n  console.log(\"Created task\", task);\n\n  // assign to Bob\n  await request(\"PUT\", `/tasks/${task.id}/assign`, { assigneeId: bob.id });\n  console.log(\"Assigned task to Bob\");\n\n  // change status todo -> in-progress\n  await request(\"PUT\", `/tasks/${task.id}/status`, { status: \"in-progress\" });\n  console.log(\"Changed status to in-progress\");\n\n  // add comment by Alice\n  await request(\"POST\", `/comments`, { taskId: task.id, authorId: alice.id, body: \"Please take a look\" });\n  console.log(\"Alice commented\");\n\n  // fetch Bob's notifications\n  const notes = await request(\"GET\", `/notifications?userId=${bob.id}`);\n  console.log(\"Bob's notifications\", notes);\n\n  // mark first as read\n  if (notes && notes.length > 0) {\n    await request(\"PUT\", `/notifications/${notes[0].id}/read`);\n    console.log(\"Marked first notification as read\");\n  }\n\n  // shutdown\n  router.close();\n}\n\nif (require.main === module) {\n  demo().catch((e) => console.error(e));\n}\n"
+          },
+          "output": "File written: src/demo.ts (77 lines)",
+          "error": false
+        }
+      ],
+      "inputTokens": 8764,
+      "outputTokens": 852
+    },
+    {
+      "role": "assistant",
+      "content": "",
+      "toolCalls": [
+        {
+          "name": "run_command",
+          "input": {
+            "command": "npx tsc --noEmit"
+          },
+          "output": "Command failed (exit 1):\n\n\u001b[41m                                                                               \u001b[0m\n\u001b[41m\u001b[37m                This is not the tsc command you are looking for                \u001b[0m\n\u001b[41m                                                                               \u001b[0m\n\nTo get access to the TypeScript compiler, \u001b[34mtsc\u001b[0m, from the command line either:\n\n- Use \u001b[1mnpm install typescript\u001b[0m to first add TypeScript to your project \u001b[1mbefore\u001b[0m using npx\n- Use \u001b[1myarn\u001b[0m to avoid accidentally running code from un-installed packages",
+          "error": true
+        }
+      ],
+      "inputTokens": 9636,
+      "outputTokens": 24
+    },
+    {
+      "role": "assistant",
+      "content": "",
+      "toolCalls": [
+        {
+          "name": "write_file",
+          "input": {
+            "path": "tsconfig.json",
+            "content": "{\n  \"compilerOptions\": {\n    \"target\": \"ES2020\",\n    \"module\": \"CommonJS\",\n    \"strict\": true,\n    \"esModuleInterop\": true,\n    \"forceConsistentCasingInFileNames\": true,\n    \"skipLibCheck\": true,\n    \"outDir\": \"dist\",\n    \"rootDir\": \"src\",\n    \"resolveJsonModule\": true,\n    \"moduleResolution\": \"node\",\n    \"noEmit\": true\n  },\n  \"include\": [\"src/**/*\"]\n}\n"
+          },
+          "output": "File written: tsconfig.json (17 lines)",
+          "error": false
+        }
+      ],
+      "inputTokens": 9810,
+      "outputTokens": 412
+    },
+    {
+      "role": "assistant",
+      "content": "",
+      "toolCalls": [
+        {
+          "name": "run_command",
+          "input": {
+            "command": "npx tsc --noEmit -v"
+          },
+          "output": "Command failed (exit 1):\n\n\u001b[41m                                                                               \u001b[0m\n\u001b[41m\u001b[37m                This is not the tsc command you are looking for                \u001b[0m\n\u001b[41m                                                                               \u001b[0m\n\nTo get access to the TypeScript compiler, \u001b[34mtsc\u001b[0m, from the command line either:\n\n- Use \u001b[1mnpm install typescript\u001b[0m to first add TypeScript to your project \u001b[1mbefore\u001b[0m using npx\n- Use \u001b[1myarn\u001b[0m to avoid accidentally running code from un-installed packages",
+          "error": true
+        }
+      ],
+      "inputTokens": 9980,
+      "outputTokens": 26
+    },
+    {
+      "role": "assistant",
+      "content": "",
+      "toolCalls": [
+        {
+          "name": "run_command",
+          "input": {
+            "command": "npx -y tsc --noEmit"
+          },
+          "output": "Command failed (exit 1):\n\n\u001b[41m                                                                               \u001b[0m\n\u001b[41m\u001b[37m                This is not the tsc command you are looking for                \u001b[0m\n\u001b[41m                                                                               \u001b[0m\n\nTo get access to the TypeScript compiler, \u001b[34mtsc\u001b[0m, from the command line either:\n\n- Use \u001b[1mnpm install typescript\u001b[0m to first add TypeScript to your project \u001b[1mbefore\u001b[0m using npx\n- Use \u001b[1myarn\u001b[0m to avoid accidentally running code from un-installed packages",
+          "error": true
+        }
+      ],
+      "inputTokens": 10156,
+      "outputTokens": 160
+    },
+    {
+      "role": "assistant",
+      "content": "",
+      "toolCalls": [
+        {
+          "name": "run_command",
+          "input": {
+            "command": "npm install --no-audit --no-fund typescript@4.9.5"
+          },
+          "output": "\nadded 1 package in 5s\n",
+          "error": false
+        }
+      ],
+      "inputTokens": 10332,
+      "outputTokens": 297
+    },
+    {
+      "role": "assistant",
+      "content": "",
+      "toolCalls": [
+        {
+          "name": "run_command",
+          "input": {
+            "command": "npx tsc --noEmit"
+          },
+          "output": "Command failed (exit 2):\nsrc/demo.ts(1,18): error TS2307: Cannot find module 'http' or its corresponding type declarations.\r\nsrc/demo.ts(7,37): error TS7006: Parameter 'res' implicitly has an 'any' type.\r\nsrc/demo.ts(8,21): error TS2580: Cannot find name 'Buffer'. Do you need to install type definitions for node? Try `npm i --save-dev @types/node`.\r\nsrc/demo.ts(9,23): error TS7006: Parameter 'c' implicitly has an 'any' type.\r\nsrc/demo.ts(9,41): error TS2580: Cannot find name 'Buffer'. Do you need to install type definitions for node? Try `npm i --save-dev @types/node`.\r\nsrc/demo.ts(13,36): error TS2580: Cannot find name 'Buffer'. Do you need to install type definitions for node? Try `npm i --save-dev @types/node`.\r\nsrc/demo.ts(15,36): error TS2580: Cannot find name 'Buffer'. Do you need to install type definitions for node? Try `npm i --save-dev @types/node`.\r\nsrc/demo.ts(74,5): error TS2580: Cannot find name 'require'. Do you need to install type definitions for node? Try `npm i --save-dev @types/node`.\r\nsrc/demo.ts(74,22): error TS2580: Cannot find name 'module'. Do you need to install type definitions for node? Try `npm i --save-dev @types/node`.\r\nsrc/main.ts(14,1): error TS2580: Cannot find name 'process'. Do you need to install type definitions for node? Try `npm i --save-dev @types/node`.\r\nsrc/main.ts(16,3): error TS2580: Cannot find name 'process'. Do you need to install type definitions for node? Try `npm i --save-dev @types/node`.\r\nsrc/router.ts(1,18): error TS2307: Cannot find module 'http' or its corresponding type declarations.\r\nsrc/router.ts(2,35): error TS2307: Cannot find module 'url' or its corresponding type declarations.\r\nsrc/router.ts(28,38): error TS7006: Parameter 'req' implicitly has an 'any' type.\r\nsrc/router.ts(28,43): error TS7006: Parameter 'res' implicitly has an 'any' type.\r\nsrc/router.ts(133,21): error TS2580: Cannot find name 'Buffer'. Do you need to install type definitions for node? Try `npm i --save-dev @types/node`.\r\nsrc/router.ts(134,23): error TS7006: Parameter 'c' implicitly has an 'any' type.\r\nsrc/router.ts(134,41): error TS2580: Cannot find name 'Buffer'. Do you need to install type definitions for node? Try `npm i --save-dev @types/node`.\r\nsrc/router.ts(138,21): error TS2580: Cannot find name 'Buffer'. Do you need to install type definitions for node? Try `npm i --save-dev @types/node`.\r\nsrc/router.ts(145,24): error TS7006: Parameter 'e' implicitly has an 'any' type.\r\nsrc/services/comment-service.ts(2,28): error TS2307: Cannot find module 'crypto' or its corresponding type declarations.\r\nsrc/services/notification-service.ts(2,28): error TS2307: Cannot find module 'crypto' or its corresponding type declarations.\r\nsrc/services/project-service.ts(2,28): error TS2307: Cannot find module 'crypto' or its corresponding type declarations.\r\nsrc/services/task-service.ts(2,28): error TS2307: Cannot find module 'crypto' or its corresponding type declarations.\r\nsrc/services/user-service.ts(2,28): error TS2307: Cannot find module 'crypto' or its corresponding type declarations.",
+          "error": true
+        }
+      ],
+      "inputTokens": 10387,
+      "outputTokens": 24
+    },
+    {
+      "role": "assistant",
+      "content": "",
+      "toolCalls": [
+        {
+          "name": "run_command",
+          "input": {
+            "command": "npm install --no-audit --no-fund --save-dev @types/node@18.16.19"
+          },
+          "output": "\nadded 1 package in 5s\n",
+          "error": false
+        }
+      ],
+      "inputTokens": 11240,
+      "outputTokens": 237
+    },
+    {
+      "role": "assistant",
+      "content": "",
+      "toolCalls": [
+        {
+          "name": "run_command",
+          "input": {
+            "command": "npx tsc --noEmit"
+          },
+          "output": "(command completed with no output)",
+          "error": false
+        }
+      ],
+      "inputTokens": 11299,
+      "outputTokens": 24
+    },
+    {
+      "role": "assistant",
+      "content": "",
+      "toolCalls": [
+        {
+          "name": "list_files",
+          "input": {},
+          "output": "package-lock.json\npackage.json\nsrc\\demo.ts\nsrc\\event-bus.ts\nsrc\\main.ts\nsrc\\router.ts\nsrc\\services\\comment-service.ts\nsrc\\services\\notification-service.ts\nsrc\\services\\project-service.ts\nsrc\\services\\task-service.ts\nsrc\\services\\user-service.ts\nsrc\\types.ts\ntsconfig.json",
+          "error": false
+        }
+      ],
+      "inputTokens": 11339,
+      "outputTokens": 14
+    },
+    {
+      "role": "assistant",
+      "content": "",
+      "toolCalls": [
+        {
+          "name": "run_command",
+          "input": {
+            "command": "npx tsx src/demo.ts"
+          },
+          "output": "Demo server started on 4000\nCreated users {\n  id: '60fd731b-7ba4-4351-9d15-385518b221a8',\n  name: 'Alice',\n  email: 'alice@example.com'\n} {\n  id: '3a2dfa9d-a072-4af0-b6cc-8b9800fdecc1',\n  name: 'Bob',\n  email: 'bob@example.com'\n}\nCreated project {\n  id: '86b67b11-4d35-49c7-9b11-856445e0fc4c',\n  name: 'Project X',\n  description: 'Top secret',\n  memberIds: []\n}\nAdded members to project\nCreated task {\n  id: 'ac409f25-5073-4b6d-b6b8-745999263a04',\n  title: 'Task 1',\n  description: 'Do something',\n  status: 'todo',\n  assigneeId: null,\n  projectId: '86b67b11-4d35-49c7-9b11-856445e0fc4c'\n}\nAssigned task to Bob\nChanged status to in-progress\nAlice commented\nBob's notifications [\n  {\n    id: 'a733e359-6f02-42b3-9557-8a0a46cf3a2c',\n    userId: '3a2dfa9d-a072-4af0-b6cc-8b9800fdecc1',\n    message: \"Task 'Task 1' assigned to you\",\n    read: false,\n    createdAt: '2026-08-19T04:25:46.463Z'\n  },\n  {\n    id: '026612eb-db49-429f-bc68-01c308d993b1',\n    userId: '3a2dfa9d-a072-4af0-b6cc-8b9800fdecc1',\n    message: \"Task 'Task 1' status changed to in-progress\",\n    read: false,\n    createdAt: '2026-08-19T04:25:46.464Z'\n  },\n  {\n    id: '944f365e-7c42-4e19-81e8-46942327966b',\n    userId: '3a2dfa9d-a072-4af0-b6cc-8b9800fdecc1',\n    message: \"New comment on 'Task 1' by Alice\",\n    read: false,\n    createdAt: '2026-08-19T04:25:46.464Z'\n  }\n]\nMarked first notification as read\n",
+          "error": false
+        }
+      ],
+      "inputTokens": 11440,
+      "outputTokens": 24
+    },
+    {
+      "role": "assistant",
+      "content": "I implemented the Task Management API per the provided architecture and rules.\n\nWhat I created\n- src/types.ts — Shared TypeScript interfaces and contracts exactly as specified.\n- src/event-bus.ts — IEventBus implementation (EventBus).\n- src/services/user-service.ts — UserService implementing IUserService with private Map store and random UUID creation.\n- src/services/project-service.ts — ProjectService implementing IProjectService with its own private Map store.\n- src/services/task-service.ts — TaskService implementing ITaskService with private Map store; publishes task.assigned and task.statusChanged events; enforces forward-only status transitions (todo → in-progress → done) and throws on invalid transitions.\n- src/services/comment-service.ts — CommentService implementing ICommentService with private Map store; publishes comment.added event.\n- src/services/notification-service.ts — NotificationService implementing INotificationService with private Map store; subscribes to events and creates notifications as specified. Subscriptions set up in constructor.\n- src/router.ts — HTTP router using Node.js http module. Handles all API routes, JSON parsing, enriches comment.added events with task title / author name / assigneeId before publishing.\n- src/main.ts — Entry point to start the server.\n- src/demo.ts — Demo script that starts a server and exercises the full flow (create users, create project, add members, create task, assign, change status, add comment, fetch and mark notifications).\n- tsconfig.json — TypeScript configuration.\n\nNotes on constraints\n- Each service is in its own file and uses its own private Map store (Exclusive Data Ownership).\n- Services do not import other service files — they only import shared types and the EventBus (No cross-service imports).\n- Services do not use HTTP APIs or Node HTTP types (HTTP only in router.ts and main.ts).\n- TaskService enforces the forward-only state machine for statuses (todo → in-progress → done).\n- No external npm packages are used in application code; only Node built-ins are imported. For compilation and running, TypeScript and @types/node were installed as dev dependencies.\n- Event wiring is done in main/router: TaskService publishes task.assigned and task.statusChanged; CommentService publishes comment.added; NotificationService subscribes and creates notifications accordingly. Router enriches comment.added payload with taskTitle, authorName, and assigneeId before publishing so notifications can be created for assignees.\n\nHow to run\n- Start the server: npx tsx src/main.ts\n- Run the demo: npx tsx src/demo.ts (this demo script starts its own server instance on port 4000 and runs through all features, then shuts down).\n\nCompilation\n- I ran npx tsc --noEmit to ensure TypeScript compiles cleanly.\n\nIf you want any changes (e.g., stricter typing for enriched events, persistence, or additional routes), tell me which part to adjust.",
+      "inputTokens": 12048,
+      "outputTokens": 596
+    }
+  ],
+  "startTime": "2026-08-19T04:22:44.645Z",
+  "endTime": "2026-08-19T04:25:52.023Z",
+  "totalInputTokens": 171469,
+  "totalOutputTokens": 13308
+}

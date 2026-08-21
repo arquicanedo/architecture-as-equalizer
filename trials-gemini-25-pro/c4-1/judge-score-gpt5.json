@@ -1,0 +1,10 @@
+{
+  "trialId": "c4-1",
+  "specType": "c4",
+  "architecturalAdherence": 8,
+  "completeness": 4,
+  "codeQuality": 7,
+  "constraintCompliance": 10,
+  "overall": 7.25,
+  "notes": "Services are isolated with their own stores and use the Event Bus for cross-service communication. Task status transitions enforce forward-only. No HTTP logic in services and no external dependencies. Missing Notification Service and API Router; no event subscriptions implemented, so notifications won’t fire. EventBus is untyped (payload: any) and synchronous. Minimal validation (e.g., assign doesn’t verify user/project membership). Minor readability issue in ProjectService.removeMember (shadowed variable). Overall clean TypeScript but incomplete system."
+}

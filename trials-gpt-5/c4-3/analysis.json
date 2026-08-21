@@ -1,0 +1,57 @@
+{
+  "trialId": "c4-3",
+  "specType": "c4",
+  "structural": {
+    "hasEventBus": true,
+    "hasUserService": true,
+    "hasProjectService": true,
+    "hasTaskService": true,
+    "hasCommentService": true,
+    "hasNotificationService": true,
+    "hasRouter": true,
+    "hasMainEntry": true,
+    "hasDemoScript": true,
+    "fileCount": 11,
+    "folderStructureScore": 10,
+    "details": [
+      "Each service in its own file: YES"
+    ]
+  },
+  "constraints": {
+    "directServiceCalls": [],
+    "sharedDataAccess": [],
+    "httpInServices": [],
+    "invalidStatusTransitions": [],
+    "externalDependencies": [],
+    "totalViolations": 0
+  },
+  "codeMetrics": {
+    "compiles": false,
+    "compilationErrors": [],
+    "totalLines": 747,
+    "totalFiles": 11,
+    "linesPerFile": {
+      "src\\demo.ts": 101,
+      "src\\event-bus.ts": 27,
+      "src\\main.ts": 15,
+      "src\\router.ts": 257,
+      "src\\services\\comment-service.ts": 59,
+      "src\\services\\notification-service.ts": 74,
+      "src\\services\\project-service.ts": 61,
+      "src\\services\\task-service.ts": 97,
+      "src\\services\\user-service.ts": 39,
+      "src\\types\\shims.d.ts": 7,
+      "src\\utils\\ids.ts": 10
+    }
+  },
+  "transcriptMetrics": {
+    "totalInputTokens": 274438,
+    "totalOutputTokens": 31415,
+    "totalTokens": 305853,
+    "messageCount": 26,
+    "toolCallCount": 25,
+    "errorCount": 4,
+    "retryCount": 0,
+    "durationMs": 299960
+  }
+}

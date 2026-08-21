@@ -1,0 +1,10 @@
+{
+  "trialId": "structured-1",
+  "specType": "structured",
+  "architecturalAdherence": 7,
+  "completeness": 8,
+  "codeQuality": 8,
+  "constraintCompliance": 7,
+  "notes": "Overall a solid implementation with clear structure. Issues found: (1) ARCHITECTURAL VIOLATION - Rule 1 broken in router.ts: the comment POST handler directly calls `this.taskService.getById(taskId)` and `this.userService.getById(authorId)` to pass data to commentService.create(), creating implicit cross-service coupling through the router layer and leaking domain data (taskTitle, assigneeId, authorName) across service boundaries. The router becomes a data-fetching orchestrator rather than a pure HTTP handler. (2) ARCHITECTURAL VIOLATION - Rule 3 is partially violated: the router is performing business logic (fetching task/user data, extracting assigneeId) that belongs to the service or event layer. (3) The comment.added event payload is enriched with taskAssigneeId by routing through the router — a design smell acknowledged in comments but still present. (4) addMember returns undefined if member already exists (idempotency broken — should arguably return the project). (5) changeStatus returns undefined for invalid transitions vs. task-not-found — the router conflates both into a generic 400, losing diagnostic precision. (6) No input validation (missing required fields, empty strings, invalid email format) — services will create entities with undefined fields silently. (7) TaskService.changeStatus allows skipping statuses (todo→done directly) since it only checks newIndex > oldIndex rather than newIndex === oldIndex + 1. (8) No unsubscribe mechanism on EventBus. (9) DELETE /projects/:id/members reads body, which parseJsonBody skips for DELETE method — member removal via DELETE would always fail. (10) The demo script and all services are present and functional. TypeScript usage is clean and idiomatic throughout.",
+  "overall": 7.5
+}

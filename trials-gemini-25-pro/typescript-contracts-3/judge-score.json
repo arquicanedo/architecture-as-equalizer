@@ -1,0 +1,10 @@
+{
+  "trialId": "typescript-contracts-3",
+  "specType": "typescript-contracts",
+  "architecturalAdherence": 0,
+  "completeness": 0,
+  "codeQuality": 0,
+  "constraintCompliance": 0,
+  "overall": 0,
+  "notes": "Parse error: ```json\n{\n  \"architecturalAdherence\": 5,\n  \"completeness\": 7,\n  \"codeQuality\": 6,\n  \"constraintCompliance\": 5,\n  \"notes\": \"ARCHITECTURAL VIOLATIONS: (1) CommentService receives ITaskService and IUserS"
+}

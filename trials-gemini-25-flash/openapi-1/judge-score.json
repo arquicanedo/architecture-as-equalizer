@@ -1,0 +1,10 @@
+{
+  "trialId": "openapi-1",
+  "specType": "openapi",
+  "architecturalAdherence": 7,
+  "completeness": 5,
+  "codeQuality": 8,
+  "constraintCompliance": 7,
+  "notes": "Architectural adherence is solid for the provided files: EventBus is a proper pub/sub, services own their own stores, no direct service-to-service calls are visible, and status transitions are forward-only. However, the API Router file is entirely missing from the review, which is a critical component (rule: all HTTP handling in API Router only). The Notification Service is also entirely absent. CommentService.createComment accepts taskTitle and authorName as parameters, which implies the API Router is doing cross-service lookups before calling the service — this is a design smell that pushes orchestration logic into the router rather than keeping it clean, and could indicate a violation of the event-bus-only inter-service communication rule depending on implementation. The changeTaskStatus method publishes an event even when status doesn't change (oldStatus === newStatus branch still reaches eventBus.publish), which is a logic bug. The removeMember method returns the unmodified project even when the member wasn't found, losing the ability for callers to distinguish 'not found' from 'member not in project'. Completeness is significantly reduced: NotificationService is missing, API Router is missing, no demo/bootstrap script is shown, and getAllTasks (global) is absent. Code quality is generally high: clean TypeScript types, proper async signatures, use of crypto.randomUUID, good use of Map. The types.ts file is well-structured with branded ID types and clear interfaces. setImmediate usage in EventBus is a reasonable decoupling choice but means publish errors won't propagate to callers. Constraint compliance: no external npm deps satisfied, each service in own file satisfied for shown files, forward-only transitions satisfied, event bus used for notifications (where visible). Missing files prevent full constraint verification.",
+  "overall": 6.75
+}

@@ -1,0 +1,10 @@
+{
+  "trialId": "structured-1",
+  "specType": "structured",
+  "architecturalAdherence": 7,
+  "completeness": 5,
+  "codeQuality": 7,
+  "constraintCompliance": 8,
+  "overall": 6.75,
+  "notes": "Event Bus is implemented and used for task.assigned, task.statusChanged, and comment.added, with no direct service-to-service calls and each service owning its data store. Services are separated into their own files, and forward-only task status transitions are enforced (allowing same-status is acceptable). However, the Notification Service and API Router are missing, reducing completeness and making it impossible to verify HTTP handling via the router. TypeScript usage is generally clean, but the EventBus is loosely typed, input validation is minimal, and there’s no subscription implementation for notifications. No external dependencies are used."
+}

@@ -1,0 +1,830 @@
+{
+  "trialId": "typescript-contracts-2",
+  "specType": "typescript-contracts",
+  "messages": [
+    {
+      "role": "assistant",
+      "content": "",
+      "toolCalls": [
+        {
+          "name": "write_file",
+          "input": {
+            "path": "src/contracts.ts",
+            "content": "// ============================================================\n// Data Models\n// ============================================================\n\nexport interface User {\n  id: string;\n  name: string;\n  email: string;\n}\n\nexport interface Project {\n  id: string;\n  name: string;\n  description: string;\n  memberIds: string[];\n}\n\nexport type TaskStatus = \"todo\" | \"in-progress\" | \"done\";\n\nexport interface Task {\n  id: string;\n  title: string;\n  description: string;\n  status: TaskStatus;\n  assigneeId: string | null;\n  projectId: string;\n}\n\nexport interface Comment {\n  id: string;\n  taskId: string;\n  authorId: string;\n  body: string;\n  createdAt: string; // ISO 8601\n}\n\nexport interface Notification {\n  id: string;\n  userId: string;\n  message: string;\n  read: boolean;\n  createdAt: string; // ISO 8601\n}\n\n// ============================================================\n// Event Bus Contract\n// ============================================================\n\nexport interface IEventBus {\n  publish(event: string, payload: unknown): void;\n  subscribe(event: string, callback: (payload: unknown) => void): void;\n}\n\n// Event payloads\nexport interface TaskAssignedPayload {\n  taskId: string;\n  taskTitle: string;\n  assigneeId: string;\n}\n\nexport interface TaskStatusChangedPayload {\n  taskId: string;\n  taskTitle: string;\n  assigneeId: string | null;\n  oldStatus: TaskStatus;\n  newStatus: TaskStatus;\n}\n\nexport interface CommentAddedPayload {\n  commentId: string;\n  taskId: string;\n  taskTitle: string;\n  authorId: string;\n  authorName: string;\n}\n\n// ============================================================\n// Service Contracts\n// ============================================================\n\nexport interface IUserService {\n  create(input: { name: string; email: string }): User;\n  getById(id: string): User | undefined;\n  getAll(): User[];\n  update(id: string, input: Partial<{ name: string; email: string }>): User;\n  delete(id: string): void;\n}\n\nexport interface IProjectService {\n  create(input: { name: string; description: string }): Project;\n  getById(id: string): Project | undefined;\n  getAll(): Project[];\n  update(id: string, input: Partial<{ name: string; description: string }>): Project;\n  delete(id: string): void;\n  addMember(projectId: string, userId: string): Project;\n  removeMember(projectId: string, userId: string): Project;\n}\n\nexport interface ITaskService {\n  create(input: { title: string; description: string; projectId: string }): Task;\n  getById(id: string): Task | undefined;\n  getByProject(projectId: string): Task[];\n  update(id: string, input: Partial<{ title: string; description: string }>): Task;\n  delete(id: string): void;\n  assign(taskId: string, assigneeId: string): Task;\n  changeStatus(taskId: string, newStatus: TaskStatus): Task;\n}\n\nexport interface ICommentService {\n  create(input: { taskId: string; authorId: string; body: string }): Comment;\n  getById(id: string): Comment | undefined;\n  getByTask(taskId: string): Comment[];\n  delete(id: string): void;\n}\n\nexport interface INotificationService {\n  getByUser(userId: string): Notification[];\n  markAsRead(notificationId: string): Notification;\n  // Internal method for creation, not on the public interface\n  // create(input: { userId: string; message: string }): Notification;\n}\n"
+          },
+          "output": "File written: src/contracts.ts (122 lines)",
+          "error": false
+        }
+      ],
+      "inputTokens": 2738,
+      "outputTokens": 886
+    },
+    {
+      "role": "assistant",
+      "content": "",
+      "toolCalls": [
+        {
+          "name": "write_file",
+          "input": {
+            "path": "src/event-bus.ts",
+            "content": "import { EventEmitter } from 'events';\nimport { IEventBus } from './contracts';\n\nexport class EventBus implements IEventBus {\n  private emitter = new EventEmitter();\n\n  public publish(event: string, payload: unknown): void {\n    this.emitter.emit(event, payload);\n  }\n\n  public subscribe(event: string, callback: (payload: unknown) => void): void {\n    this.emitter.on(event, callback);\n  }\n}\n"
+          },
+          "output": "File written: src/event-bus.ts (15 lines)",
+          "error": false
+        }
+      ],
+      "inputTokens": 4041,
+      "outputTokens": 118
+    },
+    {
+      "role": "assistant",
+      "content": "",
+      "toolCalls": [
+        {
+          "name": "write_file",
+          "input": {
+            "content": "import * as crypto from 'crypto';\nimport { User, IUserService } from './contracts';\n\nexport class UserService implements IUserService {\n  private readonly users = new Map<string, User>();\n\n  create(input: { name: string; email: string }): User {\n    const id = crypto.randomUUID();\n    const user: User = {\n      id,\n      ...input,\n    };\n    this.users.set(id, user);\n    return user;\n  }\n\n  getById(id: string): User | undefined {\n    return this.users.get(id);\n  }\n\n  getAll(): User[] {\n    return Array.from(this.users.values());\n  }\n\n  update(id: string, input: Partial<{ name: string; email: string }>): User {\n    const user = this.getById(id);\n    if (!user) {\n      throw new Error(`User with id ${id} not found`);\n    }\n\n    const updatedUser = { ...user, ...input };\n    this.users.set(id, updatedUser);\n    return updatedUser;\n  }\n\n  delete(id: string): void {\n    if (!this.users.has(id)) {\n      throw new Error(`User with id ${id} not found`);\n    }\n    this.users.delete(id);\n  }\n}\n",
+            "path": "src/services/user-service.ts"
+          },
+          "output": "File written: src/services/user-service.ts (43 lines)",
+          "error": false
+        }
+      ],
+      "inputTokens": 4217,
+      "outputTokens": 325
+    },
+    {
+      "role": "assistant",
+      "content": "",
+      "toolCalls": [
+        {
+          "name": "write_file",
+          "input": {
+            "path": "src/services/project-service.ts",
+            "content": "import * as crypto from 'crypto';\nimport { Project, IProjectService } from '../contracts';\n\nexport class ProjectService implements IProjectService {\n    private readonly projects = new Map<string, Project>();\n\n    create(input: { name: string; description: string }): Project {\n        const id = crypto.randomUUID();\n        const project: Project = {\n            id,\n            ...input,\n            memberIds: [],\n        };\n        this.projects.set(id, project);\n        return project;\n    }\n\n    getById(id: string): Project | undefined {\n        return this.projects.get(id);\n    }\n\n    getAll(): Project[] {\n        return Array.from(this.projects.values());\n    }\n\n    update(id: string, input: Partial<{ name: string; description: string }>): Project {\n        const project = this.getById(id);\n        if (!project) {\n            throw new Error(`Project with id ${id} not found`);\n        }\n\n        const updatedProject = { ...project, ...input };\n        this.projects.set(id, updatedProject);\n        return updatedProject;\n    }\n\n    delete(id: string): void {\n        if (!this.projects.has(id)) {\n            throw new Error(`Project with id ${id} not found`);\n        }\n        this.projects.delete(id);\n    }\n\n    addMember(projectId: string, userId: string): Project {\n        const project = this.getById(projectId);\n        if (!project) {\n            throw new Error(`Project with id ${projectId} not found`);\n        }\n\n        if (!project.memberIds.includes(userId)) {\n            project.memberIds.push(userId);\n        }\n\n        return project;\n    }\n\n    removeMember(projectId: string, userId: string): Project {\n        const project = this.getById(projectId);\n        if (!project) {\n            throw new Error(`Project with id ${projectId} not found`);\n        }\n\n        project.memberIds = project.memberIds.filter((id) => id !== userId);\n        return project;\n    }\n}\n"
+          },
+          "output": "File written: src/services/project-service.ts (67 lines)",
+          "error": false
+        }
+      ],
+      "inputTokens": 4620,
+      "outputTokens": 503
+    },
+    {
+      "role": "assistant",
+      "content": "",
+      "toolCalls": [
+        {
+          "name": "write_file",
+          "input": {
+            "path": "src/services/task-service.ts",
+            "content": "import * as crypto from 'crypto';\nimport {\n    Task,\n    ITaskService,\n    TaskStatus,\n    IEventBus,\n    TaskAssignedPayload,\n    TaskStatusChangedPayload\n} from '../contracts';\n\nexport class TaskService implements ITaskService {\n    private readonly tasks = new Map<string, Task>();\n\n    constructor(private readonly eventBus: IEventBus) {}\n\n    create(input: { title: string; description: string; projectId: string }): Task {\n        const id = crypto.randomUUID();\n        const task: Task = {\n            id,\n            ...input,\n            status: 'todo',\n            assigneeId: null,\n        };\n        this.tasks.set(id, task);\n        return task;\n    }\n\n    getById(id: string): Task | undefined {\n        return this.tasks.get(id);\n    }\n\n    getByProject(projectId: string): Task[] {\n        return Array.from(this.tasks.values()).filter(\n            (task) => task.projectId === projectId\n        );\n    }\n\n    update(id: string, input: Partial<{ title: string; description: string }>): Task {\n        const task = this.getById(id);\n        if (!task) {\n            throw new Error(`Task with id ${id} not found`);\n        }\n\n        const updatedTask = { ...task, ...input };\n        this.tasks.set(id, updatedTask);\n        return updatedTask;\n    }\n\n    delete(id: string): void {\n        if (!this.tasks.has(id)) {\n            throw new Error(`Task with id ${id} not found`);\n        }\n        this.tasks.delete(id);\n    }\n\n    assign(taskId: string, assigneeId: string): Task {\n        const task = this.getById(taskId);\n        if (!task) {\n            throw new Error(`Task with id ${taskId} not found`);\n        }\n\n        task.assigneeId = assigneeId;\n\n        this.eventBus.publish('task.assigned', {\n            taskId: task.id,\n            taskTitle: task.title,\n            assigneeId,\n        } as TaskAssignedPayload);\n\n        return task;\n    }\n\n    changeStatus(taskId: string, newStatus: TaskStatus): Task {\n        const task = this.getById(taskId);\n        if (!task) {\n            throw new Error(`Task with id ${taskId} not found`);\n        }\n\n        const oldStatus = task.status;\n\n        // Enforce forward-only status transitions\n        if (oldStatus === 'todo' && newStatus !== 'in-progress') {\n            throw new Error(`Invalid status transition from todo to ${newStatus}`);\n        }\n        if (oldStatus === 'in-progress' && newStatus !== 'done') {\n            throw new Error(`Invalid status transition from in-progress to ${newStatus}`);\n        }\n        if (oldStatus === 'done') {\n            throw new Error(`Invalid status transition from done to ${newStatus}`);\n        }\n        // also handles the skipping case\n\n        task.status = newStatus;\n\n        this.eventBus.publish('task.statusChanged', {\n            taskId: task.id,\n            taskTitle: task.title,\n            assigneeId: task.assigneeId,\n            oldStatus,\n            newStatus,\n        } as TaskStatusChangedPayload);\n\n        return task;\n    }\n}\n"
+          },
+          "output": "File written: src/services/task-service.ts (106 lines)",
+          "error": false
+        }
+      ],
+      "inputTokens": 5197,
+      "outputTokens": 801
+    },
+    {
+      "role": "assistant",
+      "content": "",
+      "toolCalls": [
+        {
+          "name": "write_file",
+          "input": {
+            "content": "import * as crypto from 'crypto';\nimport {\n    Comment,\n    ICommentService,\n    IEventBus,\n    CommentAddedPayload,\n    IUserService,\n    ITaskService\n} from '../contracts';\n\nexport class CommentService implements ICommentService {\n    private readonly comments = new Map<string, Comment>();\n\n    constructor(\n        private readonly eventBus: IEventBus,\n        private readonly userService: IUserService,\n        private readonly taskService: ITaskService\n    ) {}\n\n    create(input: { taskId: string; authorId: string; body: string }): Comment {\n        const id = crypto.randomUUID();\n        const comment: Comment = {\n            id,\n            ...input,\n            createdAt: new Date().toISOString(),\n        };\n        this.comments.set(id, comment);\n\n        const author = this.userService.getById(input.authorId);\n        const task = this.taskService.getById(input.taskId);\n\n        if (!author) {\n            throw new Error(`Author with id ${input.authorId} not found`);\n        }\n        if (!task) {\n            throw new Error(`Task with id ${input.taskId} not found`);\n        }\n\n        this.eventBus.publish('comment.added', {\n            commentId: comment.id,\n            taskId: task.id,\n            taskTitle: task.title,\n            authorId: author.id,\n            authorName: author.name,\n        } as CommentAddedPayload);\n\n        return comment;\n    }\n\n    getById(id: string): Comment | undefined {\n        return this.comments.get(id);\n    }\n\n    getByTask(taskId: string): Comment[] {\n        return Array.from(this.comments.values()).filter(\n            (comment) => comment.taskId === taskId\n        );\n    }\n\n    delete(id: string): void {\n        if (!this.comments.has(id)) {\n            throw new Error(`Comment with id ${id} not found`);\n        }\n        this.comments.delete(id);\n    }\n}\n",
+            "path": "src/services/comment-service.ts"
+          },
+          "output": "File written: src/services/comment-service.ts (67 lines)",
+          "error": false
+        }
+      ],
+      "inputTokens": 6066,
+      "outputTokens": 489
+    },
+    {
+      "role": "assistant",
+      "content": "",
+      "toolCalls": [
+        {
+          "name": "write_file",
+          "input": {
+            "path": "src/services/notification-service.ts",
+            "content": "import * as crypto from 'crypto';\nimport {\n    Notification,\n    INotificationService,\n    IEventBus,\n    TaskAssignedPayload,\n    TaskStatusChangedPayload,\n    CommentAddedPayload,\n    ITaskService\n} from '../contracts';\n\nexport class NotificationService implements INotificationService {\n    private readonly notifications = new Map<string, Notification>();\n\n    constructor(private readonly eventBus: IEventBus, private readonly taskService: ITaskService) {\n        this.subscribeToEvents();\n    }\n\n    private subscribeToEvents(): void {\n        this.eventBus.subscribe('task.assigned', (payload) => this.handleTaskAssigned(payload as TaskAssignedPayload));\n        this.eventBus.subscribe('task.statusChanged', (payload) => this.handleTaskStatusChanged(payload as TaskStatusChangedPayload));\n        this.eventBus.subscribe('comment.added', (payload) => this.handleCommentAdded(payload as CommentAddedPayload));\n    }\n\n    private handleTaskAssigned(payload: TaskAssignedPayload): void {\n        const message = `Task '${payload.taskTitle}' has been assigned to you.`;\n        this.create({ userId: payload.assigneeId, message });\n    }\n\n    private handleTaskStatusChanged(payload: TaskStatusChangedPayload): void {\n        if (payload.assigneeId) {\n            const message = `Task '${payload.taskTitle}' status changed from '${payload.oldStatus}' to '${payload.newStatus}'.`;\n            this.create({ userId: payload.assigneeId, message });\n        }\n    }\n\n    private handleCommentAdded(payload: CommentAddedPayload): void {\n        const task = this.taskService.getById(payload.taskId);\n        // Only notify if there is an assignee and the commenter is not the assignee\n        if (task && task.assigneeId && task.assigneeId !== payload.authorId) {\n            const message = `A new comment was added to task '${payload.taskTitle}' by ${payload.authorName}.`;\n            this.create({ userId: task.assigneeId, message });\n        }\n    }\n\n    private create(input: { userId: string; message: string }): Notification {\n        const id = crypto.randomUUID();\n        const notification: Notification = {\n            id,\n            ...input,\n            read: false,\n            createdAt: new Date().toISOString(),\n        };\n        this.notifications.set(id, notification);\n        return notification;\n    }\n\n    getByUser(userId: string): Notification[] {\n        return Array.from(this.notifications.values()).filter(\n            (n) => n.userId === userId && !n.read\n        );\n    }\n\n    markAsRead(notificationId: string): Notification {\n        const notification = this.notifications.get(notificationId);\n        if (!notification) {\n            throw new Error(`Notification with id ${notificationId} not found`);\n        }\n        notification.read = true;\n        return notification;\n    }\n}\n"
+          },
+          "output": "File written: src/services/notification-service.ts (73 lines)",
+          "error": false
+        }
+      ],
+      "inputTokens": 9014,
+      "outputTokens": 695
+    },
+    {
+      "role": "assistant",
+      "content": "",
+      "toolCalls": [
+        {
+          "name": "write_file",
+          "input": {
+            "path": "src/router.ts",
+            "content": "\nimport * as http from 'http';\nimport * as url from 'url';\nimport { IUserService, IProjectService, ITaskService, ICommentService, INotificationService } from './contracts';\n\n// Helper to parse body\nasync function parseBody(req: http.IncomingMessage): Promise<any> {\n    return new Promise((resolve, reject) => {\n        let body = '';\n        req.on('data', chunk => body += chunk.toString());\n        req.on('end', () => {\n            try {\n                resolve(JSON.parse(body));\n            } catch (e) {\n                reject(e);\n            }\n        });\n        req.on('error', reject);\n    });\n}\n\nexport class ApiRouter {\n    constructor(\n        private userService: IUserService,\n        private projectService: IProjectService,\n        private taskService: ITaskService,\n        private commentService: ICommentService,\n        private notificationService: INotificationService\n    ) {}\n\n    public async handle(req: http.IncomingMessage, res: http.ServerResponse) {\n        const { pathname, query } = url.parse(req.url!, true);\n        const method = req.method?.toUpperCase();\n        res.setHeader('Content-Type', 'application/json');\n\n        try {\n            // User Routes\n            if (pathname === '/users') {\n                if (method === 'GET') {\n                    const users = this.userService.getAll();\n                    res.statusCode = 200;\n                    res.end(JSON.stringify(users));\n                } else if (method === 'POST') {\n                    const body = await parseBody(req);\n                    const user = this.userService.create(body);\n                    res.statusCode = 201;\n                    res.end(JSON.stringify(user));\n                }\n            } else if (pathname?.startsWith('/users/')) {\n                const id = pathname.split('/')[2];\n                if (method === 'GET') {\n                    const user = this.userService.getById(id);\n                    if(!user) throw new Error('User not found');\n                    res.statusCode = 200;\n                    res.end(JSON.stringify(user));\n                } else if (method === 'PUT') {\n                    const body = await parseBody(req);\n                    const user = this.userService.update(id, body);\n                    res.statusCode = 200;\n                    res.end(JSON.stringify(user));\n                } else if (method === 'DELETE') {\n                    this.userService.delete(id);\n                    res.statusCode = 204;\n                    res.end();\n                }\n            }\n\n            // Project Routes\n            else if (pathname === '/projects') {\n                if (method === 'GET') {\n                    res.statusCode = 200;\n                    res.end(JSON.stringify(this.projectService.getAll()));\n                } else if (method === 'POST') {\n                    const body = await parseBody(req);\n                    const project = this.projectService.create(body);\n                    res.statusCode = 201;\n                    res.end(JSON.stringify(project));\n                }\n            } else if (pathname?.startsWith('/projects/')) {\n                const id = pathname.split('/')[2];\n                if (pathname.endsWith('/members')) {\n                     const body = await parseBody(req);\n                    if (method === 'POST') {\n                       const project = this.projectService.addMember(id, body.userId);\n                       res.statusCode = 200;\n                       res.end(JSON.stringify(project));\n                    } else if (method === 'DELETE') {\n                       const project = this.projectService.removeMember(id, body.userId);\n                       res.statusCode = 200;\n                       res.end(JSON.stringify(project));\n                    }\n                } else {\n                    if (method === 'GET') {\n                        const project = this.projectService.getById(id);\n                        if(!project) throw new Error('Project not found');\n                        res.statusCode = 200;\n                        res.end(JSON.stringify(project));\n                    } else if (method === 'PUT') {\n                        const body = await parseBody(req);\n                        const project = this.projectService.update(id, body);\n                        res.statusCode = 200;\n                        res.end(JSON.stringify(project));\n                    } else if (method === 'DELETE') {\n                        this.projectService.delete(id);\n                        res.statusCode = 204;\n                        res.end();\n                    }\n                }\n            }\n            \n            // Task Routes\n            else if (pathname === '/tasks') {\n                 if (method === 'GET' && query.projectId) {\n                    const tasks = this.taskService.getByProject(query.projectId as string);\n                    res.statusCode = 200;\n                    res.end(JSON.stringify(tasks));\n                } else if (method === 'POST') {\n                    const body = await parseBody(req);\n                    const task = this.taskService.create(body);\n                    res.statusCode = 201;\n                    res.end(JSON.stringify(task));\n                }\n            } else if (pathname?.startsWith('/tasks/')) {\n                 const id = pathname.split('/')[2];\n                 if (pathname.endsWith('/status')) {\n                     if (method === 'PUT') {\n                         const body = await parseBody(req);\n                         const task = this.taskService.changeStatus(id, body.status);\n                         res.statusCode = 200;\n                         res.end(JSON.stringify(task));\n                     }\n                 } else if (pathname.endsWith('/assign')) {\n                      if (method === 'PUT') {\n                         const body = await parseBody(req);\n                         const task = this.taskService.assign(id, body.assigneeId);\n                         res.statusCode = 200;\n                         res.end(JSON.stringify(task));\n                      }\n                 } else {\n                     if (method === 'GET') {\n                         const task = this.taskService.getById(id);\n                         if(!task) throw new Error('Task not found');\n                         res.statusCode = 200;\n                         res.end(JSON.stringify(task));\n                     } else if (method === 'PUT') {\n                         const body = await parseBody(req);\n                         const task = this.taskService.update(id, body);\n                         res.statusCode = 200;\n                         res.end(JSON.stringify(task));\n                     } else if (method === 'DELETE') {\n                         this.taskService.delete(id);\n                         res.statusCode = 204;\n                         res.end();\n                     }\n                 }\n            }\n            \n            // Comment Routes\n            else if (pathname === '/comments') {\n                if (method === 'GET' && query.taskId) {\n                    const comments = this.commentService.getByTask(query.taskId as string);\n                    res.statusCode = 200;\n                    res.end(JSON.stringify(comments));\n                } else if (method === 'POST') {\n                    const body = await parseBody(req);\n                    const comment = this.commentService.create(body);\n                    res.statusCode = 201;\n                    res.end(JSON.stringify(comment));\n                }\n            } else if (pathname?.startsWith('/comments/')) {\n                const id = pathname.split('/')[2];\n                if (method === 'GET') {\n                    const comment = this.commentService.getById(id);\n                    if(!comment) throw new Error('Comment not found');\n                    res.statusCode = 200;\n                    res.end(JSON.stringify(comment));\n                } else if (method === 'DELETE') {\n                    this.commentService.delete(id);\n                    res.statusCode = 204;\n                    res.end();\n                }\n            }\n            \n            // Notification Routes\n            else if (pathname === '/notifications' && query.userId) {\n                if (method === 'GET') {\n                    const notifications = this.notificationService.getByUser(query.userId as string);\n                    res.statusCode = 200;\n                    res.end(JSON.stringify(notifications));\n                }\n            } else if (pathname?.startsWith('/notifications/')) {\n                 const id = pathname.split('/')[2];\n                 if(pathname.endsWith('/read') && method === 'PUT') {\n                     const notification = this.notificationService.markAsRead(id);\n                     res.statusCode = 200;\n                     res.end(JSON.stringify(notification));\n                 }\n            }\n            \n            else {\n                res.statusCode = 404;\n                res.end(JSON.stringify({ error: 'Not Found' }));\n            }\n\n        } catch (error: any) {\n            console.error(error);\n            res.statusCode = error.message.includes('not found') ? 404 : 400;\n            res.end(JSON.stringify({ error: error.message }));\n        }\n    }\n}\n"
+          },
+          "output": "File written: src/router.ts (212 lines)",
+          "error": false
+        }
+      ],
+      "inputTokens": 9808,
+      "outputTokens": 2112
+    },
+    {
+      "role": "assistant",
+      "content": "",
+      "toolCalls": [
+        {
+          "name": "write_file",
+          "input": {
+            "content": "import * as http from 'http';\nimport { EventBus } from './event-bus';\nimport { UserService } from './services/user-service';\nimport { ProjectService } from './services/project-service';\nimport { TaskService } from './services/task-service';\nimport { CommentService } from './services/comment-service';\nimport { NotificationService } from './services/notification-service';\nimport { ApiRouter } from './router';\n\nconst PORT = process.env.PORT || 3000;\n\n// 1. Initialize Event Bus\nconst eventBus = new EventBus();\n\n// 2. Initialize Services\nconst userService = new UserService();\nconst projectService = new ProjectService();\nconst taskService = new TaskService(eventBus);\n// As per the deduction, inject services that are needed for generating event payloads\nconst commentService = new CommentService(eventBus, userService, taskService);\nconst notificationService = new NotificationService(eventBus, taskService);\n\n// 3. Initialize Router\nconst router = new ApiRouter(\n    userService,\n    projectService,\n    taskService,\n    commentService,\n    notificationService\n);\n\n// 4. Create and start HTTP server\nconst server = http.createServer((req, res) => {\n    router.handle(req, res);\n});\n\nserver.listen(PORT, () => {\n    console.log(`Server running on http://localhost:${PORT}`);\n});\n\n// Export server for demo script\nexport { server };\n",
+            "path": "src/main.ts"
+          },
+          "output": "File written: src/main.ts (43 lines)",
+          "error": false
+        }
+      ],
+      "inputTokens": 12033,
+      "outputTokens": 341
+    },
+    {
+      "role": "assistant",
+      "content": "",
+      "toolCalls": [
+        {
+          "name": "write_file",
+          "input": {
+            "content": "import * as http from \\'http\\';\\nimport { server } from \\'./main\\'; // Import the server to close it later\\n\\nconst PORT = 3000;\\nconst BASE_URL = `http://localhost:${PORT}`;\\n\\nasync function request(method: string, path: string, data?: any): Promise<any> {\\n    return new Promise((resolve, reject) => {\\n        const options: http.RequestOptions = {\\n            method,\\n            path,\\n            headers: {\\n                \\'Content-Type\\': \\'application/json\\'\\n            }\\n        };\\n\\n        const req = http.request(BASE_URL + path, options, (res) => {\\n            let body = \\'\\';\\n            res.on(\\'data\\', (chunk) => body += chunk);\\n            res.on(\\'end\\', () => {\\n                if (res.statusCode && res.statusCode >= 200 && res.statusCode < 300) {\\n                    resolve(body ? JSON.parse(body) : null);\\n                } else {\\n                    console.error(`Request failed: ${method} ${path}`);\\n                    console.error(`Status: ${res.statusCode}`);\\n                    console.error(`Body: ${body}`);\\n                    reject(new Error(`Request failed with status ${res.statusCode}`));\\n                }\\n            });\\n        });\\n\\n        req.on(\\'error\\', (e) => reject(e));\\n        if (data) {\\n            req.write(JSON.stringify(data));\\n        }\\n        req.end();\\n    });\\n}\\n\\nasync function runDemo() {\\n    console.log(\\'--- Starting API Demo ---\\');\\n\\n    try {\\n        // 1. Create Users\\n        console.log(\\'\\\\n1. Creating users...\\');\\n        const user1 = await request(\\'POST\\', \\'/users\\', { name: \\'Alice\\', email: \\'alice@example.com\\' });\\n        const user2 = await request(\\'POST\\', \\'/users\\', { name: \\'Bob\\', email: \\'bob@example.com\\' });\\n        console.log(\\'  -> Created:\\', user1.name, user2.name);\\n\\n        // 2. Create Project\\n        console.log(\\'\\\\n2. Creating a project...\\');\\n        const project = await request(\\'POST\\', \\'/projects\\', { name: \\'Taskify\\', description: \\'A demo project\\' });\\n        console.log(\\'  -> Created:\\', project.name);\\n\\n        // 3. Add members to project\\n        console.log(\\'\\\\n3. Adding members to the project...\\');\\n        await request(\\'POST\\', `/projects/${project.id}/members`, { userId: user1.id });\\n        await request(\\'POST\\', `/projects/${project.id}/members`, { userId: user2.id });\\n        const updatedProject = await request(\\'GET\\', `/projects/${project.id}`);\\n        console.log(\\'  -> Project members:\\', updatedProject.memberIds);\\n\\n        // 4. Create tasks\\n        console.log(\\'\\\\n4. Creating tasks...\\');\\n        const task1 = await request(\\'POST\\', \\'/tasks\\', { title: \\'Implement UI\\', description: \\'Design and code the frontend\\', projectId: project.id });\\n        const task2 = await request(\\'POST\\', \\'/tasks\\', { title: \\'Implement API\\', description: \\'Design and code the backend\\', projectId: project.id });\\n        console.log(\\'  -> Created tasks:\\', task1.title, task2.title);\\n\\n        // 5. Assign task to user\\n        console.log(\\'\\\\n5. Assigning tasks...\\');\\n        await request(\\'PUT\\', `/tasks/${task1.id}/assign`, { assigneeId: user1.id });\\n        console.log(`  -> Assigned \\'${task1.title}\\' to ${user1.name}`);\\n\\n        // 6. Check notifications for user1 (Task Assigned)\\n        console.log(`\\\\n6. Checking notifications for ${user1.name}...\\`);\\n        let notifications1 = await request(\\'GET\\', `/notifications?userId=${user1.id}`);\\n        console.log(\\'  -> Found notifications:\\', notifications1.map((n: any) => n.message));\\n        await request(\\'PUT\\', `/notifications/${notifications1[0].id}/read`, {});\\n\\n        // 7. Change task status\\n        console.log(\\'\\\\n7. Changing task status...\\');\\n        await request(\\'PUT\\', `/tasks/${task1.id}/status`, { status: \\'in-progress\\' });\\n        console.log(`  -> Changed status of \\'${task1.title}\\' to in-progress`);\\n\\n        // 8. Check notifications for user1 (Status Change)\\n        console.log(`\\\\n8. Checking notifications for ${user1.name} again...\\`);\\n        notifications1 = await request(\\'GET\\', `/notifications?userId=${user1.id}`);\\n        console.log(\\'  -> Found notifications:\\', notifications1.map((n: any) => n.message));\\n        await request(\\'PUT\\', `/notifications/${notifications1[0].id}/read`, {});\\n\\n        // 9. Add a comment\\n        console.log(\\'\\\\n9. Adding a comment to a task...\\');\\n        await request(\\'POST\\', \\'/comments\\', { taskId: task1.id, authorId: user2.id, body: \\'Hey, how is the UI going?\\' });\\n        console.log(`  -> ${user2.name} added a comment to \\'${task1.title}\\'`);\\n\\n        // 10. Check notifications for user1 (New Comment)\\n        console.log(`\\\\n10. Checking notifications for ${user1.name} for the new comment...\\`);\\n        notifications1 = await request(\\'GET\\', `/notifications?userId=${user1.id}`);\\n        console.log(\\'  -> Found notifications:\\', notifications1.map((n: any) => n.message));\\n\\n        // 11. Try an invalid status change\\n        console.log(\\'\\\\n11. Trying an invalid status change (todo -> done)...\\');\\n        try {\\n            await request(\\'PUT\\', `/tasks/${task2.id}/status`, { status: \\'done\\' });\\n        } catch (e) {\\n            console.log(\\'  -> Successfully caught expected error!\\');\\n        }\\n\\n        console.log(\\'\\\\n--- Demo Finished Successfully! ---\\');\\n\\n    } catch (error) {\\n        console.error(\\'\\\\n--- Demo Failed ---\\');\\n        console.error(error);\\n    } finally {\\n        server.close();\\n        console.log(\\'\\\\nServer shut down.\\');\\n    }\\n}\\n\\n// Run the demo after a short delay to ensure the server is up\\nsetTimeout(runDemo, 500);\\n",
+            "path": "src/demo.ts"
+          },
+          "output": "File written: src/demo.ts (1 lines)",
+          "error": false
+        }
+      ],
+      "inputTokens": 12449,
+      "outputTokens": 1682
+    },
+    {
+      "role": "assistant",
+      "content": "",
+      "toolCalls": [
+        {
+          "name": "write_file",
+          "input": {
+            "content": "{\n  \"compilerOptions\": {\n    \"target\": \"es2020\",\n    \"module\": \"commonjs\",\n    \"esModuleInterop\": true,\n    \"forceConsistentCasingInFileNames\": true,\n    \"strict\": true,\n    \"skipLibCheck\": true,\n    \"outDir\": \"./dist\",\n    \"rootDir\": \"./src\",\n    \"noEmit\": true\n  },\n  \"include\": [\n    \"src/**/*.ts\"\n  ]\n}\n",
+            "path": "tsconfig.json"
+          },
+          "output": "File written: tsconfig.json (17 lines)",
+          "error": false
+        }
+      ],
+      "inputTokens": 14217,
+      "outputTokens": 120
+    },
+    {
+      "role": "assistant",
+      "content": "",
+      "toolCalls": [
+        {
+          "name": "run_command",
+          "input": {
+            "command": "npx tsc --noEmit"
+          },
+          "output": "Command failed (exit 1):\n\n\u001b[41m                                                                               \u001b[0m\n\u001b[41m\u001b[37m                This is not the tsc command you are looking for                \u001b[0m\n\u001b[41m                                                                               \u001b[0m\n\nTo get access to the TypeScript compiler, \u001b[34mtsc\u001b[0m, from the command line either:\n\n- Use \u001b[1mnpm install typescript\u001b[0m to first add TypeScript to your project \u001b[1mbefore\u001b[0m using npx\n- Use \u001b[1myarn\u001b[0m to avoid accidentally running code from un-installed packages",
+          "error": true
+        }
+      ],
+      "inputTokens": 14405,
+      "outputTokens": 11
+    },
+    {
+      "role": "assistant",
+      "content": "",
+      "toolCalls": [
+        {
+          "name": "write_file",
+          "input": {
+            "path": "package.json",
+            "content": "{\n  \"name\": \"task-management-api\",\n  \"version\": \"1.0.0\",\n  \"description\": \"\",\n  \"main\": \"dist/main.js\",\n  \"scripts\": {\n    \"start\": \"npx tsx src/main.ts\",\n    \"dev\": \"npx tsx --watch src/main.ts\",\n    \"build\": \"npx tsc\",\n    \"test\": \"npx tsx src/demo.ts\",\n    \"check\": \"npx tsc --noEmit\"\n  },\n  \"keywords\": [],\n  \"author\": \"\",\n  \"license\": \"ISC\",\n  \"devDependencies\": {\n    \"@types/node\": \"^20.12.12\",\n    \"tsx\": \"^4.10.2\",\n    \"typescript\": \"^5.4.5\"\n  }\n}\n"
+          },
+          "output": "File written: package.json (22 lines)",
+          "error": false
+        }
+      ],
+      "inputTokens": 14596,
+      "outputTokens": 209
+    },
+    {
+      "role": "assistant",
+      "content": "",
+      "toolCalls": [
+        {
+          "name": "run_command",
+          "input": {
+            "command": "npm install"
+          },
+          "output": "\nadded 6 packages, and audited 7 packages in 7s\n\nfound 0 vulnerabilities\n",
+          "error": false
+        }
+      ],
+      "inputTokens": 14909,
+      "outputTokens": 6
+    },
+    {
+      "role": "assistant",
+      "content": "",
+      "toolCalls": [
+        {
+          "name": "run_command",
+          "input": {
+            "command": "npx tsc --noEmit"
+          },
+          "output": "Command failed (exit 2):\nsrc/services/user-service.ts(2,36): error TS2307: Cannot find module './types' or its corresponding type declarations.",
+          "error": true
+        }
+      ],
+      "inputTokens": 14964,
+      "outputTokens": 11
+    },
+    {
+      "role": "assistant",
+      "content": "",
+      "toolCalls": [
+        {
+          "name": "read_file",
+          "input": {
+            "path": "src/services/user-service.ts"
+          },
+          "output": "import { randomUUID } from \"node:crypto\";\nimport { IUserService, User } from \"./types\";\n\nexport class UserService implements IUserService {\n  private users: Map<string, User> = new Map();\n\n  create(input: { name: string; email: string }): User {\n    const id = randomUUID();\n    const user: User = {\n      id,\n      ...input,\n    };\n    this.users.set(id, user);\n    return user;\n  }\n\n  getById(id: string): User {\n    const user = this.users.get(id);\n    if (!user) {\n      throw new Error(`User with id ${id} not found`);\n    }\n    return user;\n  }\n\n  getAll(): User[] {\n    return Array.from(this.users.values());\n  }\n\n  update(id: string, input: Partial<{ name: string; email: string }>): User {\n    const user = this.getById(id);\n    const updatedUser = { ...user, ...input };\n    this.users.set(id, updatedUser);\n    return updatedUser;\n  }\n\n  delete(id: string): void {\n    if (!this.users.has(id)) {\n      throw new Error(`User with id ${id} not found`);\n    }\n    this.users.delete(id);\n  }\n}\n",
+          "error": false
+        }
+      ],
+      "inputTokens": 15042,
+      "outputTokens": 13
+    },
+    {
+      "role": "assistant",
+      "content": "",
+      "toolCalls": [
+        {
+          "name": "write_file",
+          "input": {
+            "path": "src/services/user-service.ts",
+            "content": "import * as crypto from 'crypto';\nimport { User, IUserService } from '../contracts';\n\nexport class UserService implements IUserService {\n  private readonly users = new Map<string, User>();\n\n  create(input: { name: string; email: string }): User {\n    const id = crypto.randomUUID();\n    const user: User = {\n      id,\n      ...input,\n    };\n    this.users.set(id, user);\n    return user;\n  }\n\n  getById(id: string): User | undefined {\n    return this.users.get(id);\n  }\n\n  getAll(): User[] {\n    return Array.from(this.users.values());\n  }\n\n  update(id: string, input: Partial<{ name: string; email: string }>): User {\n    const user = this.getById(id);\n    if (!user) {\n      throw new Error(`User with id ${id} not found`);\n    }\n\n    const updatedUser = { ...user, ...input };\n    this.users.set(id, updatedUser);\n    return updatedUser;\n  }\n\n  delete(id: string): void {\n    if (!this.users.has(id)) {\n      throw new Error(`User with id ${id} not found`);\n    }\n    this.users.delete(id);\n  }\n}\n"
+          },
+          "output": "File written: src/services/user-service.ts (43 lines)",
+          "error": false
+        }
+      ],
+      "inputTokens": 15464,
+      "outputTokens": 325
+    },
+    {
+      "role": "assistant",
+      "content": "",
+      "toolCalls": [
+        {
+          "name": "run_command",
+          "input": {
+            "command": "npx tsc --noEmit"
+          },
+          "output": "Command failed (exit 2):\nsrc/main.ts(20,53): error TS2345: Argument of type 'UserService' is not assignable to parameter of type 'IUserService'.\r\n  The types returned by 'getById(...)' are incompatible between these types.\r\n    Type 'User | undefined' is not assignable to type 'User'.\r\n      Type 'undefined' is not assignable to type 'User'.\r\nsrc/main.ts(29,3): error TS2345: Argument of type 'UserService' is not assignable to parameter of type 'IUserService'.\r\n  The types returned by 'getById(...)' are incompatible between these types.\r\n    Type 'User | undefined' is not assignable to type 'User'.\r\n      Type 'undefined' is not assignable to type 'User'.",
+          "error": true
+        }
+      ],
+      "inputTokens": 15888,
+      "outputTokens": 11
+    },
+    {
+      "role": "assistant",
+      "content": "",
+      "toolCalls": [
+        {
+          "name": "read_file",
+          "input": {
+            "path": "src/contracts.ts"
+          },
+          "output": "// ============================================================\n// Data Models\n// ============================================================\n\nexport interface User {\n  id: string;\n  name: string;\n  email: string;\n}\n\nexport interface Project {\n  id: string;\n  name: string;\n  description: string;\n  memberIds: string[];\n}\n\nexport type TaskStatus = \"todo\" | \"in-progress\" | \"done\";\n\nexport interface Task {\n  id: string;\n  title: string;\n  description: string;\n  status: TaskStatus;\n  assigneeId: string | null;\n  projectId: string;\n}\n\nexport interface Comment {\n  id: string;\n  taskId: string;\n  authorId: string;\n  body: string;\n  createdAt: string; // ISO 8601\n}\n\nexport interface Notification {\n  id: string;\n  userId: string;\n  message: string;\n  read: boolean;\n  createdAt: string; // ISO 8601\n}\n\n// ============================================================\n// Event Bus Contract\n// ============================================================\n\nexport interface IEventBus {\n  publish(event: string, payload: unknown): void;\n  subscribe(event: string, callback: (payload: unknown) => void): void;\n}\n\n// Event payloads\nexport interface TaskAssignedPayload {\n  taskId: string;\n  taskTitle: string;\n  assigneeId: string;\n}\n\nexport interface TaskStatusChangedPayload {\n  taskId: string;\n  taskTitle: string;\n  assigneeId: string | null;\n  oldStatus: TaskStatus;\n  newStatus: TaskStatus;\n}\n\nexport interface CommentAddedPayload {\n  commentId: string;\n  taskId: string;\n  taskTitle: string;\n  authorId: string;\n  authorName: string;\n}\n\n// ============================================================\n// Service Contracts\n// ============================================================\n\nexport interface IUserService {\n  create(input: { name: string; email: string }): User;\n  getById(id: string): User | undefined;\n  getAll(): User[];\n  update(id: string, input: Partial<{ name: string; email: string }>): User;\n  delete(id: string): void;\n}\n\nexport interface IProjectService {\n  create(input: { name: string; description: string }): Project;\n  getById(id: string): Project | undefined;\n  getAll(): Project[];\n  update(id: string, input: Partial<{ name: string; description: string }>): Project;\n  delete(id: string): void;\n  addMember(projectId: string, userId: string): Project;\n  removeMember(projectId: string, userId: string): Project;\n}\n\nexport interface ITaskService {\n  create(input: { title: string; description: string; projectId: string }): Task;\n  getById(id: string): Task | undefined;\n  getByProject(projectId: string): Task[];\n  update(id: string, input: Partial<{ title: string; description: string }>): Task;\n  delete(id: string): void;\n  assign(taskId: string, assigneeId: string): Task;\n  changeStatus(taskId: string, newStatus: TaskStatus): Task;\n}\n\nexport interface ICommentService {\n  create(input: { taskId: string; authorId: string; body: string }): Comment;\n  getById(id: string): Comment | undefined;\n  getByTask(taskId: string): Comment[];\n  delete(id: string): void;\n}\n\nexport interface INotificationService {\n  getByUser(userId: string): Notification[];\n  markAsRead(notificationId: string): Notification;\n  // Internal method for creation, not on the public interface\n  // create(input: { userId: string; message: string }): Notification;\n}\n",
+          "error": false
+        }
+      ],
+      "inputTokens": 16112,
+      "outputTokens": 9
+    },
+    {
+      "role": "assistant",
+      "content": "",
+      "toolCalls": [
+        {
+          "name": "read_file",
+          "input": {
+            "path": "src/services/user-service.ts"
+          },
+          "output": "import { randomUUID } from \"node:crypto\";\nimport { IUserService, User } from \"../types\";\n\nexport class UserService implements IUserService {\n  private users: Map<string, User> = new Map();\n\n  create(input: { name: string; email: string }): User {\n    const id = randomUUID();\n    const user: User = {\n      id,\n      ...input,\n    };\n    this.users.set(id, user);\n    return user;\n  }\n\n  getById(id: string): User {\n    const user = this.users.get(id);\n    if (!user) {\n      throw new Error(`User with id ${id} not found`);\n    }\n    return user;\n  }\n\n  getAll(): User[] {\n    return Array.from(this.users.values());\n  }\n\n  update(id: string, input: Partial<{ name: string; email: string }>): User {\n    const user = this.getById(id);\n    const updatedUser = { ...user, ...input };\n    this.users.set(id, updatedUser);\n    return updatedUser;\n  }\n\n  delete(id: string): void {\n    if (!this.users.has(id)) {\n      throw new Error(`User with id ${id} not found`);\n    }\n    this.users.delete(id);\n  }\n}\n",
+          "error": false
+        }
+      ],
+      "inputTokens": 18840,
+      "outputTokens": 13
+    },
+    {
+      "role": "assistant",
+      "content": "",
+      "toolCalls": [
+        {
+          "name": "write_file",
+          "input": {
+            "content": "import * as crypto from 'crypto';\nimport { User, IUserService } from '../contracts';\n\nexport class UserService implements IUserService {\n  private readonly users = new Map<string, User>();\n\n  create(input: { name: string; email: string }): User {\n    const id = crypto.randomUUID();\n    const user: User = {\n      id,\n      ...input,\n    };\n    this.users.set(id, user);\n    return user;\n  }\n\n  getById(id: string): User | undefined {\n    return this.users.get(id);\n  }\n\n  getAll(): User[] {\n    return Array.from(this.users.values());\n  }\n\n  update(id: string, input: Partial<{ name: string; email: string }>): User {\n    const user = this.getById(id);\n    if (!user) {\n      throw new Error(`User with id ${id} not found`);\n    }\n\n    const updatedUser = { ...user, ...input };\n    this.users.set(id, updatedUser);\n    return updatedUser;\n  }\n\n  delete(id: string): void {\n    if (!this.users.has(id)) {\n      throw new Error(`User with id ${id} not found`);\n    }\n    this.users.delete(id);\n  }\n}\n",
+            "path": "src/services/user-service.ts"
+          },
+          "output": "File written: src/services/user-service.ts (43 lines)",
+          "error": false
+        }
+      ],
+      "inputTokens": 19374,
+      "outputTokens": 325
+    },
+    {
+      "role": "assistant",
+      "content": "",
+      "toolCalls": [
+        {
+          "name": "run_command",
+          "input": {
+            "command": "npx tsc --noEmit"
+          },
+          "output": "Command failed (exit 2):\nsrc/main.ts(20,53): error TS2345: Argument of type 'UserService' is not assignable to parameter of type 'IUserService'.\r\n  The types returned by 'getById(...)' are incompatible between these types.\r\n    Type 'User | undefined' is not assignable to type 'User'.\r\n      Type 'undefined' is not assignable to type 'User'.\r\nsrc/main.ts(29,3): error TS2345: Argument of type 'UserService' is not assignable to parameter of type 'IUserService'.\r\n  The types returned by 'getById(...)' are incompatible between these types.\r\n    Type 'User | undefined' is not assignable to type 'User'.\r\n      Type 'undefined' is not assignable to type 'User'.",
+          "error": true
+        }
+      ],
+      "inputTokens": 19825,
+      "outputTokens": 11
+    },
+    {
+      "role": "assistant",
+      "content": "",
+      "toolCalls": [
+        {
+          "name": "run_command",
+          "input": {
+            "command": "rm -rf node_modules package-lock.json"
+          },
+          "output": "(command completed with no output)",
+          "error": false
+        }
+      ],
+      "inputTokens": 20049,
+      "outputTokens": 15
+    },
+    {
+      "role": "assistant",
+      "content": "",
+      "toolCalls": [
+        {
+          "name": "run_command",
+          "input": {
+            "command": "npm install"
+          },
+          "output": "\nadded 6 packages, and audited 7 packages in 7s\n\nfound 0 vulnerabilities\n",
+          "error": false
+        }
+      ],
+      "inputTokens": 20144,
+      "outputTokens": 6
+    },
+    {
+      "role": "assistant",
+      "content": "",
+      "toolCalls": [
+        {
+          "name": "run_command",
+          "input": {
+            "command": "npx tsc --noEmit"
+          },
+          "output": "(command completed with no output)",
+          "error": false
+        }
+      ],
+      "inputTokens": 20203,
+      "outputTokens": 11
+    },
+    {
+      "role": "assistant",
+      "content": "",
+      "toolCalls": [
+        {
+          "name": "run_command",
+          "input": {
+            "command": "npx tsx src/demo.ts"
+          },
+          "output": "Command failed (exit 1):\n--- Starting Task Management API Demo ---\n\n1. Creating users...\n  - Created: {\n  id: 'c3b6a7200ce2619fa9f62cfb03e47456',\n  name: 'Alice',\n  email: 'alice@example.com'\n}\n  - Created: {\n  id: '3ff8e89e20b9827d75999e906b8d4506',\n  name: 'Bob',\n  email: 'bob@example.com'\n}\n\n2. Creating a project...\n  - Created: {\n  id: '4a63744fdaf5fefd5be8c652d7939c21',\n  name: 'API Development',\n  description: 'Build the new Task API',\n  members: [ null ]\n}\n\n3. Adding members to the project...\n\n\n--- Demo Failed ---\nError: Request failed with status 404: {\"message\":\"Route not found\"}\n    at IncomingMessage.<anonymous> (C:\\Users\\user\\Downloads\\example.com\\architecture-driven-design\\trials-gemini-25-pro\\typescript-contracts-2\\code\\src\\demo.ts:25:20)\n    at IncomingMessage.emit (node:events:520:35)\n    at endReadableNT (node:internal/streams/readable:1729:12)\n    at process.processTicksAndRejections (node:internal/process/task_queues:90:21)",
+          "error": true
+        }
+      ],
+      "inputTokens": 20241,
+      "outputTokens": 13
+    },
+    {
+      "role": "assistant",
+      "content": "",
+      "toolCalls": [
+        {
+          "name": "read_file",
+          "input": {
+            "path": "src/services/project-service.ts"
+          },
+          "output": "import { randomUUID } from \"node:crypto\";\nimport { IProjectService, Project } from \"../types\";\n\nexport class ProjectService implements IProjectService {\n  private projects: Map<string, Project> = new Map();\n\n  // Note: Does not validate if userId exists in UserService, following decoupling rule.\n  // In a real system, this might be a saga or an async validation.\n\n  create(input: { name: string; description: string }): Project {\n    const id = randomUUID();\n    const project: Project = {\n      id,\n      ...input,\n      memberIds: [],\n    };\n    this.projects.set(id, project);\n    return project;\n  }\n\n  getById(id: string): Project {\n    const project = this.projects.get(id);\n    if (!project) {\n      throw new Error(`Project with id ${id} not found`);\n    }\n    return project;\n  }\n\n  getAll(): Project[] {\n    return Array.from(this.projects.values());\n  }\n\n  update(\n    id: string,\n    input: Partial<{ name: string; description: string }>\n  ): Project {\n    const project = this.getById(id);\n    const updatedProject = { ...project, ...input };\n    this.projects.set(id, updatedProject);\n    return updatedProject;\n  }\n\n  delete(id: string): void {\n    if (!this.projects.has(id)) {\n      throw new Error(`Project with id ${id} not found`);\n    }\n    this.projects.delete(id);\n  }\n\n  addMember(projectId: string, userId: string): Project {\n    const project = this.getById(projectId);\n    if (project.memberIds.includes(userId)) {\n      // To be idempotent, we don't throw an error if user is already a member.\n      return project;\n    }\n    project.memberIds.push(userId);\n    this.projects.set(projectId, project);\n    return project;\n  }\n\n  removeMember(projectId: string, userId: string): Project {\n    const project = this.getById(projectId);\n    const memberIndex = project.memberIds.indexOf(userId);\n    if (memberIndex === -1) {\n      throw new Error(`User with id ${userId} is not a member of project ${projectId}`);\n    }\n    project.memberIds.splice(memberIndex, 1);\n    this.projects.set(projectId, project);\n    return project;\n  }\n}\n",
+          "error": false
+        }
+      ],
+      "inputTokens": 20685,
+      "outputTokens": 13
+    },
+    {
+      "role": "assistant",
+      "content": "",
+      "toolCalls": [
+        {
+          "name": "write_file",
+          "input": {
+            "content": "import * as crypto from 'crypto';\nimport { Project, IProjectService } from '../contracts';\n\nexport class ProjectService implements IProjectService {\n    private readonly projects = new Map<string, Project>();\n\n    create(input: { name: string; description: string }): Project {\n        const id = crypto.randomUUID();\n        const project: Project = {\n            id,\n            ...input,\n            memberIds: [],\n        };\n        this.projects.set(id, project);\n        return project;\n    }\n\n    getById(id: string): Project | undefined {\n        return this.projects.get(id);\n    }\n\n    getAll(): Project[] {\n        return Array.from(this.projects.values());\n    }\n\n    update(id: string, input: Partial<{ name: string; description: string }>): Project {\n        const project = this.getById(id);\n        if (!project) {\n            throw new Error(`Project with id ${id} not found`);\n        }\n\n        const updatedProject = { ...project, ...input };\n        this.projects.set(id, updatedProject);\n        return updatedProject;\n    }\n\n    delete(id: string): void {\n        if (!this.projects.has(id)) {\n            throw new Error(`Project with id ${id} not found`);\n        }\n        this.projects.delete(id);\n    }\n\n    addMember(projectId: string, userId: string): Project {\n        const project = this.getById(projectId);\n        if (!project) {\n            throw new Error(`Project with id ${projectId} not found`);\n        }\n\n        if (!project.memberIds.includes(userId)) {\n            project.memberIds.push(userId);\n        }\n\n        return project;\n    }\n\n    removeMember(projectId: string, userId: string): Project {\n        const project = this.getById(projectId);\n        if (!project) {\n            throw new Error(`Project with id ${projectId} not found`);\n        }\n\n        project.memberIds = project.memberIds.filter((id) => id !== userId);\n        return project;\n    }\n}\n",
+            "path": "src/services/project-service.ts"
+          },
+          "output": "File written: src/services/project-service.ts (67 lines)",
+          "error": false
+        }
+      ],
+      "inputTokens": 21727,
+      "outputTokens": 503
+    },
+    {
+      "role": "assistant",
+      "content": "",
+      "toolCalls": [
+        {
+          "name": "run_command",
+          "input": {
+            "command": "npx tsc --noEmit"
+          },
+          "output": "Command failed (exit 2):\nsrc/main.ts(30,3): error TS2345: Argument of type 'ProjectService' is not assignable to parameter of type 'IProjectService'.\r\n  The types returned by 'getById(...)' are incompatible between these types.\r\n    Type 'Project | undefined' is not assignable to type 'Project'.\r\n      Type 'undefined' is not assignable to type 'Project'.",
+          "error": true
+        }
+      ],
+      "inputTokens": 22300,
+      "outputTokens": 11
+    },
+    {
+      "role": "assistant",
+      "content": "",
+      "toolCalls": [
+        {
+          "name": "run_command",
+          "input": {
+            "command": "npx tsc --noEmit"
+          },
+          "output": "Command failed (exit 2):\nsrc/main.ts(30,3): error TS2345: Argument of type 'ProjectService' is not assignable to parameter of type 'IProjectService'.\r\n  The types returned by 'getById(...)' are incompatible between these types.\r\n    Type 'Project | undefined' is not assignable to type 'Project'.\r\n      Type 'undefined' is not assignable to type 'Project'.",
+          "error": true
+        }
+      ],
+      "inputTokens": 22446,
+      "outputTokens": 11
+    },
+    {
+      "role": "assistant",
+      "content": "",
+      "toolCalls": [
+        {
+          "name": "list_files",
+          "input": {},
+          "output": "package-lock.json\npackage.json\nsrc\\contracts.ts\nsrc\\demo.ts\nsrc\\event-bus.ts\nsrc\\main.ts\nsrc\\router.ts\nsrc\\services\\comment-service.ts\nsrc\\services\\notification-service.ts\nsrc\\services\\project-service.ts\nsrc\\services\\task-service.ts\nsrc\\services\\user-service.ts\nsrc\\types.ts\ntsconfig.json",
+          "error": false
+        }
+      ],
+      "inputTokens": 23021,
+      "outputTokens": 3
+    },
+    {
+      "role": "assistant",
+      "content": "",
+      "toolCalls": [
+        {
+          "name": "run_command",
+          "input": {
+            "command": "rm src/types.ts"
+          },
+          "output": "(command completed with no output)",
+          "error": false
+        }
+      ],
+      "inputTokens": 23211,
+      "outputTokens": 10
+    },
+    {
+      "role": "assistant",
+      "content": "",
+      "toolCalls": [
+        {
+          "name": "read_file",
+          "input": {
+            "path": "src/services/user-service.ts"
+          },
+          "output": "import { randomUUID } from \"node:crypto\";\nimport { IUserService, User } from \"../types\";\n\nexport class UserService implements IUserService {\n  private users: Map<string, User> = new Map();\n\n  create(input: { name: string; email: string }): User {\n    const id = randomUUID();\n    const user: User = {\n      id,\n      ...input,\n    };\n    this.users.set(id, user);\n    return user;\n  }\n\n  getById(id: string): User {\n    const user = this.users.get(id);\n    if (!user) {\n      throw new Error(`User with id ${id} not found`);\n    }\n    return user;\n  }\n\n  getAll(): User[] {\n    return Array.from(this.users.values());\n  }\n\n  update(id: string, input: Partial<{ name: string; email: string }>): User {\n    const user = this.getById(id);\n    const updatedUser = { ...user, ...input };\n    this.users.set(id, updatedUser);\n    return updatedUser;\n  }\n\n  delete(id: string): void {\n    if (!this.users.has(id)) {\n        // Checking before trying to delete is slightly more performant\n        // than calling getById and catching the error.\n        throw new Error(`User with id ${id} not found`);\n    }\n    this.users.delete(id);\n  }\n}\n",
+          "error": false
+        }
+      ],
+      "inputTokens": 23290,
+      "outputTokens": 13
+    },
+    {
+      "role": "assistant",
+      "content": "",
+      "toolCalls": [
+        {
+          "name": "write_file",
+          "input": {
+            "path": "src/services/user-service.ts",
+            "content": "import * as crypto from 'crypto';\nimport { User, IUserService } from '../contracts';\n\nexport class UserService implements IUserService {\n  private readonly users = new Map<string, User>();\n\n  create(input: { name: string; email: string }): User {\n    const id = crypto.randomUUID();\n    const user: User = {\n      id,\n      ...input,\n    };\n    this.users.set(id, user);\n    return user;\n  }\n\n  getById(id: string): User | undefined {\n    return this.users.get(id);\n  }\n\n  getAll(): User[] {\n    return Array.from(this.users.values());\n  }\n\n  update(id: string, input: Partial<{ name: string; email: string }>): User {\n    const user = this.getById(id);\n    if (!user) {\n      throw new Error(`User with id ${id} not found`);\n    }\n\n    const updatedUser = { ...user, ...input };\n    this.users.set(id, updatedUser);\n    return updatedUser;\n  }\n\n  delete(id: string): void {\n    if (!this.users.has(id)) {\n      throw new Error(`User with id ${id} not found`);\n    }\n    this.users.delete(id);\n  }\n}\n"
+          },
+          "output": "File written: src/services/user-service.ts (43 lines)",
+          "error": false
+        }
+      ],
+      "inputTokens": 23708,
+      "outputTokens": 325
+    },
+    {
+      "role": "assistant",
+      "content": "",
+      "toolCalls": [
+        {
+          "name": "read_file",
+          "input": {
+            "path": "src/services/project-service.ts"
+          },
+          "output": "import * as crypto from 'crypto';\nimport { Project, IProjectService } from '../contracts';\n\nexport class ProjectService implements IProjectService {\n    private readonly projects = new Map<string, Project>();\n\n    create(input: { name: string; description: string }): Project {\n        const id = crypto.randomUUID();\n        const project: Project = {\n            id,\n            ...input,\n            memberIds: [],\n        };\n        this.projects.set(id, project);\n        return project;\n    }\n\n    getById(id: string): Project | undefined {\n        return this.projects.get(id);\n    }\n\n    getAll(): Project[] {\n        return Array.from(this.projects.values());\n    }\n\n    update(id: string, input: Partial<{ name: string; description: string }>): Project {\n        const project = this.getById(id);\n        if (!project) {\n            throw new Error(`Project with id ${id} not found`);\n        }\n\n        const updatedProject = { ...project, ...input };\n        this.projects.set(id, updatedProject);\n        return updatedProject;\n    }\n\n    delete(id: string): void {\n        if (!this.projects.has(id)) {\n            throw new Error(`Project with id ${id} not found`);\n        }\n        this.projects.delete(id);\n    }\n\n    addMember(projectId: string, userId: string): Project {\n        const project = this.getById(projectId);\n        if (!project) {\n            throw new Error(`Project with id ${projectId} not found`);\n        }\n\n        if (!project.memberIds.includes(userId)) {\n            project.memberIds.push(userId);\n        }\n\n        return project;\n    }\n\n    removeMember(projectId: string, userId: string): Project {\n        const project = this.getById(projectId);\n        if (!project) {\n            throw new Error(`Project with id ${projectId} not found`);\n        }\n\n        project.memberIds = project.memberIds.filter((id) => id !== userId);\n        return project;\n    }\n}\n",
+          "error": false
+        }
+      ],
+      "inputTokens": 24084,
+      "outputTokens": 13
+    },
+    {
+      "role": "assistant",
+      "content": "",
+      "toolCalls": [
+        {
+          "name": "read_file",
+          "input": {
+            "path": "src/services/task-service.ts"
+          },
+          "output": "import { randomUUID } from \"node:crypto\";\nimport {\n  IEventBus,\n  ITaskService,\n  Task,\n  TaskAssignedPayload,\n  TaskStatus,\n  TaskStatusChangedPayload,\n} from \"../types\";\n\nexport class TaskService implements ITaskService {\n  private tasks: Map<string, Task> = new Map();\n\n  constructor(private eventBus: IEventBus) {}\n\n  create(input: { title: string; description: string; projectId: string }): Task {\n    const id = randomUUID();\n    const task: Task = {\n      id,\n      ...input,\n      status: \"todo\",\n      assigneeId: null,\n    };\n    this.tasks.set(id, task);\n    return task;\n  }\n\n  getById(id: string): Task {\n    const task = this.tasks.get(id);\n    if (!task) {\n      throw new Error(`Task with id ${id} not found`);\n    }\n    return task;\n  }\n\n  getByProject(projectId: string): Task[] {\n    return Array.from(this.tasks.values()).filter(\n      (task) => task.projectId === projectId\n    );\n  }\n\n  update(\n    id: string,\n    input: Partial<{ title: string; description: string }>\n  ): Task {\n    const task = this.getById(id);\n    const updatedTask = { ...task, ...input };\n    this.tasks.set(id, updatedTask);\n    return updatedTask;\n  }\n\n  delete(id: string): void {\n    if (!this.tasks.has(id)) {\n      throw new Error(`Task with id ${id} not found`);\n    }\n    this.tasks.delete(id);\n  }\n\n  assign(taskId: string, assigneeId: string): Task {\n    const task = this.getById(taskId);\n    task.assigneeId = assigneeId;\n    this.tasks.set(taskId, task);\n\n    const payload: TaskAssignedPayload = {\n      taskId: task.id,\n      taskTitle: task.title,\n      assigneeId: task.assigneeId,\n    };\n    this.eventBus.publish(\"task.assigned\", payload);\n\n    return task;\n  }\n\n  changeStatus(taskId: string, newStatus: TaskStatus): Task {\n    const task = this.getById(taskId);\n    const oldStatus = task.status;\n\n    const allowedTransitions: Record<TaskStatus, TaskStatus[]> = {\n      todo: [\"in-progress\"],\n      \"in-progress\": [\"done\"],\n      done: [],\n    };\n\n    if (!allowedTransitions[oldStatus].includes(newStatus)) {\n      throw new Error(\n        `Invalid status transition from ${oldStatus} to ${newStatus}`\n      );\n    }\n\n    task.status = newStatus;\n    this.tasks.set(taskId, task);\n\n    const payload: TaskStatusChangedPayload = {\n      taskId: task.id,\n      taskTitle: task.title,\n      assigneeId: task.assigneeId,\n      oldStatus,\n      newStatus,\n    };\n    this.eventBus.publish(\"task.statusChanged\", payload);\n\n    return task;\n  }\n}\n",
+          "error": false
+        }
+      ],
+      "inputTokens": 24603,
+      "outputTokens": 13
+    },
+    {
+      "role": "assistant",
+      "content": "",
+      "toolCalls": [
+        {
+          "name": "write_file",
+          "input": {
+            "path": "src/services/task-service.ts",
+            "content": "import * as crypto from 'crypto';\nimport {\n    Task,\n    ITaskService,\n    TaskStatus,\n    IEventBus,\n    TaskAssignedPayload,\n    TaskStatusChangedPayload\n} from '../contracts';\n\nexport class TaskService implements ITaskService {\n    private readonly tasks = new Map<string, Task>();\n\n    constructor(private readonly eventBus: IEventBus) {}\n\n    create(input: { title: string; description: string; projectId: string }): Task {\n        const id = crypto.randomUUID();\n        const task: Task = {\n            id,\n            ...input,\n            status: 'todo',\n            assigneeId: null,\n        };\n        this.tasks.set(id, task);\n        return task;\n    }\n\n    getById(id: string): Task | undefined {\n        return this.tasks.get(id);\n    }\n\n    getByProject(projectId: string): Task[] {\n        return Array.from(this.tasks.values()).filter(\n            (task) => task.projectId === projectId\n        );\n    }\n\n    update(id: string, input: Partial<{ title: string; description: string }>): Task {\n        const task = this.getById(id);\n        if (!task) {\n            throw new Error(`Task with id ${id} not found`);\n        }\n\n        const updatedTask = { ...task, ...input };\n        this.tasks.set(id, updatedTask);\n        return updatedTask;\n    }\n\n    delete(id: string): void {\n        if (!this.tasks.has(id)) {\n            throw new Error(`Task with id ${id} not found`);\n        }\n        this.tasks.delete(id);\n    }\n\n    assign(taskId: string, assigneeId: string): Task {\n        const task = this.getById(taskId);\n        if (!task) {\n            throw new Error(`Task with id ${taskId} not found`);\n        }\n\n        task.assigneeId = assigneeId;\n\n        this.eventBus.publish('task.assigned', {\n            taskId: task.id,\n            taskTitle: task.title,\n            assigneeId,\n        } as TaskAssignedPayload);\n\n        return task;\n    }\n\n    changeStatus(taskId: string, newStatus: TaskStatus): Task {\n        const task = this.getById(taskId);\n        if (!task) {\n            throw new Error(`Task with id ${taskId} not found`);\n        }\n\n        const oldStatus = task.status;\n\n        // Enforce forward-only status transitions\n        if (oldStatus === 'todo' && newStatus !== 'in-progress') {\n            throw new Error(`Invalid status transition from todo to ${newStatus}`);\n        }\n        if (oldStatus === 'in-progress' && newStatus !== 'done') {\n            throw new Error(`Invalid status transition from in-progress to ${newStatus}`);\n        }\n        if (oldStatus === 'done') {\n            throw new Error(`Invalid status transition from done to ${newStatus}`);\n        }\n        // also handles the skipping case\n\n        task.status = newStatus;\n\n        this.eventBus.publish('task.statusChanged', {\n            taskId: task.id,\n            taskTitle: task.title,\n            assigneeId: task.assigneeId,\n            oldStatus,\n            newStatus,\n        } as TaskStatusChangedPayload);\n\n        return task;\n    }\n}\n"
+          },
+          "output": "File written: src/services/task-service.ts (106 lines)",
+          "error": false
+        }
+      ],
+      "inputTokens": 25427,
+      "outputTokens": 801
+    },
+    {
+      "role": "assistant",
+      "content": "",
+      "toolCalls": [
+        {
+          "name": "read_file",
+          "input": {
+            "path": "src/services/comment-service.ts"
+          },
+          "output": "import { randomUUID } from \"node:crypto\";\nimport {\n  Comment,\n  CommentAddedPayload,\n  ICommentService,\n  IEventBus,\n  ITaskService,\n  IUserService,\n} from \"../types\";\n\nexport class CommentService implements ICommentService {\n  private comments: Map<string, Comment> = new Map();\n\n  constructor(\n    private eventBus: IEventBus,\n    private userService: IUserService,\n    private taskService: ITaskService\n  ) {}\n\n  create(input: { taskId: string; authorId: string; body: string }): Comment {\n    const id = randomUUID();\n    const comment: Comment = {\n      id,\n      ...input,\n      createdAt: new Date().toISOString(),\n    };\n    this.comments.set(id, comment);\n\n    // Get additional data for the event payload\n    const author = this.userService.getById(input.authorId);\n    const task = this.taskService.getById(input.taskId);\n\n    const payload: CommentAddedPayload = {\n      commentId: id,\n      taskId: input.taskId,\n      taskTitle: task.title,\n      authorId: input.authorId,\n      authorName: author.name,\n    };\n    this.eventBus.publish(\"comment.added\", payload);\n\n    return comment;\n  }\n\n  getById(id: string): Comment {\n    const comment = this.comments.get(id);\n    if (!comment) {\n      throw new Error(`Comment with id ${id} not found`);\n    }\n    return comment;\n  }\n\n  getByTask(taskId: string): Comment[] {\n    return Array.from(this.comments.values()).filter(\n      (comment) => comment.taskId === taskId\n    );\n  }\n\n  delete(id: string): void {\n    if (!this.comments.has(id)) {\n      throw new Error(`Comment with id ${id} not found`);\n    }\n    this.comments.delete(id);\n  }\n}\n",
+          "error": false
+        }
+      ],
+      "inputTokens": 26282,
+      "outputTokens": 13
+    },
+    {
+      "role": "assistant",
+      "content": "",
+      "toolCalls": [
+        {
+          "name": "write_file",
+          "input": {
+            "content": "import * as crypto from 'crypto';\nimport {\n    Comment,\n    ICommentService,\n    IEventBus,\n    CommentAddedPayload,\n    IUserService,\n    ITaskService\n} from '../contracts';\n\nexport class CommentService implements ICommentService {\n    private readonly comments = new Map<string, Comment>();\n\n    constructor(\n        private readonly eventBus: IEventBus,\n        private readonly userService: IUserService,\n        private readonly taskService: ITaskService\n    ) {}\n\n    create(input: { taskId: string; authorId: string; body: string }): Comment {\n        const id = crypto.randomUUID();\n        const comment: Comment = {\n            id,\n            ...input,\n            createdAt: new Date().toISOString(),\n        };\n        this.comments.set(id, comment);\n\n        const author = this.userService.getById(input.authorId);\n        const task = this.taskService.getById(input.taskId);\n\n        if (!author) {\n            throw new Error(`Author with id ${input.authorId} not found`);\n        }\n        if (!task) {\n            throw new Error(`Task with id ${input.taskId} not found`);\n        }\n\n        this.eventBus.publish('comment.added', {\n            commentId: comment.id,\n            taskId: task.id,\n            taskTitle: task.title,\n            authorId: author.id,\n            authorName: author.name,\n        } as CommentAddedPayload);\n\n        return comment;\n    }\n\n    getById(id: string): Comment | undefined {\n        return this.comments.get(id);\n    }\n\n    getByTask(taskId: string): Comment[] {\n        return Array.from(this.comments.values()).filter(\n            (comment) => comment.taskId === taskId\n        );\n    }\n\n    delete(id: string): void {\n        if (!this.comments.has(id)) {\n            throw new Error(`Comment with id ${id} not found`);\n        }\n        this.comments.delete(id);\n    }\n}\n",
+            "path": "src/services/comment-service.ts"
+          },
+          "output": "File written: src/services/comment-service.ts (67 lines)",
+          "error": false
+        }
+      ],
+      "inputTokens": 26773,
+      "outputTokens": 489
+    },
+    {
+      "role": "assistant",
+      "content": "",
+      "toolCalls": [
+        {
+          "name": "read_file",
+          "input": {
+            "path": "src/services/notification-service.ts"
+          },
+          "output": "import { randomUUID } from \"node:crypto\";\nimport {\n  IEventBus,\n  INotificationService,\n  ITaskService,\n  Notification,\n  TaskAssignedPayload,\n  TaskStatusChangedPayload,\n  CommentAddedPayload\n} from \"../types\";\n\nexport class NotificationService implements INotificationService {\n  private notifications: Map<string, Notification> = new Map();\n\n  constructor(private eventBus: IEventBus, private taskService: ITaskService) {}\n\n  // This method should be called once in main.ts to set up subscriptions\n  registerEventListeners() {\n    this.eventBus.subscribe(\"task.assigned\", (payload) => this.handleTaskAssigned(payload as TaskAssignedPayload));\n    this.eventBus.subscribe(\"task.statusChanged\", (payload) => this.handleTaskStatusChanged(payload as TaskStatusChangedPayload));\n    this.eventBus.subscribe(\"comment.added\", (payload) => this.handleCommentAdded(payload as CommentAddedPayload));\n  }\n\n  private createNotification(userId: string, message: string): Notification {\n    const id = randomUUID();\n    const notification: Notification = {\n      id,\n      userId,\n      message,\n      read: false,\n      createdAt: new Date().toISOString(),\n    };\n    this.notifications.set(id, notification);\n    return notification;\n  }\n\n  private handleTaskAssigned(payload: TaskAssignedPayload) {\n    const { taskTitle, assigneeId } = payload;\n    const message = `Task '${taskTitle}' assigned to you`;\n    this.createNotification(assigneeId, message);\n  }\n\n  private handleTaskStatusChanged(payload: TaskStatusChangedPayload) {\n    if (payload.assigneeId) {\n      const { taskTitle, newStatus, assigneeId } = payload;\n      const message = `Task '${taskTitle}' status changed to ${newStatus}`;\n      this.createNotification(assigneeId, message);\n    }\n  }\n\n  private handleCommentAdded(payload: CommentAddedPayload) {\n    const { taskId, taskTitle, authorName } = payload;\n    try {\n      const task = this.taskService.getById(taskId);\n      if (task.assigneeId) {\n        // Don't notify the user if they are the one who commented\n        if (task.assigneeId !== payload.authorId) {\n           const message = `New comment on task '${taskTitle}' from ${authorName}`;\n           this.createNotification(task.assigneeId, message);\n        }\n      }\n    } catch (error) {\n      console.error(`Error handling comment.added event: Task with id ${taskId} not found.`);\n    }\n  }\n\n  getByUser(userId: string): Notification[] {\n    return Array.from(this.notifications.values()).filter(\n      (n) => n.userId === userId && !n.read\n    );\n  }\n\n  markAsRead(notificationId: string): Notification {\n    const notification = this.notifications.get(notificationId);\n    if (!notification) {\n      throw new Error(`Notification with id ${notificationId} not found`);\n    }\n    notification.read = true;\n    this.notifications.set(notificationId, notification);\n    return notification;\n  }\n}\n",
+          "error": false
+        }
+      ],
+      "inputTokens": 27309,
+      "outputTokens": 13
+    },
+    {
+      "role": "assistant",
+      "content": "",
+      "toolCalls": [
+        {
+          "name": "write_file",
+          "input": {
+            "path": "src/services/notification-service.ts",
+            "content": "import * as crypto from 'crypto';\nimport {\n    Notification,\n    INotificationService,\n    IEventBus,\n    TaskAssignedPayload,\n    TaskStatusChangedPayload,\n    CommentAddedPayload,\n    ITaskService\n} from '../contracts';\n\nexport class NotificationService implements INotificationService {\n    private readonly notifications = new Map<string, Notification>();\n\n    constructor(private readonly eventBus: IEventBus, private readonly taskService: ITaskService) {\n        this.subscribeToEvents();\n    }\n\n    private subscribeToEvents(): void {\n        this.eventBus.subscribe('task.assigned', (payload) => this.handleTaskAssigned(payload as TaskAssignedPayload));\n        this.eventBus.subscribe('task.statusChanged', (payload) => this.handleTaskStatusChanged(payload as TaskStatusChangedPayload));\n        this.eventBus.subscribe('comment.added', (payload) => this.handleCommentAdded(payload as CommentAddedPayload));\n    }\n\n    private handleTaskAssigned(payload: TaskAssignedPayload): void {\n        const message = `Task '${payload.taskTitle}' has been assigned to you.`;\n        this.create({ userId: payload.assigneeId, message });\n    }\n\n    private handleTaskStatusChanged(payload: TaskStatusChangedPayload): void {\n        if (payload.assigneeId) {\n            const message = `Task '${payload.taskTitle}' status changed from '${payload.oldStatus}' to '${payload.newStatus}'.`;\n            this.create({ userId: payload.assigneeId, message });\n        }\n    }\n\n    private handleCommentAdded(payload: CommentAddedPayload): void {\n        const task = this.taskService.getById(payload.taskId);\n        // Only notify if there is an assignee and the commenter is not the assignee\n        if (task && task.assigneeId && task.assigneeId !== payload.authorId) {\n            const message = `A new comment was added to task '${payload.taskTitle}' by ${payload.authorName}.`;\n            this.create({ userId: task.assigneeId, message });\n        }\n    }\n\n    private create(input: { userId: string; message: string }): Notification {\n        const id = crypto.randomUUID();\n        const notification: Notification = {\n            id,\n            ...input,\n            read: false,\n            createdAt: new Date().toISOString(),\n        };\n        this.notifications.set(id, notification);\n        return notification;\n    }\n\n    getByUser(userId: string): Notification[] {\n        return Array.from(this.notifications.values()).filter(\n            (n) => n.userId === userId && !n.read\n        );\n    }\n\n    markAsRead(notificationId: string): Notification {\n        const notification = this.notifications.get(notificationId);\n        if (!notification) {\n            throw new Error(`Notification with id ${notificationId} not found`);\n        }\n        notification.read = true;\n        return notification;\n    }\n}\n"
+          },
+          "output": "File written: src/services/notification-service.ts (73 lines)",
+          "error": false
+        }
+      ],
+      "inputTokens": 28081,
+      "outputTokens": 695
+    },
+    {
+      "role": "assistant",
+      "content": "",
+      "toolCalls": [
+        {
+          "name": "run_command",
+          "input": {
+            "command": "npx tsc --noEmit"
+          },
+          "output": "Command failed (exit 2):\nsrc/event-bus.ts(2,27): error TS2307: Cannot find module './types' or its corresponding type declarations.\r\nsrc/main.ts(25,21): error TS2339: Property 'registerEventListeners' does not exist on type 'NotificationService'.\r\nsrc/router.ts(9,8): error TS2307: Cannot find module './types' or its corresponding type declarations.",
+          "error": true
+        }
+      ],
+      "inputTokens": 28817,
+      "outputTokens": 11
+    },
+    {
+      "role": "assistant",
+      "content": "",
+      "toolCalls": [
+        {
+          "name": "read_file",
+          "input": {
+            "path": "src/event-bus.ts"
+          },
+          "output": "import { EventEmitter } from \"node:events\";\nimport { IEventBus } from \"./types\";\n\nexport class EventBus extends EventEmitter implements IEventBus {\n  publish(event: string, payload: unknown): void {\n    this.emit(event, payload);\n  }\n\n  subscribe(event: string, callback: (payload: unknown) => void): void {\n    this.on(event, callback);\n  }\n}\n",
+          "error": false
+        }
+      ],
+      "inputTokens": 28956,
+      "outputTokens": 11
+    },
+    {
+      "role": "assistant",
+      "content": "",
+      "toolCalls": [
+        {
+          "name": "write_file",
+          "input": {
+            "path": "src/event-bus.ts",
+            "content": "import { EventEmitter } from 'events';\nimport { IEventBus } from './contracts';\n\nexport class EventBus implements IEventBus {\n  private emitter = new EventEmitter();\n\n  public publish(event: string, payload: unknown): void {\n    this.emitter.emit(event, payload);\n  }\n\n  public subscribe(event: string, callback: (payload: unknown) => void): void {\n    this.emitter.on(event, callback);\n  }\n}\n"
+          },
+          "output": "File written: src/event-bus.ts (15 lines)",
+          "error": false
+        }
+      ],
+      "inputTokens": 29215,
+      "outputTokens": 118
+    },
+    {
+      "role": "assistant",
+      "content": "",
+      "toolCalls": [
+        {
+          "name": "read_file",
+          "input": {
+            "path": "src/router.ts"
+          },
+          "output": "import { IncomingMessage, ServerResponse } from \"node:http\";\nimport { parse as parseUrl } from \"node:url\";\nimport {\n  ICommentService,\n  IProjectService,\n  ITaskService,\n  IUserService,\n  INotificationService\n} from \"./types\";\n\n// A simple JSON body parser\nfunction parseJsonBody(req: IncomingMessage): Promise<any> {\n  return new Promise((resolve, reject) => {\n    let body = \"\";\n    req.on(\"data\", (chunk) => {\n      body += chunk.toString();\n    });\n    req.on(\"end\", () => {\n      try {\n        resolve(JSON.parse(body || \"{}\"));\n      } catch (e) {\n        reject(e);\n      }\n    });\n    req.on(\"error\", (err) => {\n      reject(err);\n    });\n  });\n}\n\nexport class ApiRouter {\n  constructor(\n    private userService: IUserService,\n    private projectService: IProjectService,\n    private taskService: ITaskService,\n    private commentService: ICommentService,\n    private notificationService: INotificationService,\n  ) {}\n\n  public async handle(req: IncomingMessage, res: ServerResponse) {\n    const { url, method } = req;\n    const { pathname, query } = parseUrl(url!, true);\n\n    res.setHeader(\"Content-Type\", \"application/json\");\n\n    try {\n      // User Routes\n      if (pathname === \"/users\") {\n        if (method === \"GET\") {\n          const users = this.userService.getAll();\n          res.statusCode = 200;\n          res.end(JSON.stringify(users));\n        } else if (method === \"POST\") {\n          const body = await parseJsonBody(req);\n          const user = this.userService.create(body);\n          res.statusCode = 201;\n          res.end(JSON.stringify(user));\n        }\n      } else if (pathname?.startsWith(\"/users/\")) {\n        const id = pathname.split(\"/\")[2];\n        if (method === \"GET\") {\n          const user = this.userService.getById(id);\n          res.statusCode = 200;\n          res.end(JSON.stringify(user));\n        } else if (method === \"PUT\") {\n          const body = await parseJsonBody(req);\n          const user = this.userService.update(id, body);\n          res.statusCode = 200;\n          res.end(JSON.stringify(user));\n        } else if (method === \"DELETE\") {\n          this.userService.delete(id);\n          res.statusCode = 204;\n          res.end();\n        }\n      }\n\n      // Project Routes\n      else if (pathname === \"/projects\") {\n        if (method === \"GET\") {\n            const projects = this.projectService.getAll();\n            res.statusCode = 200;\n            res.end(JSON.stringify(projects));\n        } else if (method === \"POST\") {\n            const body = await parseJsonBody(req);\n            const project = this.projectService.create(body);\n            res.statusCode = 201;\n            res.end(JSON.stringify(project));\n        }\n      } else if (pathname?.startsWith(\"/projects/\")) {\n        const parts = pathname.split('/');\n        const id = parts[2];\n        if (parts.length === 3) {\n            if (method === \"GET\") {\n                const project = this.projectService.getById(id);\n                res.statusCode = 200;\n                res.end(JSON.stringify(project));\n            } else if (method === \"PUT\") {\n                const body = await parseJsonBody(req);\n                const project = this.projectService.update(id, body);\n                res.statusCode = 200;\n                res.end(JSON.stringify(project));\n            } else if (method === \"DELETE\") {\n                this.projectService.delete(id);\n                res.statusCode = 204;\n                res.end();\n            }\n        } else if (parts.length === 4 && parts[3] === 'members') {\n            const body = await parseJsonBody(req);\n            if (method === 'POST') {\n                const project = this.projectService.addMember(id, body.userId);\n                res.statusCode = 200;\n                res.end(JSON.stringify(project));\n            } else if (method === 'DELETE') {\n                 const project = this.projectService.removeMember(id, body.userId);\n                 res.statusCode = 200;\n                 res.end(JSON.strin\n...(truncated)",
+          "error": false
+        }
+      ],
+      "inputTokens": 29384,
+      "outputTokens": 9
+    },
+    {
+      "role": "assistant",
+      "content": "",
+      "toolCalls": [
+        {
+          "name": "write_file",
+          "input": {
+            "content": "\nimport * as http from 'http';\nimport * as url from 'url';\nimport { IUserService, IProjectService, ITaskService, ICommentService, INotificationService } from './contracts';\n\n// Helper to parse body\nasync function parseBody(req: http.IncomingMessage): Promise<any> {\n    return new Promise((resolve, reject) => {\n        let body = '';\n        req.on('data', chunk => body += chunk.toString());\n        req.on('end', () => {\n            try {\n                resolve(JSON.parse(body));\n            } catch (e) {\n                reject(e);\n            }\n        });\n        req.on('error', reject);\n    });\n}\n\nexport class ApiRouter {\n    constructor(\n        private userService: IUserService,\n        private projectService: IProjectService,\n        private taskService: ITaskService,\n        private commentService: ICommentService,\n        private notificationService: INotificationService\n    ) {}\n\n    public async handle(req: http.IncomingMessage, res: http.ServerResponse) {\n        const { pathname, query } = url.parse(req.url!, true);\n        const method = req.method?.toUpperCase();\n        res.setHeader('Content-Type', 'application/json');\n\n        try {\n            // User Routes\n            if (pathname === '/users') {\n                if (method === 'GET') {\n                    const users = this.userService.getAll();\n                    res.statusCode = 200;\n                    res.end(JSON.stringify(users));\n                } else if (method === 'POST') {\n                    const body = await parseBody(req);\n                    const user = this.userService.create(body);\n                    res.statusCode = 201;\n                    res.end(JSON.stringify(user));\n                }\n            } else if (pathname?.startsWith('/users/')) {\n                const id = pathname.split('/')[2];\n                if (method === 'GET') {\n                    const user = this.userService.getById(id);\n                    if(!user) throw new Error('User not found');\n                    res.statusCode = 200;\n                    res.end(JSON.stringify(user));\n                } else if (method === 'PUT') {\n                    const body = await parseBody(req);\n                    const user = this.userService.update(id, body);\n                    res.statusCode = 200;\n                    res.end(JSON.stringify(user));\n                } else if (method === 'DELETE') {\n                    this.userService.delete(id);\n                    res.statusCode = 204;\n                    res.end();\n                }\n            }\n\n            // Project Routes\n            else if (pathname === '/projects') {\n                if (method === 'GET') {\n                    res.statusCode = 200;\n                    res.end(JSON.stringify(this.projectService.getAll()));\n                } else if (method === 'POST') {\n                    const body = await parseBody(req);\n                    const project = this.projectService.create(body);\n                    res.statusCode = 201;\n                    res.end(JSON.stringify(project));\n                }\n            } else if (pathname?.startsWith('/projects/')) {\n                const id = pathname.split('/')[2];\n                if (pathname.endsWith('/members')) {\n                     const body = await parseBody(req);\n                    if (method === 'POST') {\n                       const project = this.projectService.addMember(id, body.userId);\n                       res.statusCode = 200;\n                       res.end(JSON.stringify(project));\n                    } else if (method === 'DELETE') {\n                       const project = this.projectService.removeMember(id, body.userId);\n                       res.statusCode = 200;\n                       res.end(JSON.stringify(project));\n                    }\n                } else {\n                    if (method === 'GET') {\n                        const project = this.projectService.getById(id);\n                        if(!project) throw new Error('Project not found');\n                        res.statusCode = 200;\n                        res.end(JSON.stringify(project));\n                    } else if (method === 'PUT') {\n                        const body = await parseBody(req);\n                        const project = this.projectService.update(id, body);\n                        res.statusCode = 200;\n                        res.end(JSON.stringify(project));\n                    } else if (method === 'DELETE') {\n                        this.projectService.delete(id);\n                        res.statusCode = 204;\n                        res.end();\n                    }\n                }\n            }\n            \n            // Task Routes\n            else if (pathname === '/tasks') {\n                 if (method === 'GET' && query.projectId) {\n                    const tasks = this.taskService.getByProject(query.projectId as string);\n                    res.statusCode = 200;\n                    res.end(JSON.stringify(tasks));\n                } else if (method === 'POST') {\n                    const body = await parseBody(req);\n                    const task = this.taskService.create(body);\n                    res.statusCode = 201;\n                    res.end(JSON.stringify(task));\n                }\n            } else if (pathname?.startsWith('/tasks/')) {\n                 const id = pathname.split('/')[2];\n                 if (pathname.endsWith('/status')) {\n                     if (method === 'PUT') {\n                         const body = await parseBody(req);\n                         const task = this.taskService.changeStatus(id, body.status);\n                         res.statusCode = 200;\n                         res.end(JSON.stringify(task));\n                     }\n                 } else if (pathname.endsWith('/assign')) {\n                      if (method === 'PUT') {\n                         const body = await parseBody(req);\n                         const task = this.taskService.assign(id, body.assigneeId);\n                         res.statusCode = 200;\n                         res.end(JSON.stringify(task));\n                      }\n                 } else {\n                     if (method === 'GET') {\n                         const task = this.taskService.getById(id);\n                         if(!task) throw new Error('Task not found');\n                         res.statusCode = 200;\n                         res.end(JSON.stringify(task));\n                     } else if (method === 'PUT') {\n                         const body = await parseBody(req);\n                         const task = this.taskService.update(id, body);\n                         res.statusCode = 200;\n                         res.end(JSON.stringify(task));\n                     } else if (method === 'DELETE') {\n                         this.taskService.delete(id);\n                         res.statusCode = 204;\n                         res.end();\n                     }\n                 }\n            }\n            \n            // Comment Routes\n            else if (pathname === '/comments') {\n                if (method === 'GET' && query.taskId) {\n                    const comments = this.commentService.getByTask(query.taskId as string);\n                    res.statusCode = 200;\n                    res.end(JSON.stringify(comments));\n                } else if (method === 'POST') {\n                    const body = await parseBody(req);\n                    const comment = this.commentService.create(body);\n                    res.statusCode = 201;\n                    res.end(JSON.stringify(comment));\n                }\n            } else if (pathname?.startsWith('/comments/')) {\n                const id = pathname.split('/')[2];\n                if (method === 'GET') {\n                    const comment = this.commentService.getById(id);\n                    if(!comment) throw new Error('Comment not found');\n                    res.statusCode = 200;\n                    res.end(JSON.stringify(comment));\n                } else if (method === 'DELETE') {\n                    this.commentService.delete(id);\n                    res.statusCode = 204;\n                    res.end();\n                }\n            }\n            \n            // Notification Routes\n            else if (pathname === '/notifications' && query.userId) {\n                if (method === 'GET') {\n                    const notifications = this.notificationService.getByUser(query.userId as string);\n                    res.statusCode = 200;\n                    res.end(JSON.stringify(notifications));\n                }\n            } else if (pathname?.startsWith('/notifications/')) {\n                 const id = pathname.split('/')[2];\n                 if(pathname.endsWith('/read') && method === 'PUT') {\n                     const notification = this.notificationService.markAsRead(id);\n                     res.statusCode = 200;\n                     res.end(JSON.stringify(notification));\n                 }\n            }\n            \n            else {\n                res.statusCode = 404;\n                res.end(JSON.stringify({ error: 'Not Found' }));\n            }\n\n        } catch (error: any) {\n            console.error(error);\n            res.statusCode = error.message.includes('not found') ? 404 : 400;\n            res.end(JSON.stringify({ error: error.message }));\n        }\n    }\n}\n",
+            "path": "src/router.ts"
+          },
+          "output": "File written: src/router.ts (212 lines)",
+          "error": false
+        }
+      ],
+      "inputTokens": 30513,
+      "outputTokens": 2112
+    },
+    {
+      "role": "assistant",
+      "content": "",
+      "toolCalls": [
+        {
+          "name": "read_file",
+          "input": {
+            "path": "src/main.ts"
+          },
+          "output": "import { createServer } from \"node:http\";\nimport { EventBus } from \"./event-bus\";\nimport { ApiRouter } from \"./router\";\nimport { CommentService } from \"./services/comment-service\";\nimport { NotificationService } from \"./services/notification-service\";\nimport { ProjectService } from \"./services/project-service\";\nimport { TaskService } from \"./services/task-service\";\nimport { UserService } from \"./services/user-service\";\n\nconst PORT = process.env.PORT || 3000;\n\n// 1. Instantiate Core Components\nconst eventBus = new EventBus();\n\n// 2. Instantiate Services\nconst userService = new UserService();\nconst projectService = new ProjectService();\nconst taskService = new TaskService(eventBus);\n// Note: Services are injected here to avoid cross-service file imports\nconst commentService = new CommentService(eventBus, userService, taskService);\nconst notificationService = new NotificationService(eventBus, taskService);\n\n// 3. Set up event listeners\n// This is the \"Event Wiring\" step from the spec\nnotificationService.registerEventListeners();\n\n// 4. Instantiate the Router\nconst router = new ApiRouter(\n  userService,\n  projectService,\n  taskService,\n  commentService,\n  notificationService,\n);\n\n// 5. Create and Start the HTTP Server\nconst server = createServer((req, res) => {\n  router.handle(req, res);\n});\n\nserver.listen(PORT, () => {\n  console.log(`Server listening on port ${PORT}`);\n  console.log(`To run the demo, execute: npx tsx src/demo.ts`);\n});\n\nexport { server }; // Export for demo script to close\n",
+          "error": false
+        }
+      ],
+      "inputTokens": 32659,
+      "outputTokens": 9
+    },
+    {
+      "role": "assistant",
+      "content": "",
+      "toolCalls": [
+        {
+          "name": "write_file",
+          "input": {
+            "path": "src/main.ts",
+            "content": "import * as http from 'http';\nimport { EventBus } from './event-bus';\nimport { UserService } from './services/user-service';\nimport { ProjectService } from './services/project-service';\nimport { TaskService } from './services/task-service';\nimport { CommentService } from './services/comment-service';\nimport { NotificationService } from './services/notification-service';\nimport { ApiRouter } from './router';\n\nconst PORT = process.env.PORT || 3000;\n\n// 1. Initialize Event Bus\nconst eventBus = new EventBus();\n\n// 2. Initialize Services\nconst userService = new UserService();\nconst projectService = new ProjectService();\nconst taskService = new TaskService(eventBus);\n// As per the deduction, inject services that are needed for generating event payloads\nconst commentService = new CommentService(eventBus, userService, taskService);\nconst notificationService = new NotificationService(eventBus, taskService);\n\n// 3. Initialize Router\nconst router = new ApiRouter(\n    userService,\n    projectService,\n    taskService,\n    commentService,\n    notificationService\n);\n\n// 4. Create and start HTTP server\nconst server = http.createServer((req, res) => {\n    router.handle(req, res);\n});\n\nserver.listen(PORT, () => {\n    console.log(`Server running on http://localhost:${PORT}`);\n});\n\n// Export server for demo script\nexport { server };\n"
+          },
+          "output": "File written: src/main.ts (43 lines)",
+          "error": false
+        }
+      ],
+      "inputTokens": 33169,
+      "outputTokens": 341
+    },
+    {
+      "role": "assistant",
+      "content": "",
+      "toolCalls": [
+        {
+          "name": "run_command",
+          "input": {
+            "command": "npx tsc --noEmit"
+          },
+          "output": "(command completed with no output)",
+          "error": false
+        }
+      ],
+      "inputTokens": 33548,
+      "outputTokens": 11
+    },
+    {
+      "role": "assistant",
+      "content": "",
+      "toolCalls": [
+        {
+          "name": "run_command",
+          "input": {
+            "command": "npx tsx src/demo.ts"
+          },
+          "output": "Command failed (exit 1):\n--- Starting Task Management API Demo ---\n\n1. Creating users...\n  - Created: {\n  id: '24544be2f64088241d7083da493cb714',\n  name: 'Alice',\n  email: 'alice@example.com'\n}\n  - Created: {\n  id: '4f5fb79fb17fa0db7fb1bddec00b445a',\n  name: 'Bob',\n  email: 'bob@example.com'\n}\n\n2. Creating a project...\n  - Created: {\n  id: '0a1a7da72bb39f984109806be4c34387',\n  name: 'API Development',\n  description: 'Build the new Task API',\n  members: [ null ]\n}\n\n3. Adding members to the project...\n\n\n--- Demo Failed ---\nError: Request failed with status 404: {\"message\":\"Route not found\"}\n    at IncomingMessage.<anonymous> (C:\\Users\\user\\Downloads\\example.com\\architecture-driven-design\\trials-gemini-25-pro\\typescript-contracts-2\\code\\src\\demo.ts:25:20)\n    at IncomingMessage.emit (node:events:520:35)\n    at endReadableNT (node:internal/streams/readable:1729:12)\n    at process.processTicksAndRejections (node:internal/process/task_queues:90:21)",
+          "error": true
+        }
+      ],
+      "inputTokens": 33597,
+      "outputTokens": 13
+    }
+  ],
+  "startTime": "2026-08-19T05:11:45.334Z",
+  "endTime": "2026-08-19T05:19:24.598Z",
+  "totalInputTokens": 987261,
+  "totalOutputTokens": 14622
+}

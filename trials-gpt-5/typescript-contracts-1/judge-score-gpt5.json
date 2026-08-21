@@ -1,0 +1,10 @@
+{
+  "trialId": "typescript-contracts-1",
+  "specType": "typescript-contracts",
+  "architecturalAdherence": 7,
+  "completeness": 9,
+  "codeQuality": 8,
+  "constraintCompliance": 8,
+  "overall": 8,
+  "notes": "Overall the implementation is clean and modular, with services owning their own in-memory stores and an in-memory event bus enabling decoupled communication. All required services and endpoints are present, events are published on task assignment/status change and comment creation, and a demo script exercises the flow. However, there is a significant architectural violation: NotificationService performs cross-service lookups via injected helper functions that directly call UserService/TaskService, bypassing the Event Bus. Rule 1 requires all inter-service communication via the Event Bus; enrichment should be provided in event payloads or handled by subscribing services without querying other services. Minor API issues: thrown 'not found' errors are converted into HTTP 400 instead of 404, and GET /tasks without projectId returns an empty list rather than all tasks. Task status transitions are enforced as one-step forward-only, which is stricter than the spec but acceptable. No external dependencies are used, and HTTP handling is confined to the Router."
+}

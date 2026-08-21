@@ -1,0 +1,56 @@
+{
+  "trialId": "typescript-contracts-3",
+  "specType": "typescript-contracts",
+  "structural": {
+    "hasEventBus": true,
+    "hasUserService": true,
+    "hasProjectService": true,
+    "hasTaskService": true,
+    "hasCommentService": true,
+    "hasNotificationService": true,
+    "hasRouter": true,
+    "hasMainEntry": true,
+    "hasDemoScript": true,
+    "fileCount": 10,
+    "folderStructureScore": 10,
+    "details": [
+      "Each service in its own file: YES"
+    ]
+  },
+  "constraints": {
+    "directServiceCalls": [],
+    "sharedDataAccess": [],
+    "httpInServices": [],
+    "invalidStatusTransitions": [],
+    "externalDependencies": [],
+    "totalViolations": 0
+  },
+  "codeMetrics": {
+    "compiles": false,
+    "compilationErrors": [],
+    "totalLines": 676,
+    "totalFiles": 10,
+    "linesPerFile": {
+      "src\\demo.ts": 90,
+      "src\\event-bus.ts": 15,
+      "src\\main.ts": 41,
+      "src\\router.ts": 189,
+      "src\\services\\comment-service.ts": 46,
+      "src\\services\\notification-service.ts": 28,
+      "src\\services\\project-service.ts": 51,
+      "src\\services\\task-service.ts": 69,
+      "src\\services\\user-service.ts": 36,
+      "src\\types.ts": 111
+    }
+  },
+  "transcriptMetrics": {
+    "totalInputTokens": 159587,
+    "totalOutputTokens": 16439,
+    "totalTokens": 176026,
+    "messageCount": 20,
+    "toolCallCount": 20,
+    "errorCount": 3,
+    "retryCount": 0,
+    "durationMs": 196207
+  }
+}

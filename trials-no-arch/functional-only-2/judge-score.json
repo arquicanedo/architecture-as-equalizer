@@ -1,0 +1,10 @@
+{
+  "trialId": "functional-only-2",
+  "specType": "functional-only",
+  "architecturalAdherence": 3,
+  "completeness": 7,
+  "codeQuality": 7,
+  "constraintCompliance": 3,
+  "overall": 5,
+  "notes": "The implementation has solid TypeScript quality, good validation, correct forward-only status transitions, cascade deletes, and a thorough demo. However, it fails critically on the most important architectural constraints. (1) No Event Bus exists — the spec requires an in-memory pub/sub bus for inter-service communication, but none is implemented. (2) Architectural Rule #1 is violated everywhere: services communicate directly by calling store accessors and utility functions across service boundaries rather than through an event bus. For example, comments.ts directly reads store.tasks and store.projects, tasks.ts reads store.users, and projects.ts reads store.users — all cross-service data access. (3) Architectural Rule #2 is violated: each service is supposed to own its own data store exclusively, but all services share a single global 'store' object, meaning any handler can read or write any other service's data freely. (4) There is no Event Bus file/module at all — the spec explicitly calls for one as a named component. (5) The Notification Service is not a standalone service with its own store; notifications are created via a shared utility function (createNotification in utils.ts) that directly writes to the shared store. (6) Each service is not truly in its own file in the service sense — they are handler files, not service classes/modules with encapsulated data. The routing and HTTP handling is correctly isolated in router.ts/server.ts. CRUD operations are largely complete. Code quality is good: TypeScript types are well-defined, validation is thorough, error codes are appropriate, and the demo script is comprehensive. The core architectural violations (no event bus, shared store, direct cross-service calls) are fundamental and disqualifying for the stated constraints."
+}

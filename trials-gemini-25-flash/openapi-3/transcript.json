@@ -1,0 +1,95 @@
+{
+  "trialId": "openapi-3",
+  "specType": "openapi",
+  "messages": [
+    {
+      "role": "assistant",
+      "content": "",
+      "toolCalls": [
+        {
+          "name": "write_file",
+          "input": {
+            "path": "src/models.ts",
+            "content": "\nexport interface User {\n    id: string;\n    name: string;\n    email: string;\n}\n\nexport interface CreateUserInput {\n    name: string;\n    email: string;\n}\n\nexport interface UpdateUserInput {\n    name?: string;\n    email?: string;\n}\n\nexport interface Project {\n    id: string;\n    name: string;\n    description: string;\n    memberIds: string[];\n}\n\nexport interface CreateProjectInput {\n    name: string;\n    description: string;\n}\n\nexport interface UpdateProjectInput {\n    name?: string;\n    description?: string;\n}\n\nexport type TaskStatus = 'todo' | 'in-progress' | 'done';\n\nexport interface Task {\n    id: string;\n    title: string;\n    description: string;\n    status: TaskStatus;\n    assigneeId: string | null;\n    projectId: string;\n}\n\nexport interface CreateTaskInput {\n    title: string;\n    description: string;\n    projectId: string;\n}\n\nexport interface UpdateTaskInput {\n    title?: string;\n    description?: string;\n}\n\nexport interface Comment {\n    id: string;\n    taskId: string;\n    authorId: string;\n    body: string;\n    createdAt: string; // ISO date string\n}\n\nexport interface CreateCommentInput {\n    taskId: string;\n    authorId: string;\n    body: string;\n}\n\nexport interface Notification {\n    id: string;\n    userId: string;\n    message: string;\n    read: boolean;\n    createdAt: string; // ISO date string\n}\n"
+          },
+          "output": "File written: src/models.ts (78 lines)",
+          "error": false
+        }
+      ],
+      "inputTokens": 4540,
+      "outputTokens": 376
+    },
+    {
+      "role": "assistant",
+      "content": "",
+      "toolCalls": [
+        {
+          "name": "write_file",
+          "input": {
+            "content": "type EventCallback = (payload: any) => void;\n\nexport class EventBus {\n    private subscribers: Map<string, EventCallback[]> = new Map();\n\n    public subscribe(event: string, callback: EventCallback): void {\n        if (!this.subscribers.has(event)) {\n            this.subscribers.set(event, []);\n        }\n        this.subscribers.get(event)?.push(callback);\n    }\n\n    public publish(event: string, payload: any): void {\n        if (this.subscribers.has(event)) {\n            this.subscribers.get(event)?.forEach(callback => {\n                // Run callbacks asynchronously to prevent blocking the publisher\n                // and to adhere to the decoupled nature of event buses.\n                setImmediate(() => callback(payload));\n            });\n        }\n    }\n}\n",
+            "path": "src/event-bus.ts"
+          },
+          "output": "File written: src/event-bus.ts (23 lines)",
+          "error": false
+        }
+      ],
+      "inputTokens": 5640,
+      "outputTokens": 201
+    },
+    {
+      "role": "assistant",
+      "content": "",
+      "toolCalls": [
+        {
+          "name": "write_file",
+          "input": {
+            "path": "src/services/user-service.ts",
+            "content": "import { User, CreateUserInput, UpdateUserInput } from '../models';\nimport { randomUUID } from 'crypto';\n\nexport class UserService {\n    private users: Map<string, User> = new Map();\n\n    constructor() {\n        // Seed with a default user\n        const defaultUser: User = {\n            id: randomUUID(),\n            name: \"John Doe\",\n            email: \"john.doe@example.com\"\n        };\n        this.users.set(defaultUser.id, defaultUser);\n    }\n\n    public async listUsers(): Promise<User[]> {\n        return Array.from(this.users.values());\n    }\n\n    public async getUser(id: string): Promise<User | undefined> {\n        return this.users.get(id);\n    }\n\n    public async createUser(input: CreateUserInput): Promise<User> {\n        const newUser: User = {\n            id: randomUUID(),\n            name: input.name,\n            email: input.email,\n        };\n        this.users.set(newUser.id, newUser);\n        return newUser;\n    }\n\n    public async updateUser(id: string, input: UpdateUserInput): Promise<User | undefined> {\n        const user = this.users.get(id);\n        if (!user) {\n            return undefined;\n        }\n        if (input.name !== undefined) {\n            user.name = input.name;\n        }\n        if (input.email !== undefined) {\n            user.email = input.email;\n        }\n        this.users.set(id, user);\n        return user;\n    }\n\n    public async deleteUser(id: string): Promise<boolean> {\n        return this.users.delete(id);\n    }\n}\n"
+          },
+          "output": "File written: src/services/user-service.ts (54 lines)",
+          "error": false
+        }
+      ],
+      "inputTokens": 5886,
+      "outputTokens": 412
+    },
+    {
+      "role": "assistant",
+      "content": "",
+      "toolCalls": [
+        {
+          "name": "write_file",
+          "input": {
+            "content": "import { Project, CreateProjectInput, UpdateProjectInput } from '../models';\nimport { randomUUID } from 'crypto';\n\nexport class ProjectService {\n    private projects: Map<string, Project> = new Map();\n\n    public async listProjects(): Promise<Project[]> {\n        return Array.from(this.projects.values());\n    }\n\n    public async getProject(id: string): Promise<Project | undefined> {\n        return this.projects.get(id);\n    }\n\n    public async createProject(input: CreateProjectInput): Promise<Project> {\n        const newProject: Project = {\n            id: randomUUID(),\n            name: input.name,\n            description: input.description,\n            memberIds: [],\n        };\n        this.projects.set(newProject.id, newProject);\n        return newProject;\n    }\n\n    public async updateProject(id: string, input: UpdateProjectInput): Promise<Project | undefined> {\n        const project = this.projects.get(id);\n        if (!project) {\n            return undefined;\n        }\n        if (input.name !== undefined) {\n            project.name = input.name;\n        }\n        if (input.description !== undefined) {\n            project.description = input.description;\n        }\n        this.projects.set(id, project);\n        return project;\n    }\n\n    public async deleteProject(id: string): Promise<boolean> {\n        return this.projects.delete(id);\n    }\n\n    public async addMemberToProject(projectId: string, userId: string): Promise<Project | undefined> {\n        const project = this.projects.get(projectId);\n        if (!project) {\n            return undefined;\n        }\n        if (!project.memberIds.includes(userId)) {\n            project.memberIds.push(userId);\n        }\n        this.projects.set(projectId, project);\n        return project;\n    }\n\n    public async removeMemberFromProject(projectId: string, userId: string): Promise<Project | undefined> {\n        const project = this.projects.get(projectId);\n        if (!project) {\n            return undefined;\n        }\n        project.memberIds = project.memberIds.filter(memberId => memberId !== userId);\n        this.projects.set(projectId, project);\n        return project;\n    }\n}\n",
+            "path": "src/services/project-service.ts"
+          },
+          "output": "File written: src/services/project-service.ts (67 lines)",
+          "error": false
+        }
+      ],
+      "inputTokens": 6371,
+      "outputTokens": 552
+    },
+    {
+      "role": "assistant",
+      "content": "",
+      "toolCalls": [
+        {
+          "name": "write_file",
+          "input": {
+            "content": "import { Task, CreateTaskInput, UpdateTaskInput, TaskStatus } from '../models';\nimport { EventBus } from '../event-bus';\nimport { randomUUID } from 'crypto';\n\nexport class TaskService {\n    private tasks: Map<string, Task> = new Map();\n    private eventBus: EventBus;\n\n    constructor(eventBus: EventBus) {\n        this.eventBus = eventBus;\n    }\n\n    public async listTasks(projectId: string): Promise<Task[]> {\n        return Array.from(this.tasks.values()).filter(task => task.projectId === projectId);\n    }\n\n    public async getTask(id: string): Promise<Task | undefined> {\n        return this.tasks.get(id);\n    }\n\n    public async createTask(input: CreateTaskInput): Promise<Task> {\n        const newTask: Task = {\n            id: randomUUID(),\n            title: input.title,\n            description: input.description,\n            status: 'todo', // Initial status\n            assigneeId: null,\n            projectId: input.projectId,\n        };\n        this.tasks.set(newTask.id, newTask);\n        return newTask;\n    }\n\n    public async updateTask(id: string, input: UpdateTaskInput): Promise<Task | undefined> {\n        const task = this.tasks.get(id);\n        if (!task) {\n            return undefined;\n        }\n        if (input.title !== undefined) {\n            task.title = input.title;\n        }\n        if (input.description !== undefined) {\n            task.description = input.description;\n        }\n        this.tasks.set(id, task);\n        return task;\n    }\n\n    public async deleteTask(id: string): Promise<boolean> {\n        return this.tasks.delete(id);\n    }\n\n    public async changeTaskStatus(id: string, newStatus: TaskStatus): Promise<Task | undefined | 'invalid_transition'> {\n        const task = this.tasks.get(id);\n        if (!task) {\n            return undefined;\n        }\n\n        const currentStatus = task.status;\n        const validTransitions: Record<TaskStatus, TaskStatus[]> = {\n            'todo': ['in-progress'],\n            'in-progress': ['done'],\n            'done': [], // No transitions from done\n        };\n\n        if (!validTransitions[currentStatus].includes(newStatus) && newStatus !== currentStatus) {\n            return 'invalid_transition';\n        }\n\n        if (newStatus !== currentStatus) {\n            const oldStatus = task.status;\n            task.status = newStatus;\n            this.tasks.set(id, task);\n            this.eventBus.publish('task.statusChanged', {\n                taskId: task.id,\n                taskTitle: task.title,\n                assigneeId: task.assigneeId,\n                oldStatus: oldStatus,\n                newStatus: newStatus,\n            });\n        }\n\n        return task;\n    }\n\n    public async assignTask(id: string, assigneeId: string): Promise<Task | undefined> {\n        const task = this.tasks.get(id);\n        if (!task) {\n            return undefined;\n        }\n        task.assigneeId = assigneeId;\n        this.tasks.set(id, task);\n        this.eventBus.publish('task.assigned', {\n            taskId: task.id,\n            taskTitle: task.title,\n            assigneeId: assigneeId,\n        });\n        return task;\n    }\n}\n",
+            "path": "src/services/task-service.ts"
+          },
+          "output": "File written: src/services/task-service.ts (101 lines)",
+          "error": false
+        }
+      ],
+      "inputTokens": 7003,
+      "outputTokens": 827
+    }
+  ],
+  "startTime": "2026-08-19T04:02:03.848Z",
+  "endTime": "2026-08-19T04:02:26.581Z",
+  "totalInputTokens": 36448,
+  "totalOutputTokens": 2368
+}

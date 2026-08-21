@@ -1,0 +1,10 @@
+{
+  "trialId": "structured-1",
+  "specType": "structured",
+  "architecturalAdherence": 7,
+  "completeness": 8,
+  "codeQuality": 8,
+  "constraintCompliance": 6,
+  "notes": "Overall a solid implementation with clear separation of concerns and good use of the event bus for inter-service communication. Specific issues: (1) CONSTRAINT VIOLATION - Rule 1 broken in router.ts: the router directly queries userService.getById() and taskService.getById() when creating a comment, then passes the extracted data (taskTitle, authorName, assigneeId) as meta to commentService.create(). This is a workaround that effectively has the HTTP layer acting as a mediator between services to circumvent the no-direct-calls rule, but architecturally the router is doing cross-service data assembly that belongs in an event-driven pattern. (2) CONSTRAINT VIOLATION - Rule 1 also broken in assign endpoint: router calls userService.getById() to validate assignee before calling taskService.assign() — this is cross-service validation in the router layer rather than purely delegating. (3) The comment.added event payload includes assigneeId injected via meta from the router, which is an architectural smell — the CommentService event payload is being enriched by the router with data it fetched from other services. The notification service comment notes acknowledge this tension but the workaround is impure. (4) No unsubscribe mechanism on EventBus, which is minor for in-memory but worth noting. (5) TaskService.changeStatus allows same-status transitions (returns existing task silently) — spec implies forward-only but same-status is ambiguous. (6) No input validation (missing required fields, duplicate emails, invalid IDs). (7) DELETE returning 204 with JSON body is non-standard. (8) No getById null-check returning 404 for user/project routes (returns null with 200). (9) All CRUD operations present for all services. Demo script is well-structured with port-check logic. TypeScript typing is reasonable though some 'any' usage exists. Event bus implementation is clean and correct.",
+  "overall": 7.25
+}

@@ -1,0 +1,10 @@
+{
+  "trialId": "c4-3",
+  "specType": "c4",
+  "architecturalAdherence": 5,
+  "completeness": 7,
+  "codeQuality": 7,
+  "constraintCompliance": 4,
+  "notes": "Multiple architectural violations found. CRITICAL - Constraint 1 (no direct service-to-service calls): comment-service.ts directly imports and calls taskService.getById() and userService.getById(), violating the event bus rule. The router also directly calls notificationService.notifyTaskAssigneeOnComment() and taskService.getById() after comment creation to coordinate cross-service notification logic, which is inter-service orchestration that should flow through the event bus. The notification-service comment.added subscriber is a stub that does nothing, with a comment acknowledging the design cop-out. CRITICAL - Constraint 3 (all HTTP handling in router only): The comment-service internally validates task and user existence by directly calling other services, which is business logic that bleeds across service boundaries. The router also performs cross-service lookups (taskService.getById + userService.getById) before calling notificationService, meaning the router is acting as a service orchestrator rather than a pure HTTP delegator. Constraint 2 (each service owns its data): violated by comment-service reaching into task and user stores via direct imports. On the positive side: forward-only status transitions are correctly implemented with clear transition map; event bus is a clean pub/sub implementation; task.assigned and task.statusChanged events do flow through the bus to notification-service properly; each service is in its own file; no external npm dependencies; TypeScript typing is reasonable though UpdateProjectRequest is incorrectly reused for UpdateUserRequest in router.ts; GET /tasks without projectId silently returns empty array instead of all tasks; input validation is minimal with no checks for missing required fields; demo script uses require('http') inside an ES module context which is inconsistent.",
+  "overall": 5.75
+}

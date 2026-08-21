@@ -1,0 +1,95 @@
+{
+  "trialId": "structured-1",
+  "specType": "structured",
+  "messages": [
+    {
+      "role": "assistant",
+      "content": "",
+      "toolCalls": [
+        {
+          "name": "write_file",
+          "input": {
+            "path": "src/event-bus.ts",
+            "content": "\ninterface EventBusEvents {\n  [key: string]: any[];\n}\n\nclass EventBus {\n  private subscribers: Map<string, ((payload: any) => void)[]> = new Map();\n\n  publish<T>(event: string, payload: T): void {\n    const handlers = this.subscribers.get(event);\n    if (handlers) {\n      handlers.forEach(handler => {\n        try {\n          handler(payload);\n        } catch (error) {\n          console.error(`Error handling event \"${event}\":`, error);\n        }\n      });\n    }\n  }\n\n  subscribe<T>(event: string, callback: (payload: T) => void): void {\n    if (!this.subscribers.has(event)) {\n      this.subscribers.set(event, []);\n    }\n    this.subscribers.get(event)?.push(callback as (payload: any) => void);\n  }\n\n  unsubscribe<T>(event: string, callback: (payload: T) => void): void {\n    const handlers = this.subscribers.get(event);\n    if (handlers) {\n      this.subscribers.set(event, handlers.filter(handler => handler !== callback));\n    }\n  }\n}\n\nexport const eventBus = new EventBus();\n"
+          },
+          "output": "File written: src/event-bus.ts (38 lines)",
+          "error": false
+        }
+      ],
+      "inputTokens": 2288,
+      "outputTokens": 308
+    },
+    {
+      "role": "assistant",
+      "content": "",
+      "toolCalls": [
+        {
+          "name": "write_file",
+          "input": {
+            "content": "interface User {\n  id: string;\n  name: string;\n  email: string;\n}\n\nclass UserService {\n  private users: Map<string, User> = new Map();\n  private nextId: number = 1;\n\n  create(name: string, email: string): User {\n    const id = `user-${this.nextId++}`;\n    const newUser: User = { id, name, email };\n    this.users.set(id, newUser);\n    return newUser;\n  }\n\n  getById(id: string): User | undefined {\n    return this.users.get(id);\n  }\n\n  getAll(): User[] {\n    return Array.from(this.users.values());\n  }\n\n  update(id: string, name: string, email: string): User | undefined {\n    const user = this.users.get(id);\n    if (user) {\n      user.name = name;\n      user.email = email;\n      return user;\n    }\n    return undefined;\n  }\n\n  delete(id: string): boolean {\n    return this.users.delete(id);\n  }\n}\n\nexport const userService = new UserService();\n",
+            "path": "src/services/user-service.ts"
+          },
+          "output": "File written: src/services/user-service.ts (42 lines)",
+          "error": false
+        }
+      ],
+      "inputTokens": 3034,
+      "outputTokens": 286
+    },
+    {
+      "role": "assistant",
+      "content": "",
+      "toolCalls": [
+        {
+          "name": "write_file",
+          "input": {
+            "content": "interface Project {\n  id: string;\n  name: string;\n  description: string;\n  memberIds: string[];\n}\n\nclass ProjectService {\n  private projects: Map<string, Project> = new Map();\n  private nextId: number = 1;\n\n  create(name: string, description: string, creatorId: string): Project {\n    const id = `proj-${this.nextId++}`;\n    const newProject: Project = { id, name, description, memberIds: [creatorId] };\n    this.projects.set(id, newProject);\n    return newProject;\n  }\n\n  getById(id: string): Project | undefined {\n    return this.projects.get(id);\n  }\n\n  getAll(): Project[] {\n    return Array.from(this.projects.values());\n  }\n\n  update(id: string, name: string, description: string): Project | undefined {\n    const project = this.projects.get(id);\n    if (project) {\n      project.name = name;\n      project.description = description;\n      return project;\n    }\n    return undefined;\n  }\n\n  delete(id: string): boolean {\n    return this.projects.delete(id);\n  }\n\n  addMember(projectId: string, userId: string): boolean {\n    const project = this.projects.get(projectId);\n    if (project && !project.memberIds.includes(userId)) {\n      project.memberIds.push(userId);\n      return true;\n    }\n    return false;\n  }\n\n  removeMember(projectId: string, userId: string): boolean {\n    const project = this.projects.get(projectId);\n    if (project) {\n      const initialLength = project.memberIds.length;\n      project.memberIds = project.memberIds.filter(memberId => memberId !== userId);\n      return project.memberIds.length < initialLength;\n    }\n    return false;\n  }\n}\n\nexport const projectService = new ProjectService();\n",
+            "path": "src/services/project-service.ts"
+          },
+          "output": "File written: src/services/project-service.ts (62 lines)",
+          "error": false
+        }
+      ],
+      "inputTokens": 3367,
+      "outputTokens": 478
+    },
+    {
+      "role": "assistant",
+      "content": "",
+      "toolCalls": [
+        {
+          "name": "write_file",
+          "input": {
+            "path": "src/services/task-service.ts",
+            "content": "import { eventBus } from '../event-bus';\n\ntype TaskStatus = 'todo' | 'in-progress' | 'done';\n\ninterface Task {\n  id: string;\n  title: string;\n  description: string;\n  status: TaskStatus;\n  assigneeId?: string;\n  projectId: string;\n}\n\nclass TaskService {\n  private tasks: Map<string, Task> = new Map();\n  private nextId: number = 1;\n\n  create(title: string, description: string, projectId: string): Task {\n    const id = `task-${this.nextId++}`;\n    const newTask: Task = { id, title, description, status: 'todo', projectId };\n    this.tasks.set(id, newTask);\n    return newTask;\n  }\n\n  getById(id: string): Task | undefined {\n    return this.tasks.get(id);\n  }\n\n  getByProject(projectId: string): Task[] {\n    return Array.from(this.tasks.values()).filter(task => task.projectId === projectId);\n  }\n\n  getAll(): Task[] {\n    return Array.from(this.tasks.values());\n  }\n\n  update(id: string, title: string, description: string): Task | undefined {\n    const task = this.tasks.get(id);\n    if (task) {\n      task.title = title;\n      task.description = description;\n      return task;\n    }\n    return undefined;\n  }\n\n  delete(id: string): boolean {\n    return this.tasks.delete(id);\n  }\n\n  assign(taskId: string, assigneeId: string): Task | undefined {\n    const task = this.tasks.get(taskId);\n    if (task) {\n      task.assigneeId = assigneeId;\n      eventBus.publish('task.assigned', { taskId: task.id, taskTitle: task.title, assigneeId });\n      return task;\n    }\n    return undefined;\n  }\n\n  changeStatus(taskId: string, newStatus: TaskStatus): Task | undefined {\n    const task = this.tasks.get(taskId);\n    if (task) {\n      const oldStatus = task.status;\n      // Enforce forward-only status transitions\n      if (\n        (oldStatus === 'todo' && newStatus === 'in-progress') ||\n        (oldStatus === 'in-progress' && newStatus === 'done') ||\n        (oldStatus === newStatus)\n      ) {\n        task.status = newStatus;\n        if (oldStatus !== newStatus && task.assigneeId) {\n          eventBus.publish('task.statusChanged', {\n            taskId: task.id,\n            taskTitle: task.title,\n            assigneeId: task.assigneeId,\n            oldStatus,\n            newStatus,\n          });\n        }\n        return task;\n      } else {\n        console.warn(`Invalid status transition for task ${taskId}: ${oldStatus} -> ${newStatus}`);\n      }\n    }\n    return undefined;\n  }\n}\n\nexport const taskService = new TaskService();\n"
+          },
+          "output": "File written: src/services/task-service.ts (91 lines)",
+          "error": false
+        }
+      ],
+      "inputTokens": 3900,
+      "outputTokens": 726
+    },
+    {
+      "role": "assistant",
+      "content": "",
+      "toolCalls": [
+        {
+          "name": "write_file",
+          "input": {
+            "path": "src/services/comment-service.ts",
+            "content": "import { eventBus } from '../event-bus';\n\ninterface Comment {\n  id: string;\n  taskId: string;\n  authorId: string;\n  body: string;\n  createdAt: number; // Timestamp\n}\n\nclass CommentService {\n  private comments: Map<string, Comment> = new Map();\n  private nextId: number = 1;\n\n  create(taskId: string, authorId: string, authorName: string, body: string, taskTitle: string): Comment {\n    const id = `comment-${this.nextId++}`;\n    const createdAt = Date.now();\n    const newComment: Comment = { id, taskId, authorId, body, createdAt };\n    this.comments.set(id, newComment);\n\n    eventBus.publish('comment.added', { commentId: id, taskId, taskTitle, authorId, authorName });\n    return newComment;\n  }\n\n  getById(id: string): Comment | undefined {\n    return this.comments.get(id);\n  }\n\n  getByTask(taskId: string): Comment[] {\n    return Array.from(this.comments.values()).filter(comment => comment.taskId === taskId);\n  }\n\n  delete(id: string): boolean {\n    return this.comments.delete(id);\n  }\n}\n\nexport const commentService = new CommentService();\n"
+          },
+          "output": "File written: src/services/comment-service.ts (39 lines)",
+          "error": false
+        }
+      ],
+      "inputTokens": 4679,
+      "outputTokens": 319
+    }
+  ],
+  "startTime": "2026-08-19T03:53:11.673Z",
+  "endTime": "2026-08-19T03:53:38.979Z",
+  "totalInputTokens": 21776,
+  "totalOutputTokens": 2117
+}

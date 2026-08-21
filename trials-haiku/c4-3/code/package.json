@@ -1,0 +1,24 @@
+{
+  "name": "task-management-api",
+  "version": "1.0.0",
+  "description": "Task Management API built with TypeScript and Node.js",
+  "main": "dist/main.js",
+  "scripts": {
+    "start": "npx tsx src/main.ts",
+    "demo": "npx tsx src/demo.ts",
+    "build": "npx tsc",
+    "type-check": "npx tsc --noEmit"
+  },
+  "keywords": [
+    "task",
+    "management",
+    "api"
+  ],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/node": "^20.19.43",
+    "tsx": "^4.23.12",
+    "typescript": "^5.9.3"
+  }
+}

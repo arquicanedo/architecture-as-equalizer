@@ -1,0 +1,17 @@
+{
+    "name": "task-management-api",
+    "version": "1.0.0",
+    "description": "A task management API system using TypeScript and Node.js.",
+    "main": "dist/main.js",
+    "scripts": {
+        "start": "npx tsx src/main.ts",
+        "build": "npx tsc",
+        "demo": "npx tsx src/demo.ts",
+        "test": "npx tsc --noEmit"
+    },
+    "devDependencies": {
+        "@types/node": "^20.11.24",
+        "tsx": "^4.7.1",
+        "typescript": "^5.3.3"
+    }
+}

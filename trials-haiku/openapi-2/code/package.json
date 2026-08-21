@@ -1,0 +1,25 @@
+{
+  "name": "task-management-api",
+  "version": "1.0.0",
+  "description": "Multi-service task management system with event-driven architecture",
+  "main": "dist/main.js",
+  "scripts": {
+    "start": "npx tsx src/main.ts",
+    "demo": "npx tsx src/demo.ts",
+    "build": "npx tsc",
+    "type-check": "npx tsc --noEmit"
+  },
+  "keywords": [
+    "task",
+    "management",
+    "api",
+    "event-driven"
+  ],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/node": "^26.2.0",
+    "tsx": "^4.0.0",
+    "typescript": "^5.0.0"
+  }
+}

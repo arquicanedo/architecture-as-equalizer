@@ -1,0 +1,12 @@
+{
+  "name": "task-mgmt-api",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "start": "node --loader tsx src/main.ts"
+  },
+  "devDependencies": {
+    "tsx": "^3.12.7",
+    "typescript": "^5.5.6"
+  }
+}

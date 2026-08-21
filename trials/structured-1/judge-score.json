@@ -1,0 +1,10 @@
+{
+  "trialId": "structured-1",
+  "specType": "structured",
+  "architecturalAdherence": 9,
+  "completeness": 10,
+  "codeQuality": 9,
+  "constraintCompliance": 10,
+  "overall": 9.5,
+  "notes": "Architecturally very strong. The event bus is used correctly for all cross-service communication (task.assigned, task.statusChanged, comment.added). No direct service-to-service calls exist. Each service owns its own Map-based store exclusively. HTTP handling is cleanly isolated in the Router. The one mild architectural tension is the router acting as a data-resolution layer for CommentService (fetching task and user data before calling comment.create), which is explicitly justified in comments as ADR-002 — a reasonable and documented tradeoff. Completeness is excellent: all five services implemented, all CRUD operations present, all three events fired, notifications triggered correctly, demo exercises every feature including edge cases (duplicate member 409, backward/skip status transitions, 404s, missing query params). Code quality is high: clean TypeScript interfaces, proper use of readonly, immutable updates via spread, consistent error handling through ApiError with appropriate status codes, good separation of concerns, thorough JSDoc. The forward-only status machine using NEXT_STATUS is elegant and correct — both skip (todo→done) and backward (done→todo) transitions are properly rejected. Minor issues: UserService error messages for name/email validation are slightly misleading ('name and email are required' thrown for either field missing individually); email format is not validated; no email uniqueness check; TaskService.create accepts an initial status parameter which could bypass the forward-only invariant if misused externally (though the router doesn't expose it). All six architectural constraints are fully respected: no npm dependencies, each service in its own file, event bus for inter-service comms, services own their data, HTTP only in router, forward-only transitions enforced."
+}

@@ -1,0 +1,56 @@
+{
+  "trialId": "openapi-3",
+  "specType": "openapi",
+  "structural": {
+    "hasEventBus": true,
+    "hasUserService": true,
+    "hasProjectService": true,
+    "hasTaskService": true,
+    "hasCommentService": false,
+    "hasNotificationService": false,
+    "hasRouter": false,
+    "hasMainEntry": false,
+    "hasDemoScript": false,
+    "fileCount": 5,
+    "folderStructureScore": 4,
+    "details": [
+      "Missing: Comment Service",
+      "Missing: Notification Service",
+      "Missing: Router",
+      "Missing: Main Entry",
+      "Missing: Demo Script",
+      "Each service in its own file: NO — some services may be combined"
+    ]
+  },
+  "constraints": {
+    "directServiceCalls": [],
+    "sharedDataAccess": [],
+    "httpInServices": [],
+    "invalidStatusTransitions": [],
+    "externalDependencies": [],
+    "totalViolations": 0
+  },
+  "codeMetrics": {
+    "compiles": false,
+    "compilationErrors": [],
+    "totalLines": 323,
+    "totalFiles": 5,
+    "linesPerFile": {
+      "src\\event-bus.ts": 23,
+      "src\\models.ts": 78,
+      "src\\services\\project-service.ts": 67,
+      "src\\services\\task-service.ts": 101,
+      "src\\services\\user-service.ts": 54
+    }
+  },
+  "transcriptMetrics": {
+    "totalInputTokens": 36448,
+    "totalOutputTokens": 2368,
+    "totalTokens": 38816,
+    "messageCount": 5,
+    "toolCallCount": 5,
+    "errorCount": 0,
+    "retryCount": 0,
+    "durationMs": 22733
+  }
+}

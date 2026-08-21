@@ -1,0 +1,752 @@
+[
+  {
+    "model": "Sonnet 4.6",
+    "trialId": "prose-1",
+    "specType": "prose",
+    "sonnetScore": {
+      "trialId": "prose-1",
+      "specType": "prose",
+      "architecturalAdherence": 8,
+      "completeness": 9,
+      "codeQuality": 9,
+      "constraintCompliance": 8,
+      "overall": 8.5,
+      "notes": "Overall a strong, well-structured implementation. Architectural adherence is good: EventBus is used for task.assigned, task.statusChanged, and comment.added; services own their own Maps; the router is the sole HTTP handler. However, there are two notable architectural tensions: (1) The router performs direct cross-service calls for validation (e.g., userService.getUser() before taskService.assignTask(), projectService.getProject() before taskService.createTask()), which technically violates rule 1 ('no direct service-to-service calls') even if it is the router doing it rather than a service — the spirit of the rule is that inter-service data flow goes through the bus, but here the router acts as an orchestrator/mediator which is a common and defensible pattern; (2) cascade deletes (deleteTasksByProject, deleteCommentsByTask) are orchestrated directly by the router calling multiple services, bypassing the event bus — a project.deleted event could have driven this instead, which would be cleaner. On constraint compliance: rule 5 (no external npm deps) is respected; rule 4 (forward-only transitions) is correctly enforced with same-status treated as a no-op rather than an error (debatable but documented); rule 6 (each service in its own file) is satisfied. The status same-status no-op is a minor design choice that could be argued either way. Completeness is high: all CRUD operations are present for all entities, all three event types are published and consumed, notifications support listing/filtering/mark-as-read, and a thorough demo script exercises all paths including error cases and cascade deletes. Code quality is excellent: consistent TypeScript interfaces in types.ts, clean error propagation, good use of generics in EventBus, idiomatic Map usage, immutable-style service constructors, proper Content-Length headers, snapshot iteration in event bus for safe mid-iteration unsubscribe, and clear comments throughout. Minor issues: the router catches all non-'not found' service errors as 400 which could mask genuine 500s; the demo's 'todo→todo same-status' test case comment is slightly misleading; deleteCommentsByTask is not called when a task is deleted via the project cascade path (only deleteTasksByProject is called, skipping comment cleanup for cascaded tasks)."
+    },
+    "gpt5Score": {
+      "trialId": "prose-1",
+      "specType": "prose",
+      "architecturalAdherence": 10,
+      "completeness": 9,
+      "codeQuality": 9,
+      "constraintCompliance": 10,
+      "overall": 9.5,
+      "notes": "Strong separation of concerns: services are decoupled and communicate via the EventBus; the router is the only HTTP layer; each service owns its datastore; forward-only task status enforced. All required services and routes are implemented, events are published and subscribed correctly, and the demo exercises the main features. Notable issue: deleting a project cascades tasks but does not remove their comments, leaving orphaned comments (router calls deleteTasksByProject but never deletes comments for those tasks), which contradicts the demo’s claim of cascading comments. Minor nits: naive query parsing and general 400 handling for validation errors are acceptable but could be more granular. No external dependencies used in application code and each service is in its own file."
+    }
+  },
+  {
+    "model": "Sonnet 4.6",
+    "trialId": "structured-1",
+    "specType": "structured",
+    "sonnetScore": {
+      "trialId": "structured-1",
+      "specType": "structured",
+      "architecturalAdherence": 9,
+      "completeness": 10,
+      "codeQuality": 9,
+      "constraintCompliance": 10,
+      "overall": 9.5,
+      "notes": "Architecturally very strong. The event bus is used correctly for all cross-service communication (task.assigned, task.statusChanged, comment.added). No direct service-to-service calls exist. Each service owns its own Map-based store exclusively. HTTP handling is cleanly isolated in the Router. The one mild architectural tension is the router acting as a data-resolution layer for CommentService (fetching task and user data before calling comment.create), which is explicitly justified in comments as ADR-002 — a reasonable and documented tradeoff. Completeness is excellent: all five services implemented, all CRUD operations present, all three events fired, notifications triggered correctly, demo exercises every feature including edge cases (duplicate member 409, backward/skip status transitions, 404s, missing query params). Code quality is high: clean TypeScript interfaces, proper use of readonly, immutable updates via spread, consistent error handling through ApiError with appropriate status codes, good separation of concerns, thorough JSDoc. The forward-only status machine using NEXT_STATUS is elegant and correct — both skip (todo→done) and backward (done→todo) transitions are properly rejected. Minor issues: UserService error messages for name/email validation are slightly misleading ('name and email are required' thrown for either field missing individually); email format is not validated; no email uniqueness check; TaskService.create accepts an initial status parameter which could bypass the forward-only invariant if misused externally (though the router doesn't expose it). All six architectural constraints are fully respected: no npm dependencies, each service in its own file, event bus for inter-service comms, services own their data, HTTP only in router, forward-only transitions enforced."
+    },
+    "gpt5Score": {
+      "trialId": "structured-1",
+      "specType": "structured",
+      "architecturalAdherence": 9,
+      "completeness": 10,
+      "codeQuality": 9,
+      "constraintCompliance": 10,
+      "overall": 9.5,
+      "notes": "Strong separation of concerns: services are isolated, all inter-service communication uses the Event Bus, and the Router is the sole HTTP entry point. Forward-only task status transitions are enforced. Each service owns its own in-memory store. No external dependencies are used, and each service is in its own file. The demo comprehensively exercises features and error paths. Minor nit: NotificationService imports types from other service modules; while not a runtime call, it introduces a compile-time coupling that contradicts the stated ADR comments—using `import type` would avoid that. Also, there is no cross-entity existence/membership validation (e.g., ensuring assignee exists or is a project member), but this was not required by the spec. Overall, clean, idiomatic TypeScript with solid error handling and event-driven design."
+    }
+  },
+  {
+    "model": "Sonnet 4.6",
+    "trialId": "openapi-1",
+    "specType": "openapi",
+    "sonnetScore": {
+      "trialId": "openapi-1",
+      "specType": "openapi",
+      "architecturalAdherence": 7,
+      "completeness": 9,
+      "codeQuality": 9,
+      "constraintCompliance": 7,
+      "overall": 8,
+      "notes": "Overall a well-structured, clean implementation. Scores and issues by category: ARCHITECTURAL ADHERENCE (7/10): The event bus is used correctly for task.assigned, task.statusChanged, and comment.added. Services do not import each other. However, the router directly calls both taskService.getTask() and userService.getUser() inside the POST /comments handler to enrich the comment payload — this is a deliberate design choice documented in comments, but it means the router is performing cross-service orchestration that arguably belongs behind the event bus or a dedicated enrichment mechanism. The router is supposed to be an HTTP entry point only, not a service orchestrator. This is a meaningful architectural compromise. COMPLETENESS (9/10): All five services are present with full CRUD. All three events (task.assigned, task.statusChanged, comment.added) are published and consumed. The notification service implements listForUser and markRead. The demo script exercises all endpoints including edge cases (backward transitions, skip transitions, invalid status values, missing fields, 404s, delete flows). Minor gap: no GET /notifications/:id endpoint (only markRead via PUT), and no update endpoint for comments — but these weren't explicitly required. Also, task listing requires projectId query param, which slightly limits flexibility but matches spec. CONSTRAINT COMPLIANCE (7/10): Constraint 1 (no direct service-to-service calls) is violated in router.ts POST /comments — the router calls taskService.getTask() and userService.getUser() to pass enriched data to commentService.createComment(). While the router is not a 'service', this cross-service data fetching in the router to satisfy comment service needs is a design smell that bends the spirit of the rule. Constraint 2 (each service owns its data store exclusively) is respected. Constraint 3 (HTTP handling only in router) is respected. Constraint 4 (forward-only transitions) is correctly implemented with VALID_TRANSITIONS map. Constraint 5 (no external npm dependencies) is respected — only built-in Node.js modules used. Constraint 6 (each service in its own file) is respected. CODE QUALITY (9/10): TypeScript types are well-defined in types.ts. The ServiceResult discriminated union with ok()/fail() helpers is clean and consistent. Error handling is thorough throughout. The event bus isolation of errors per handler is good practice. Input validation is present in all services. The router is verbose but clear and maintainable. Minor issues: body parsing in router casts to Record<string,unknown> without runtime validation library (acceptable given no-npm constraint); project description field validation in createProject is overly strict (rejects empty string which might be valid)."
+    },
+    "gpt5Score": {
+      "trialId": "openapi-1",
+      "specType": "openapi",
+      "architecturalAdherence": 10,
+      "completeness": 10,
+      "codeQuality": 9,
+      "constraintCompliance": 10,
+      "overall": 9.75,
+      "notes": "Architecture is clean and well-separated: each service owns its store and never imports other services; inter-service communication is via the Event Bus; HTTP handling is confined to the router. All required services and endpoints are implemented, including member management, task assignment, forward-only status changes, comment CRUD, and notifications for the specified events. The demo script thoroughly exercises the API and edge cases. Code quality is high: consistent ServiceResult pattern, solid input validation, typed event payloads, and idiomatic TypeScript. Minor nit: the router enriches comment creation by calling multiple services, which is acceptable here but introduces some orchestration coupling; otherwise, the implementation is robust and adheres to all constraints."
+    }
+  },
+  {
+    "model": "Sonnet 4.6",
+    "trialId": "c4-1",
+    "specType": "c4",
+    "sonnetScore": {
+      "trialId": "c4-1",
+      "specType": "c4",
+      "architecturalAdherence": 9,
+      "completeness": 10,
+      "codeQuality": 9,
+      "constraintCompliance": 10,
+      "overall": 9.5,
+      "notes": "Excellent implementation overall. Architectural adherence is strong: the event bus is used correctly for all inter-service communication (task.assigned, task.statusChanged, comment.added), each service owns its own private Map store, and the router is the sole HTTP layer. The clever router-mediated context passing (resolving taskTitle, authorName, taskAssigneeId before calling commentService.create) elegantly preserves service isolation without violating rule #1 — the router is explicitly permitted to orchestrate. Minor architectural note: the router calling taskService.getById() and userService.getById() before commentService.create() is a pragmatic and acceptable pattern, though a purist might argue that task/user validation belongs fully in-band with the comment event. One small deduction: notification-service.ts uses a duplicate import of eventBus at the bottom of the file (both as a constructor parameter and a separate import for the singleton), which is slightly untidy but functionally harmless. Completeness is perfect: all five services implemented, all CRUD operations present, all three events fired and consumed, forward-only status transitions enforced with correct one-step validation, idempotent member add, self-notification suppression, and a thorough demo script covering happy paths and error cases. Code quality is high: consistent use of custom typed error classes mapped cleanly to HTTP status codes, good TypeScript typing throughout, no any types, clean separation of concerns, and well-structured comments. All six constraints are fully respected: no npm dependencies, no direct service-to-service calls, each service in its own file, event bus used for cross-service communication, forward-only status transitions enforced, and HTTP handling isolated to the router."
+    },
+    "gpt5Score": {
+      "trialId": "c4-1",
+      "specType": "c4",
+      "architecturalAdherence": 10,
+      "completeness": 9,
+      "codeQuality": 9,
+      "constraintCompliance": 10,
+      "overall": 9.5,
+      "notes": "Clear separation of services with exclusive data stores and no direct inter-service calls; all cross-service communication via the Event Bus. The router is the sole HTTP interface and delegates correctly. Task status transitions are enforced forward-only. All required services and operations are implemented, events are published/subscribed appropriately, and the demo exercises the full workflow. Minor gaps: Task creation does not validate that the project exists (router could check ProjectService), and project member add/remove do not validate user existence. Router sends a JSON body on 204 responses and treats invalid JSON as missing body (less precise error reporting). GET /tasks requires projectId, which is fine but slightly restrictive. Overall, clean, idiomatic TypeScript with robust error mapping and in-memory event-driven design."
+    }
+  },
+  {
+    "model": "Sonnet 4.6",
+    "trialId": "typescript-contracts-1",
+    "specType": "typescript-contracts",
+    "sonnetScore": {
+      "trialId": "typescript-contracts-1",
+      "specType": "typescript-contracts",
+      "architecturalAdherence": 8,
+      "completeness": 9,
+      "codeQuality": 9,
+      "constraintCompliance": 8,
+      "overall": 8.5,
+      "notes": "Overall a strong, well-structured implementation. Architectural adherence is good: EventBus is used for all inter-service communication (task.assigned, task.statusChanged, comment.added), services own their own stores, and the Router is the sole HTTP handler. The injected resolver pattern in CommentService and NotificationService is a clever workaround to avoid direct service-to-service imports while still allowing data lookups — however, this is a grey area. The closures in main.ts call taskService.getById() and userService.getById() directly, meaning cross-service data access does happen at composition time, which slightly bends Rule 1 (no direct service-to-service calls). A purist reading would say the NotificationService and CommentService are indirectly calling other services synchronously within their own execution context rather than purely reacting to events. The forward-only status transition enforcement is correctly implemented with VALID_TRANSITIONS. All six services are present in separate files (Rule 6 satisfied). No external npm dependencies used. Completeness is high: all CRUD operations are implemented for all entities, all three event types are published and subscribed, and the demo script exercises all major flows including negative cases. Minor gaps: no input validation (missing fields on create don't return 400, they'd likely throw 500 or produce broken entities), no duplicate email check for users, no verification that assigneeId or projectId exist when creating/assigning tasks, and GET /tasks without projectId returns 400 rather than all tasks (a mild but potentially unexpected API design choice). Code quality is high: clean TypeScript interfaces in types.ts, consistent use of defensive copying (spread operator) to prevent store mutation via returned references, proper async/await in the router, and error-to-HTTP-status mapping in the catch block. The error mapping heuristic (string matching on 'not found', 'invalid', 'transition') is fragile and could misclassify errors, but works for the current error messages. The demo is thorough and self-validating with assertions."
+    },
+    "gpt5Score": {
+      "trialId": "typescript-contracts-1",
+      "specType": "typescript-contracts",
+      "architecturalAdherence": 7,
+      "completeness": 10,
+      "codeQuality": 9,
+      "constraintCompliance": 8,
+      "overall": 8.5,
+      "notes": "Overall structure is clean and services are well-separated with an in-memory event bus. However, Rule 1 is violated: CommentService and NotificationService perform direct service-to-service lookups via injected resolver closures (calling TaskService/UserService). Inter-service communication should be exclusively via the Event Bus. All services own their own stores; the router centralizes HTTP handling; forward-only status transitions are enforced; no external dependencies are used; and each service is in its own file. Minor quality nit: 204 responses are sent with a JSON body (null), which is non-standard. Otherwise, the code is idiomatic, typed, and has reasonable error mapping, and the demo thoroughly exercises the system."
+    }
+  },
+  {
+    "model": "Haiku 4.5",
+    "trialId": "prose-1",
+    "specType": "prose",
+    "sonnetScore": {
+      "trialId": "prose-1",
+      "specType": "prose",
+      "architecturalAdherence": 4,
+      "completeness": 6,
+      "codeQuality": 7,
+      "constraintCompliance": 4,
+      "notes": "Multiple significant violations found. CRITICAL - Architectural Rule #1 (no direct service-to-service calls) is broken pervasively: comment-service imports taskService and userService directly; notification-service imports userService and taskService directly; project-service imports userService directly; task-service imports projectService and userService directly. All cross-service validation and data lookups should occur via event bus patterns or be eliminated. Rule #2 (each service owns its data exclusively) is violated because notification-service calls taskService.getTask() to read task data it does not own. The event bus IS used for publishing events correctly, but direct imports undermine the entire architecture. COMPLETENESS ISSUES: Comment entity spec requires field 'body' but implementation uses 'text'; spec requires 'createdAt' but implementation uses 'timestamp'; Task spec requires 'assigneeId' but implementation uses 'assignee'; Project spec requires 'memberIds' but implementation uses 'members' - these are schema mismatches against the spec. The demo script bypasses HTTP entirely and calls services directly, which is acceptable for demo but notification-service in-constructor subscription to taskService is a hidden coupling. STATUS TRANSITION: canTransition allows jumping from todo directly to done (only checks index ordering), which may or may not match intent of 'forward-only' but allows skipping states. STATUS TRANSITION bug: updateStatus returns the task object (not null) when newStatus === currentStatus, treating a no-op as success, but the status field name in events is 'task.status-changed' while notification-service subscribes to 'task.status-changed' - this actually matches, unlike some other areas. ERROR DISCRIMINATION: handleUpdateTaskStatus returns 400 for both 'task not found' and 'invalid transition' with same status code and combined message, losing specificity. The 204 responses correctly send empty body conceptually but send '{}' which is non-standard. CODE QUALITY positives: TypeScript types used throughout, route matching with named regex groups is clean, error handling in event bus callbacks prevents cascading failures, handler organization is clear. Overall the event bus exists but is cosmetic given the pervasive direct imports.",
+      "overall": 5.25
+    },
+    "gpt5Score": {
+      "trialId": "prose-1",
+      "specType": "prose",
+      "architecturalAdherence": 4,
+      "completeness": 8,
+      "codeQuality": 8,
+      "constraintCompliance": 5,
+      "overall": 6.25,
+      "notes": "Major violation of the no direct service-to-service calls rule: multiple services import and call other services (project-service→user-service, task-service→project-service/user-service, comment-service→task-service/user-service, notification-service→task-service/user-service). While the Event Bus is implemented and used for publishing/subscribing, services still rely on direct calls for validation and data lookup. Data stores are isolated per service and HTTP handling is correctly confined to the API Router. Task status transitions are properly forward-only. Completeness is strong: CRUD for users/projects/tasks, member add/remove, task assign/status change, comments create/get/delete, notifications reacting to events, and demo provided; minor deviations include comment field names (text/timestamp vs body/createdAt) and no GET /comments/:id route exposed. Code quality is generally good (clear types, error handling, idiomatic TS), but there are small issues: 204 responses include a body, event name mismatch for status change (task.status-changed vs task.statusChanged), and some responses conflate 404 vs 400. No external npm deps and each service resides in its own file."
+    }
+  },
+  {
+    "model": "Haiku 4.5",
+    "trialId": "structured-1",
+    "specType": "structured",
+    "sonnetScore": {
+      "trialId": "structured-1",
+      "specType": "structured",
+      "architecturalAdherence": 5,
+      "completeness": 7,
+      "codeQuality": 7,
+      "constraintCompliance": 4,
+      "notes": "ARCHITECTURAL VIOLATIONS: (1) CommentService directly imports and calls taskService and userService to enrich the event payload — this is a direct service-to-service call, breaking Rule 1. The event payload should carry only what the comment service already owns, or the notification service should query via the event bus. (2) TaskService is imported by CommentService, crossing service boundaries outside the event bus. (3) NotificationService's comment.added handler only notifies the author ('you added a comment'), not the task assignee — the assignee's userId is not in the payload because it would require a cross-service lookup, revealing the design flaw caused by the rule-1 violation. CONSTRAINT COMPLIANCE: Rule 1 (no direct service-to-service calls) is violated in comment-service.ts. Rule 2 (each service owns its data exclusively) is effectively violated because comment-service reaches into task-service and user-service stores indirectly via their public methods. Rule 4 (forward-only transitions) is correctly implemented. Rule 5 (no external npm dependencies) is respected. Rule 6 (each service in its own file) is respected. Rule 3 (HTTP handling only in router) is respected. COMPLETENESS: All five services exist with CRUD operations. Events task.assigned and task.statusChanged are published. comment.added is published but notification targeting is incomplete (assignee not notified). The demo script works end-to-end. markAsRead endpoint exists. Member add/remove is implemented. Missing: email uniqueness validation, no unsubscribe mechanism on event bus, no input sanitization, DELETE /projects/:id/members uses body which is unreliable for DELETE requests in many HTTP clients. CODE QUALITY: TypeScript types are used well. Error handling in router is adequate. The idCounter approach is simple but non-collision-safe in concurrent scenarios. The demo uses require('http') inside an async function instead of the already-imported createServer, which is inconsistent. Overall readable and structured, but the architectural violations are significant given the stated rules.",
+      "overall": 5.75
+    },
+    "gpt5Score": {
+      "trialId": "structured-1",
+      "specType": "structured",
+      "architecturalAdherence": 7,
+      "completeness": 9,
+      "codeQuality": 8,
+      "constraintCompliance": 7,
+      "overall": 7.75,
+      "notes": "Overall architecture is well-separated with services, an in-memory event bus, and a router. Major issue: CommentService directly imports and calls TaskService and UserService (taskService.getById, userService.getById), violating the rule that services must communicate only via the Event Bus and undermining exclusive data ownership. NotificationService subscribes correctly to events but its comment.added handling only notifies the author, which is acceptable but arguably less useful than notifying the assignee. HTTP routing is centralized in the router, but some HTTP handling (CORS/preflight) occurs in main.ts/demo.ts rather than inside the router, which is a minor deviation from the “all HTTP handling in the router” rule. CRUD endpoints are implemented for users/projects/tasks/comments, project member add/remove, task assign/status transitions (forward-only enforced), and notifications (get by user, mark as read). Code is clean and idiomatic, with good error handling and statuses, though event payloads use any and there’s some mixed import/require usage in the demo."
+    }
+  },
+  {
+    "model": "Haiku 4.5",
+    "trialId": "openapi-1",
+    "specType": "openapi",
+    "sonnetScore": {
+      "trialId": "openapi-1",
+      "specType": "openapi",
+      "architecturalAdherence": 6,
+      "completeness": 7,
+      "codeQuality": 7,
+      "constraintCompliance": 6,
+      "notes": "Architectural violation: comment-service.ts directly imports and calls userService and taskService to enrich event payloads — this breaks Rule 1 (no direct service-to-service calls). The notification service's handleCommentAdded only logs and never actually creates a notification for any user, making the comment.added event functionally useless for notifications. Rule 2 is otherwise respected. Rule 3 (HTTP handling only in router) is correctly followed. Rule 4 (forward-only transitions) is correctly implemented including same-status no-op. Rule 5 (no external npm deps) is respected. Rule 6 (each service in its own file) is followed. Additional issues: no input validation (missing fields like name/email/title silently produce undefined values in objects), no email uniqueness enforcement, the router only extracts a single 'id' capture group so multi-segment routes like /projects/:id/members and /notifications/:id/read work only by coincidence since params.id captures the first group — but for /notifications/:id/read the pattern would capture the notification id correctly. DELETE /projects/:id/members passes body.userId which requires body parsing on DELETE — the router only parses body for POST and PUT, so removeMember via DELETE would receive an empty body and userId would be undefined, silently returning the project unchanged rather than erroring. The demo script uses require('http') inside an ES module context which is inconsistent. The notificationService is imported in main.ts solely to trigger its constructor side-effects — this is a code smell. Overall the implementation is functional for the happy path but has meaningful architectural and correctness defects.",
+      "overall": 6.5
+    },
+    "gpt5Score": {
+      "trialId": "openapi-1",
+      "specType": "openapi",
+      "architecturalAdherence": 6,
+      "completeness": 7,
+      "codeQuality": 7,
+      "constraintCompliance": 6,
+      "overall": 6.5,
+      "notes": "Major violation: CommentService directly calls UserService and TaskService to enrich event payloads, breaking the 'no direct service-to-service calls' rule (should rely solely on Event Bus). Minor violation: Main handles CORS headers and OPTIONS responses instead of delegating all HTTP handling to the Router. Completeness gap: NotificationService subscribes to comment.added but only logs; it does not create notifications for comments as specified. Otherwise, services are separated with their own stores, event bus is used for task-assigned and status-changed events, and forward-only status transitions are enforced. Code quality is generally good and idiomatic, but event payloads use 'any' (weak typing), and parseBody JSON errors are not caught at the router level, potentially causing unhandled rejections instead of a clean 400 response."
+    }
+  },
+  {
+    "model": "Haiku 4.5",
+    "trialId": "c4-1",
+    "specType": "c4",
+    "sonnetScore": {
+      "trialId": "c4-1",
+      "specType": "c4",
+      "architecturalAdherence": 6,
+      "completeness": 7,
+      "codeQuality": 7,
+      "constraintCompliance": 6,
+      "notes": "Several notable issues: (1) ARCHITECTURAL VIOLATION - The router directly calls taskService.getById() to fetch task title before calling commentService.create(), meaning the router performs cross-service data lookups and passes task data into CommentService — this breaks rule #1 (no direct service-to-service calls) and rule #3 (all HTTP handling in router only, but the router is doing service orchestration beyond routing). (2) ARCHITECTURAL VIOLATION - The comment.added event handler in NotificationService explicitly admits it cannot notify the task assignee ('In a real system, we'd need to know the assignee') and falls back to just logging — this means the comment.added notification is non-functional, breaking the Notification Service requirements. The notification service has no mechanism to look up task assignee data without violating service boundaries, and this was left unresolved. (3) The EventBus publish() is synchronous, which is acceptable for in-memory, but error swallowing in callbacks could mask real bugs. (4) Input validation is missing throughout — no checks for required fields (e.g., empty name/email on user create, missing projectId on task create), no email format validation, no duplicate email checks. (5) The router uses require('http') inside demo.ts (dynamic require inside an ES module context is inconsistent with the import style used elsewhere). (6) CommentService.create() receives taskTitle as a parameter rather than deriving it from an event payload — this is a workaround for the cross-service data problem but results in an awkward API. (7) ProjectService does not validate that userId actually exists before adding as member (cross-service validation would require event bus coordination or is simply missing). (8) Forward-only status transition logic is correctly implemented. (9) All six files are properly separated. (10) Demo script is thorough and well-structured. Overall the implementation is a reasonable skeleton but has meaningful architectural violations and an incomplete notification feature.",
+      "overall": 6.5
+    },
+    "gpt5Score": {
+      "trialId": "c4-1",
+      "specType": "c4",
+      "architecturalAdherence": 8,
+      "completeness": 7,
+      "codeQuality": 7,
+      "constraintCompliance": 10,
+      "overall": 8,
+      "notes": "Good separation of services, exclusive in-memory stores, and proper Event Bus usage. The API Router is the sole HTTP entry point and task status transitions are enforced as forward-only. However, NotificationService does not create notifications for comment.added events (it only logs), which misses a specified feature. CommentService emits an incorrect payload field (authorName is set to authorId) and requires taskTitle from the router, introducing coupling to another service’s data shape via the router. Input validation is minimal and parseBody returns any. The forward-only status check is implemented, though it allows skipping directly from todo to done (likely acceptable). No external dependencies and each service is in its own file. Demo script exercises the workflow but uses arbitrary delays for event processing."
+    }
+  },
+  {
+    "model": "Haiku 4.5",
+    "trialId": "typescript-contracts-1",
+    "specType": "typescript-contracts",
+    "sonnetScore": {
+      "trialId": "typescript-contracts-1",
+      "specType": "typescript-contracts",
+      "architecturalAdherence": 7,
+      "completeness": 8,
+      "codeQuality": 8,
+      "constraintCompliance": 7,
+      "notes": "Overall a solid implementation with good separation of concerns and clean TypeScript. Issues found: (1) ARCHITECTURAL VIOLATION - main.ts wires the comment.added event handler by calling this.taskService.getById() directly inside the Application class, which acts as a hidden cross-service dependency rather than true event-driven decoupling; the notification logic for comments requires task data that isn't carried in the event payload, forcing a direct service call. (2) ARCHITECTURAL VIOLATION - CommentService receives a getUserName callback injected at construction time that calls userService.getById() internally — this is effectively a disguised cross-service call, violating Rule 1, even if indirect. (3) The CommentAddedPayload has an empty taskTitle field (set to '') that is never populated, meaning comment notifications don't include the task title, indicating incomplete event payload design. (4) The router correctly owns all HTTP handling and services own their own stores — those rules are followed well. (5) Forward-only status transitions are correctly implemented with a clear transition map. (6) No external npm dependencies are used; crypto is a Node.js built-in. (7) Each service is in its own file. (8) GET /tasks requires projectId query param, meaning you can't retrieve a single arbitrary task list without a project — this is a minor API design limitation but not a spec violation. (9) demo.ts uses require('http') inside an async function instead of a top-level import, which is a minor style issue. (10) Error handling uniformly converts thrown errors to 500 responses without distinguishing 404 (not found) from 400 (bad input) — all service-level errors return 500. (11) The unused variable warning in comment-service.ts delete method (const comment = this.getById(id) is assigned but only used for side-effect validation). (12) test.ts is a good smoke test but not a proper test suite with assertions framework. The core architecture is mostly correct but the cross-service coupling issues in the comment notification flow are meaningful violations.",
+      "overall": 7.5
+    },
+    "gpt5Score": {
+      "trialId": "typescript-contracts-1",
+      "specType": "typescript-contracts",
+      "architecturalAdherence": 6,
+      "completeness": 9,
+      "codeQuality": 7,
+      "constraintCompliance": 6,
+      "overall": 7,
+      "notes": "Uses an in-memory Event Bus and separates services/files as specified, with Router handling HTTP and forward-only task status enforced. However, there are notable violations of the no direct service-to-service rule: CommentService depends on a getUserName function that calls UserService, and Application’s event subscribers call TaskService.getById and then NotificationService directly, bypassing pure event-driven communication. CommentAddedPayload publishes taskTitle as an empty string, relying on a subsequent direct TaskService lookup, which is an architectural smell. Router returns 500 on service-thrown not found errors (should be 404), minimal validation, and DELETE uses a request body. No external npm dependencies are used; each service owns its own in-memory data and lives in its own file. Features/endpoints are largely complete (CRUD for users/projects/tasks/comments, assign, status change, notifications and events, demo). Overall solid but with strict rule #1 violations and some payload/HTTP handling issues."
+    }
+  },
+  {
+    "model": "GPT-5-mini",
+    "trialId": "prose-1",
+    "specType": "prose",
+    "sonnetScore": {
+      "trialId": "prose-1",
+      "specType": "prose",
+      "architecturalAdherence": 6,
+      "completeness": 7,
+      "codeQuality": 7,
+      "constraintCompliance": 6,
+      "notes": "Several issues found across categories. ARCHITECTURAL: The biggest violation is in api-router.ts where the router directly calls `services.tasks.getTask()` after creating a comment (to enrich the event payload), then manually publishes 'comment.added' — this means the event is published twice for a comment creation (once inside CommentService.addComment, once in the router). The router is doing cross-service data aggregation, which blurs the separation of concerns. The CommentService also publishes 'comment.added' internally with incomplete payload (no task info), while the router re-publishes with enriched payload — a design inconsistency that indicates the event model was not thought through cleanly. Architectural rule #1 (no direct service-to-service calls) is technically followed for service-to-service, but the router acting as a mediator fetching data from TaskService to feed NotificationService is a workaround smell. COMPLETENESS: Task model uses 'assignee' (string) instead of the specified 'assigneeId', and Project uses 'members' instead of 'memberIds' — minor field naming deviations from spec. The 'task.status_changed' event name is used in NotificationService subscription but TaskService publishes 'task.status_changed' — these match, but the spec implies 'task.statusChanged' (camelCase). No email uniqueness validation in UserService. No validation that assigneeId or projectId actually exist when creating/assigning tasks. The forward-only status transition allows same-status re-assignment (to === from is allowed), which is arguably acceptable but debatable. STATUS TRANSITION: `to < from` correctly enforces forward-only, but equal transitions (e.g., todo→todo) are silently allowed. COMPLETENESS: demo.ts double-publishes 'comment.added' manually, same bug as router. NotificationService subscribes to 'task.status_changed' but the spec lists 'task.statusChanged' — consistent internally but deviates from spec naming. CODE QUALITY: TypeScript types are reasonable but Task.assignee should be assigneeId per spec. The `updateTask` allows overwriting status and assignee via the general PUT endpoint, bypassing the forward-only transition guard — a significant business logic bypass. Error handling in the HTTP server is present but minimal. The unhandled promise from eventBus.publish (fire-and-forget in most places) could swallow errors. Overall solid structure but with meaningful correctness and architectural issues.",
+      "overall": 6.5
+    },
+    "gpt5Score": {
+      "trialId": "prose-1",
+      "specType": "prose",
+      "architecturalAdherence": 0,
+      "completeness": 0,
+      "codeQuality": 0,
+      "constraintCompliance": 0,
+      "overall": 0,
+      "notes": "Parse error: "
+    }
+  },
+  {
+    "model": "GPT-5-mini",
+    "trialId": "structured-1",
+    "specType": "structured",
+    "sonnetScore": {
+      "trialId": "structured-1",
+      "specType": "structured",
+      "architecturalAdherence": 7,
+      "completeness": 8,
+      "codeQuality": 8,
+      "constraintCompliance": 6,
+      "notes": "Overall a solid implementation with clear separation of concerns and good use of the event bus for inter-service communication. Specific issues: (1) CONSTRAINT VIOLATION - Rule 1 broken in router.ts: the router directly queries userService.getById() and taskService.getById() when creating a comment, then passes the extracted data (taskTitle, authorName, assigneeId) as meta to commentService.create(). This is a workaround that effectively has the HTTP layer acting as a mediator between services to circumvent the no-direct-calls rule, but architecturally the router is doing cross-service data assembly that belongs in an event-driven pattern. (2) CONSTRAINT VIOLATION - Rule 1 also broken in assign endpoint: router calls userService.getById() to validate assignee before calling taskService.assign() — this is cross-service validation in the router layer rather than purely delegating. (3) The comment.added event payload includes assigneeId injected via meta from the router, which is an architectural smell — the CommentService event payload is being enriched by the router with data it fetched from other services. The notification service comment notes acknowledge this tension but the workaround is impure. (4) No unsubscribe mechanism on EventBus, which is minor for in-memory but worth noting. (5) TaskService.changeStatus allows same-status transitions (returns existing task silently) — spec implies forward-only but same-status is ambiguous. (6) No input validation (missing required fields, duplicate emails, invalid IDs). (7) DELETE returning 204 with JSON body is non-standard. (8) No getById null-check returning 404 for user/project routes (returns null with 200). (9) All CRUD operations present for all services. Demo script is well-structured with port-check logic. TypeScript typing is reasonable though some 'any' usage exists. Event bus implementation is clean and correct.",
+      "overall": 7.25
+    },
+    "gpt5Score": {
+      "trialId": "structured-1",
+      "specType": "structured",
+      "architecturalAdherence": 9,
+      "completeness": 10,
+      "codeQuality": 8,
+      "constraintCompliance": 10,
+      "overall": 9.25,
+      "notes": "Strong separation of services with exclusive in-memory stores and an in-memory EventBus used for inter-service events (task.assigned, task.statusChanged, comment.added). No service directly calls another; the API Router orchestrates interactions and handles all HTTP. Forward-only task status transitions are enforced. All required services, CRUD operations, member management, assignment, status changes, comments, notifications, and a demo script are implemented. Code is clean and well-typed, but HTTP responses for GET by id return 200 with null instead of 404, and duplicate creates throw leading to 500 rather than a more appropriate 409. Input validation is minimal, and the NotificationService design relies on the router to supply assigneeId in comment events (acceptable but a bit fragile). Overall, constraints are fully respected."
+    }
+  },
+  {
+    "model": "GPT-5-mini",
+    "trialId": "openapi-1",
+    "specType": "openapi",
+    "sonnetScore": {
+      "trialId": "openapi-1",
+      "specType": "openapi",
+      "architecturalAdherence": 6,
+      "completeness": 7,
+      "codeQuality": 7,
+      "constraintCompliance": 6,
+      "notes": "Architectural adherence: The event bus is used correctly for task.assigned, task.statusChanged, and comment.added. However, rule #1 (no direct service-to-service calls) is violated in router.ts handleCreateComment, which calls both this.users.get() and this.tasks.get() to enrich the notification payload before passing data to CommentService — this is cross-service data access orchestrated outside the bus. While the Router is the HTTP entry point (rule #3 satisfied), the enrichment logic bleeds service concerns into the router. The try/catch in publish() is placed outside the setImmediate callback, meaning errors thrown inside the callback are never caught. Completeness: All five services are present with their own files. CRUD for users, projects, tasks, comments is implemented. Events task.assigned, task.statusChanged, comment.added are published. Demo script exists and exercises the main flows. Missing: comment.added notification is sent only to the author (acknowledged as a limitation in a code comment), not to the task assignee or project members — the notification semantics are incomplete. The event bus publish wraps callbacks in setImmediate but the try/catch surrounds setImmediate scheduling, not the callback execution, so subscriber errors are silently swallowed without the comment being accurate. No GET /notifications/:id endpoint. No update endpoint for comments (minor, not required). handleGetTask/handleGetProject use req.url!.split('/')[2] which breaks for paths like /tasks/id/assign or /tasks/id/status (split index 2 is correct but fragile — works here because sub-routes use different handlers). Code quality: TypeScript types are clean and consistent. Return type Task | null | Error is an unusual and non-idiomatic pattern; a discriminated union or thrown exception would be cleaner. URL parsing mixes URL API and raw req.url.split() inconsistently. The setImmediate/try-catch bug is a logic error. The 'old' variable in assign() is computed but never used. Routing is a long if-chain with no abstraction. Constraint compliance: Rule 1 violated (router queries UserService and TaskService to pass metadata to CommentService). Rule 4 (forward-only transitions) is correctly enforced. Rule 5 (no npm deps) satisfied — only Node.js built-ins used. Rule 6 (each service in own file) satisfied. Rules 2 and 3 are mostly satisfied. Two rules partially violated brings the score down.",
+      "overall": 6.5
+    },
+    "gpt5Score": {
+      "trialId": "openapi-1",
+      "specType": "openapi",
+      "architecturalAdherence": 0,
+      "completeness": 0,
+      "codeQuality": 0,
+      "constraintCompliance": 0,
+      "overall": 0,
+      "notes": "Parse error: "
+    }
+  },
+  {
+    "model": "GPT-5-mini",
+    "trialId": "c4-1",
+    "specType": "c4",
+    "sonnetScore": {
+      "trialId": "c4-1",
+      "specType": "c4",
+      "architecturalAdherence": 6,
+      "completeness": 7,
+      "codeQuality": 6,
+      "constraintCompliance": 5,
+      "notes": "architecturalAdherence: The event bus is used correctly for task and comment events, and services are in separate files with private stores. However, the router directly calls `this.taskService.getById()` and `this.userService.getById()` inside the comment POST handler to enrich the event payload — this is a cross-service data read happening in the router rather than via the event bus, which is a meaningful architectural violation. The comment.added event is also published twice (once by CommentService, once by the router), creating duplicate event firing. constraintCompliance: Rule 1 (no direct service-to-service calls) is technically not violated in service layer, but the router acts as an intermediary cross-service data broker which circumvents the spirit of the rule. Rule 4 (forward-only transitions) is correctly implemented. Rule 5 (no external npm deps) is satisfied. Rule 6 (each service in own file) is satisfied. Rule 2 (each service owns its own store) is satisfied at the service level but undermined by the router reading task/user data to enrich comment events. Rule 3 (all HTTP handling in router only) is satisfied. The shims.d.ts overrides standard Node.js type declarations with `any`, which is a poor practice that defeats type safety entirely. completeness: DELETE for users, projects, tasks, and comments is stubbed in the router but doesn't actually call the service's delete method — it just returns 204 with null, so deletions are silently no-ops. Project update returns null without error handling when project not found. Task update via PUT /tasks/:id bypasses the status transition enforcement. No validation on required fields (e.g., missing name/email on user creation). Notification mark-as-read endpoint is implemented as a bonus. codeQuality: The double-publish of comment.added is a clear bug. The unused `u` variable in demo.ts (URL constructed but unused). Error responses when resources aren't found return 200 with null rather than 404. The `send` method serializes null body as `{}` which is misleading for 204 responses. TypeScript shims replace proper types with `any`, eliminating type safety benefits. The `taskService.update()` allows overwriting status without transition enforcement.",
+      "overall": 6
+    },
+    "gpt5Score": {
+      "trialId": "c4-1",
+      "specType": "c4",
+      "architecturalAdherence": 6,
+      "completeness": 6,
+      "codeQuality": 6,
+      "constraintCompliance": 7,
+      "overall": 6.25,
+      "notes": "Pros: Services are split into separate files and own their data stores; inter-service communication uses an in-memory EventBus; HTTP handling is confined to the ApiRouter; demo script exercises the flow; no external npm dependencies. Issues: The router’s DELETE endpoints return 204 but never call the services’ delete methods (users/projects/tasks/comments), breaking CRUD completeness. TaskService.update allows arbitrary status changes, bypassing the forward-only transition rule (todo → in-progress → done) and violating the architectural constraint. Router republishes comment.added with a different payload, leading to duplicate event names and inconsistent event schemas; better to standardize event payloads in the service or introduce a dedicated orchestrator pattern. Many endpoints return 200 with null for not-found instead of 404; input validation is minimal; widespread use of any via shims reduces type safety. EventBus is synchronous and error-swallowing; okay but could be improved. Overall, good structure with notable correctness and constraint issues."
+    }
+  },
+  {
+    "model": "GPT-5-mini",
+    "trialId": "typescript-contracts-1",
+    "specType": "typescript-contracts",
+    "sonnetScore": {
+      "trialId": "typescript-contracts-1",
+      "specType": "typescript-contracts",
+      "architecturalAdherence": 5,
+      "completeness": 7,
+      "codeQuality": 7,
+      "constraintCompliance": 5,
+      "notes": "Several notable violations: (1) Architectural Rule 1 broken — the Router directly calls both taskService.getById() and userService.getById() inside the POST /comments handler to enrich the comment.added event, constituting a cross-service call mediated by the router rather than the event bus. CommentService also publishes 'comment.added' with empty taskTitle/authorName before the router re-publishes an enriched version, resulting in duplicate event emissions — a significant design flaw. (2) CommentService publishes 'comment.added' internally with blank fields AND the router publishes it again enriched, so NotificationService receives two events per comment creation. (3) The CommentAddedPayload type does not include 'assigneeId', but the notification service casts to 'any' to access it — a type safety violation and a smell indicating the type contract is insufficient. (4) The router acts as an orchestrator beyond pure HTTP handling by reading from two services to enrich events, violating Rule 3 ('all HTTP handling in API Router only' — the router goes beyond HTTP handling into business logic). (5) Status transition allows only one step forward (newIndex === oldIndex + 1), which correctly enforces forward-only but disallows jumping from todo directly to done — this is arguably correct per spec but worth noting. (6) No input validation (missing required fields, invalid UUIDs, etc.) beyond try/catch. (7) GET /tasks without projectId returns 404 rather than all tasks or a proper error. (8) DELETE /projects members uses body on a DELETE request which is fragile. (9) Error responses always return 400 regardless of error type (not found should be 404). (10) All services are in separate files as required. (11) No external npm dependencies. (12) EventBus, types, and interfaces are well-structured. (13) Demo script is functional and exercises main flows. Overall the architecture is partially correct but the comment enrichment approach fundamentally breaks the event bus isolation rule.",
+      "overall": 6
+    },
+    "gpt5Score": {
+      "trialId": "typescript-contracts-1",
+      "specType": "typescript-contracts",
+      "architecturalAdherence": 7,
+      "completeness": 9,
+      "codeQuality": 7,
+      "constraintCompliance": 10,
+      "overall": 8.25,
+      "notes": "Good separation of services, exclusive in-memory stores, and event-driven communication via an in-memory bus. All HTTP is handled in the Router and no external deps are used. Task status transitions are forward-only (even stricter: single-step). However, the Router publishes an additional enriched 'comment.added' event and cross-reads User/Task services to do so, mixing HTTP layer with domain/event orchestration and causing duplicate events for the same action. NotificationService’s comment handling relies on loosely-typed payload ('any'), and GET-by-id errors return 400 instead of 404. Overall feature coverage is strong (CRUD for users/projects/tasks, member management, assign/status change, comments, notifications, demo), but the event enrichment in Router detracts from architectural purity."
+    }
+  },
+  {
+    "model": "GPT-5",
+    "trialId": "prose-1",
+    "specType": "prose",
+    "sonnetScore": {
+      "trialId": "prose-1",
+      "specType": "prose",
+      "architecturalAdherence": 7,
+      "completeness": 8,
+      "codeQuality": 8,
+      "constraintCompliance": 8,
+      "notes": "Overall a solid implementation with good structure. Issues found: (1) ARCHITECTURAL: The comment.added notification flow has a design smell — NotificationService publishes 'comment.added.needsAssignee' and main.ts subscribes to it, then calls tasks.get() to enrich and re-publishes 'comment.added.enriched'. This is a cross-service call disguised via the event bus wiring in main.ts, which is a workaround rather than a clean solution. The task assignee could have been included in the original comment.added payload by TaskService publishing a richer event, but TaskService doesn't know about comments. A cleaner approach would be for TaskService to always include assignee in task events and for CommentService to include it in comment.added. (2) COMPLETENESS: Project field is 'members' in the model but the spec says 'memberIds' — minor naming discrepancy. Task field is 'assignee' but spec says 'assigneeId' — inconsistent naming throughout. No email uniqueness validation on user creation. The setStatus allows same-status transitions (newIndex - currentIndex === 0 is permitted), which may or may not be desired. No 'task.created' event subscription in NotificationService despite being published. (3) CODE QUALITY: Generally clean TypeScript with proper interfaces and UUID usage. Error handling in EventBus is good. readJsonBody and sendJson are well-implemented helpers. The regex-based routing in api-router is functional but verbose — a routing table would be cleaner. sendJson for 204 responses sends an empty object '{}' which is non-standard (204 No Content should have no body). (4) CONSTRAINTS: All 6 architectural constraints are mostly respected. No external npm dependencies used. Each service in its own file. Event bus used for inter-service communication. The main.ts bridge subscription for comment enrichment is the primary gray area — it technically involves looking up a task outside of TaskService's normal API call chain, representing a constraint boundary blur.",
+      "overall": 7.75
+    },
+    "gpt5Score": {
+      "trialId": "prose-1",
+      "specType": "prose",
+      "architecturalAdherence": 9,
+      "completeness": 10,
+      "codeQuality": 8,
+      "constraintCompliance": 9,
+      "overall": 9,
+      "notes": "Overall architecture is well-separated: services own their data, communicate via the Event Bus, and HTTP is handled solely in the API router. Notification enrichment is done via events; the main wiring subscribes and consults TaskService to enrich comment events, which is acceptable though slightly coupling outside services. All required services and endpoints are implemented, including member management, task assignment, status changes with forward-only checks, and notifications reacting to task.assigned/statusChanged/comment.added. Code is clean and idiomatic TypeScript; minor issues include allowing same-status changes (forward-only should arguably only allow advancing), returning 204 with a JSON body, invalid JSON resulting in a 500 instead of 400, and inconsistent naming (assignee vs assigneeId) relative to the spec. Constraints are met with a minor caveat on strict forward-only transitions."
+    }
+  },
+  {
+    "model": "GPT-5",
+    "trialId": "structured-1",
+    "specType": "structured",
+    "sonnetScore": {
+      "trialId": "structured-1",
+      "specType": "structured",
+      "architecturalAdherence": 7,
+      "completeness": 8,
+      "codeQuality": 8,
+      "constraintCompliance": 7,
+      "notes": "Overall a solid implementation with clean structure and good separation of concerns. Specific issues: (1) ARCHITECTURAL - The helper callbacks (getTaskTitle, getUserName, getTaskAssignee) passed into CommentService and NotificationService are closures over TaskService/UserService instances, which is a semantic workaround for direct service-to-service calls but is functionally equivalent to calling those services directly. This violates Rule 1 in spirit — the NotificationService calling getTaskAssignee() at event-handling time is a synchronous cross-service data pull disguised as a callback, not true event-driven decoupling. The task.assigned and task.statusChanged events should carry the assigneeId in the payload (task.assigned does, task.statusChanged does too — that part is fine), but comment.added relies on a runtime callback into TaskService data, which breaks the data ownership boundary. (2) CONSTRAINT 2 - NotificationService accesses TaskService's data store indirectly via the getTaskAssignee callback at event-handling time, blurring data ownership. (3) COMPLETENESS - GET /tasks without a projectId returns 400 instead of returning all tasks, limiting utility. The unsubscribe mechanism is absent from EventBus, which could cause memory leaks in long-running processes. No email uniqueness validation in UserService. Status change allows transitioning from 'todo' directly to 'done' (skipping 'in-progress'), which may or may not be intentional — the forward-only rule is technically satisfied but skipping steps may be undesired. (4) CODE QUALITY - Error discrimination in router is weak: all exceptions return 400 regardless of type (e.g., invalid status transition returns 404 via null return rather than a descriptive 400/422). The changeStatus returning undefined for both 'task not found' and 'invalid transition' makes it impossible for the router to differentiate. The router's tasks GET requires projectId query param, making individual task listing by ID the only other option — there is no GET /tasks to list all tasks. Content-Length header is set to 0 even for GET requests with no body, which is harmless but slightly incorrect. The demo file duplicates wiring logic from main.ts. TypeScript types are generally well-used with clean interfaces throughout.",
+      "overall": 7.5
+    },
+    "gpt5Score": {
+      "trialId": "structured-1",
+      "specType": "structured",
+      "architecturalAdherence": 6,
+      "completeness": 9,
+      "codeQuality": 8,
+      "constraintCompliance": 8,
+      "overall": 7.75,
+      "notes": "Overall structure matches the intended architecture with separate services, an in-memory event bus, and a single HTTP router. However, rule #1 is violated: CommentService and NotificationService call into other services via injected helper functions (getTaskTitle, getUserName, getTaskAssignee), which are direct cross-service reads instead of event-driven communication. Data stores are kept private in each service, and HTTP handling is confined to the router. Task status transitions are enforced as forward-only. No external dependencies are used and each service is in its own file. Code is clean and idiomatic TypeScript, but event payloads are typed as any and there’s limited validation. TaskService.update allows changing status/assignee if misused outside the router, which could bypass the transition rule; the router mitigates this by only allowing title/description updates. Demo script is present and exercises the system well."
+    }
+  },
+  {
+    "model": "GPT-5",
+    "trialId": "openapi-1",
+    "specType": "openapi",
+    "sonnetScore": {
+      "trialId": "openapi-1",
+      "specType": "openapi",
+      "architecturalAdherence": 5,
+      "completeness": 8,
+      "codeQuality": 7,
+      "constraintCompliance": 5,
+      "notes": "Completeness is strong: all five services exist, full CRUD is present, status transitions are forward-only, events are published and consumed, and a working demo is included. Code quality is solid overall — types are well-defined, Map-based stores are clean, error handling exists at the router level, and the code is readable. However, several significant issues drag down the architectural and constraint scores. (1) Rule 1 violated: CommentService receives two callback lambdas from the router — '(taskId) => this.taskService.get(taskId)?.title' and '(userId) => this.userService.get(userId)?.name' — which are direct cross-service data reads disguised as constructor injection. This is a service-to-service call through a thin wrapper; it bypasses the event bus entirely and tightly couples the router to inter-service data flow. (2) Rule 2 partially violated: by passing those callbacks, the router is acting as a data bridge between TaskService/UserService and CommentService, meaning CommentService is reading data from other services' stores indirectly. (3) Rule 3 is respected — all HTTP handling is in the router. (4) The comment.added notification notifies only the author ('your comment was added'), not other relevant parties such as the task assignee or project members, which is semantically weak and arguably incorrect for a notification system. (5) No input validation beyond type expectations — missing required-field checks (e.g., creating a task without title/projectId silently succeeds). (6) The EventBus is synchronous, which is acceptable for in-memory but subscriber errors are silently swallowed with no logging, which could hide bugs. (7) No unsubscribe mechanism on EventBus, minor but notable. (8) 'update' on tasks exposes a generic patch that could overwrite status/assigneeId if UpdateTaskInput were extended, though currently constrained by type. (9) Demo uses a hardcoded port 3001 separate from main.ts port 3000 — acceptable but slightly messy.",
+      "overall": 6.25
+    },
+    "gpt5Score": {
+      "trialId": "openapi-1",
+      "specType": "openapi",
+      "architecturalAdherence": 7,
+      "completeness": 10,
+      "codeQuality": 8,
+      "constraintCompliance": 6,
+      "overall": 7.75,
+      "notes": "Overall structure is solid: services are separated, the API Router handles HTTP, and the Event Bus is used for inter-service notifications. However, CommentService directly reads task titles and user names via injected provider functions that call TaskService/UserService, violating the no direct service-to-service calls rule and breaching exclusive data store ownership. Forward-only task status transitions are correctly enforced. All required services, CRUD operations, events, and a demo script are present. Code is clean and typed, with reasonable error handling, but lacks validation (e.g., existence checks for IDs, membership checks) and silently swallows EventBus subscriber errors. No external npm dependencies are used, and each service resides in its own file."
+    }
+  },
+  {
+    "model": "GPT-5",
+    "trialId": "c4-1",
+    "specType": "c4",
+    "sonnetScore": {
+      "trialId": "c4-1",
+      "specType": "c4",
+      "architecturalAdherence": 6,
+      "completeness": 8,
+      "codeQuality": 8,
+      "constraintCompliance": 6,
+      "notes": "Overall a solid implementation with clean code and good TypeScript usage, but several architectural and constraint violations exist. \n\nArchitectural issues: (1) CommentService receives callback functions (getTaskTitle, getUserName) that are closures over UserService and TaskService instances — this is a direct service-to-service coupling disguised as dependency injection. It violates Rule 1 (no direct service-to-service calls) because the comment service is effectively calling into other services synchronously at publish time, not via the event bus. The event payload could simply carry the needed data, or the comment service could publish with only IDs and let the notification service resolve names via its own cached state from prior events. (2) NotificationService maintains a taskAssignees cache built from events, which is a reasonable pattern, but it means comment notifications only fire if a task.assigned event was previously received — no comment notification fires for unassigned tasks, and no notification goes to other project members (only the assignee). This is a design limitation. (3) The isForwardTransition allows same-status transitions (indexOf newStatus >= indexOf oldStatus) in update(), meaning you can set todo->todo which is fine, but changeStatus() correctly short-circuits on same status. Minor inconsistency.\n\nConstraint violations: (1) Rule 1 violated — CommentService directly invokes getTaskTitle and getUserName closures that reach into TaskService and UserService. (2) The task.assigned event payload doesn't include enough data for NotificationService to know the previous assignee when reassignment happens, so stale taskAssignees cache could send notifications to the wrong user. (3) router.ts imports all service types directly, which is acceptable as it's the API layer, not a service calling another service. (4) All services are in their own files — Rule 6 satisfied. (5) No npm dependencies — Rule 5 satisfied. (6) Forward-only transitions implemented correctly in changeStatus; the update() method also enforces it which is good.\n\nCompleteness: All CRUD operations present for all entities. Events task.assigned, task.statusChanged, comment.added all published. NotificationService subscribes to all three. Demo script exercises all features. markAsRead endpoint present. GET /tasks requires projectId query param which is a minor API design choice but limits discoverability. No getById for notifications. DELETE member uses request body which is non-standard for REST but functional.\n\nCode quality: Clean, idiomatic TypeScript, good use of Map stores, proper error handling with try/catch in router, consistent response patterns, good use of randomUUID, ISO timestamps. The router is long but well-organized. Minor: isForwardTransition uses >= which allows same-status in update path unnecessarily.",
+      "overall": 7
+    },
+    "gpt5Score": {
+      "trialId": "c4-1",
+      "specType": "c4",
+      "architecturalAdherence": 6,
+      "completeness": 8,
+      "codeQuality": 8,
+      "constraintCompliance": 7,
+      "overall": 7.25,
+      "notes": "Overall structure is solid: services are separated, each with its own store, and the router owns all HTTP handling. Events are used for task assignment, status changes, and comment additions. However, CommentService violates the 'no direct service-to-service calls' rule by using injected functions that directly access UserService and TaskService data; this should be handled via events or a dedicated read model. Additionally, TaskService.update allows changing status and assignee without emitting events, which undermines the event-driven notification model and can lead to missed notifications (e.g., assignee changes via update, or initial assignee on task creation). Forward-only transitions are enforced correctly. Code is clean and idiomatic TypeScript with minimal dependencies and proper typing, though EventBus swallows errors silently and there is no unsubscribe. All specified CRUD operations and endpoints appear implemented, with a working demo. One key constraint (no direct service calls) is violated; others are met."
+    }
+  },
+  {
+    "model": "GPT-5",
+    "trialId": "typescript-contracts-1",
+    "specType": "typescript-contracts",
+    "sonnetScore": {
+      "trialId": "typescript-contracts-1",
+      "specType": "typescript-contracts",
+      "architecturalAdherence": 7,
+      "completeness": 9,
+      "codeQuality": 8,
+      "constraintCompliance": 7,
+      "notes": "Overall a solid implementation with good separation of concerns and clean TypeScript. Specific issues: (1) ARCHITECTURAL VIOLATION - main.ts directly calls userService.getById() and taskService.getById() from within the NotificationService wiring context, passing these as callback closures into NotificationService. This is a subtle but real violation of Rule 1 (no direct service-to-service calls) — the NotificationService is effectively querying TaskService and UserService data through injected function references, bypassing the event bus. The callbacks are just thin wrappers around direct service method calls, which circumvents the spirit of the rule even if it avoids direct import coupling. (2) CONSTRAINT VIOLATION - The comment.added event payload deliberately sends empty strings for taskTitle and authorName ('will be enriched by subscribers'), meaning the event bus payload is intentionally incomplete and relies on out-of-band lookups; this undermines the event-driven contract. (3) Status transition enforces one-step-at-a-time (newIndex !== currentIndex + 1), which is stricter than 'forward-only' — going from todo directly to done is rejected, which may or may not match intent but is a reasonable interpretation. (4) GET /tasks requires projectId query param with no fallback for listing all tasks without a filter. (5) Error handling uniformly returns 400 for all errors (not found → should be 404, validation → 400, conflicts → 409). (6) CommentService sends empty-string fields in event payload rather than enriching at publish time using data it has (it has taskId and authorId but not title/name — acceptable, but the empty string sentinel is a code smell). (7) NotificationService.wireSubscriptions() is a manual wiring step that could be forgotten. (8) 204 responses send an empty JSON object {} instead of no body. (9) Demo and main.ts duplicate wiring logic. (10) The Router correctly centralizes all HTTP handling. The event bus implementation is clean and correct. Each service owns its own Map store exclusively.",
+      "overall": 7.75
+    },
+    "gpt5Score": {
+      "trialId": "typescript-contracts-1",
+      "specType": "typescript-contracts",
+      "architecturalAdherence": 7,
+      "completeness": 9,
+      "codeQuality": 8,
+      "constraintCompliance": 8,
+      "overall": 8,
+      "notes": "Overall the implementation is clean and modular, with services owning their own in-memory stores and an in-memory event bus enabling decoupled communication. All required services and endpoints are present, events are published on task assignment/status change and comment creation, and a demo script exercises the flow. However, there is a significant architectural violation: NotificationService performs cross-service lookups via injected helper functions that directly call UserService/TaskService, bypassing the Event Bus. Rule 1 requires all inter-service communication via the Event Bus; enrichment should be provided in event payloads or handled by subscribing services without querying other services. Minor API issues: thrown 'not found' errors are converted into HTTP 400 instead of 404, and GET /tasks without projectId returns an empty list rather than all tasks. Task status transitions are enforced as one-step forward-only, which is stricter than the spec but acceptable. No external dependencies are used, and HTTP handling is confined to the Router."
+    }
+  },
+  {
+    "model": "Gemini Flash",
+    "trialId": "prose-1",
+    "specType": "prose",
+    "sonnetScore": {
+      "trialId": "prose-1",
+      "specType": "prose",
+      "architecturalAdherence": 5,
+      "completeness": 4,
+      "codeQuality": 6,
+      "constraintCompliance": 4,
+      "notes": "Several significant issues found: (1) CONSTRAINT VIOLATION - projectService.ts has 'import { v4 as uuidv4 } from uuid' (an external npm dependency) even though it's commented as a placeholder and a local function is used instead — the import itself is a violation and would cause a runtime error. (2) MISSING COMPONENTS - No API Router (HTTP entry point using Node.js built-in http module) is provided, which is a core architectural requirement. (3) MISSING SERVICE - NotificationService is entirely absent; no in-memory notification handling for task.assigned, task.statusChanged, or comment.added events. (4) ARCHITECTURAL VIOLATION - The spec says services should communicate only via EventBus, but the API Router (missing) would need to call services directly, and there are no cross-service event subscriptions shown (e.g., TaskService does not validate that a projectId exists, UserService not consulted for assigneeId — acceptable via event bus design, but Notification subscriptions are absent entirely). (5) Comment type uses 'text' field but spec says 'body' — type mismatch with spec. (6) TaskAssignedEvent has assigneeId typed as string but task.assigneeId is string|null — type inconsistency. (7) Status transition logic uses pairwise checks rather than an ordered array/map, which is functional but fragile. (8) ProjectService seeds data in constructor using its own createProject method, creating coupling to initialization order. (9) No demo/index script is present. (10) UserService has no EventBus dependency at all — fine per spec, but createUser accepts a full User (including id) rather than generating one. (11) memberIds serialized as Set will break JSON.stringify without custom handling in the missing router. Overall, the partial implementation shows reasonable TypeScript patterns but is missing ~40% of required components and has a rule-breaking import statement.",
+      "overall": 4.75
+    },
+    "gpt5Score": {
+      "trialId": "prose-1",
+      "specType": "prose",
+      "architecturalAdherence": 7,
+      "completeness": 3,
+      "codeQuality": 6,
+      "constraintCompliance": 8,
+      "overall": 6,
+      "notes": "Services are separated and own their data stores; inter-service communication uses the EventBus (publish-only shown). Forward-only task status transitions are enforced. However, the Notification Service and API Router are missing, and there are no event subscribers, making the system incomplete. The Comment schema uses 'text' instead of the specified 'body'. TaskAssignedEvent typing is incorrect (assigneeId can be null but the type requires string), and EventBus typings loosen type safety with 'any' and a catch-all payload. projectService imports 'uuid' (external dependency) which violates the no-external-deps constraint, even though a local UUID generator is present. Overall clean code structure, but incomplete and with notable type/schema issues."
+    }
+  },
+  {
+    "model": "Gemini Flash",
+    "trialId": "structured-1",
+    "specType": "structured",
+    "sonnetScore": {
+      "trialId": "structured-1",
+      "specType": "structured",
+      "architecturalAdherence": 6,
+      "completeness": 4,
+      "codeQuality": 7,
+      "constraintCompliance": 6,
+      "notes": "architecturalAdherence: Event bus is properly implemented and used by TaskService and CommentService. ProjectService correctly has no event bus dependency. However, the API Router is entirely missing, which is a core architectural component. NotificationService is also missing, so there is no subscriber consuming task.assigned, task.statusChanged, or comment.added events — the pub/sub pipeline is half-built. Rule 1 (no direct service-to-service calls) appears respected in what exists, but CommentService.create() accepts taskTitle and authorName as parameters, which implies the caller (API Router) must fetch these from other services before calling — this pushes cross-service coordination into the router, which is borderline acceptable but indicates the design forces the router to act as an orchestrator rather than a thin HTTP layer. completeness: UserService, ProjectService, TaskService, and CommentService are present with CRUD. NotificationService is completely absent. API Router is completely absent. No demo/index script. Event subscriptions are never wired up. getByProject on TaskService exists but there is no equivalent index on CommentService beyond getByTask. No unsubscribe usage anywhere. codeQuality: Code is clean and readable. TypeScript types are used appropriately. Error handling in EventBus publish is good (try/catch per handler). TaskService changeStatus silently returns undefined on invalid transition with only a console.warn — should return a typed error or throw. update() methods accept only positional full-field replacements with no partial update support (minor). nextId as a plain number is not collision-safe across restarts but acceptable for in-memory. constraintCompliance: Rule 3 violated — API Router is missing entirely. Rule 6 violated — NotificationService is missing its own file. Rule 4 (forward-only transitions) is correctly implemented. Rule 5 (no external npm deps) appears respected. Rule 2 (each service owns its data) is respected. Rule 1 appears respected. Two of six rules have clear violations due to missing components.",
+      "overall": 5.75
+    },
+    "gpt5Score": {
+      "trialId": "structured-1",
+      "specType": "structured",
+      "architecturalAdherence": 7,
+      "completeness": 5,
+      "codeQuality": 7,
+      "constraintCompliance": 8,
+      "overall": 6.75,
+      "notes": "Event Bus is implemented and used for task.assigned, task.statusChanged, and comment.added, with no direct service-to-service calls and each service owning its data store. Services are separated into their own files, and forward-only task status transitions are enforced (allowing same-status is acceptable). However, the Notification Service and API Router are missing, reducing completeness and making it impossible to verify HTTP handling via the router. TypeScript usage is generally clean, but the EventBus is loosely typed, input validation is minimal, and there’s no subscription implementation for notifications. No external dependencies are used."
+    }
+  },
+  {
+    "model": "Gemini Flash",
+    "trialId": "openapi-1",
+    "specType": "openapi",
+    "sonnetScore": {
+      "trialId": "openapi-1",
+      "specType": "openapi",
+      "architecturalAdherence": 7,
+      "completeness": 5,
+      "codeQuality": 8,
+      "constraintCompliance": 7,
+      "notes": "Architectural adherence is solid for the provided files: EventBus is a proper pub/sub, services own their own stores, no direct service-to-service calls are visible, and status transitions are forward-only. However, the API Router file is entirely missing from the review, which is a critical component (rule: all HTTP handling in API Router only). The Notification Service is also entirely absent. CommentService.createComment accepts taskTitle and authorName as parameters, which implies the API Router is doing cross-service lookups before calling the service — this is a design smell that pushes orchestration logic into the router rather than keeping it clean, and could indicate a violation of the event-bus-only inter-service communication rule depending on implementation. The changeTaskStatus method publishes an event even when status doesn't change (oldStatus === newStatus branch still reaches eventBus.publish), which is a logic bug. The removeMember method returns the unmodified project even when the member wasn't found, losing the ability for callers to distinguish 'not found' from 'member not in project'. Completeness is significantly reduced: NotificationService is missing, API Router is missing, no demo/bootstrap script is shown, and getAllTasks (global) is absent. Code quality is generally high: clean TypeScript types, proper async signatures, use of crypto.randomUUID, good use of Map. The types.ts file is well-structured with branded ID types and clear interfaces. setImmediate usage in EventBus is a reasonable decoupling choice but means publish errors won't propagate to callers. Constraint compliance: no external npm deps satisfied, each service in own file satisfied for shown files, forward-only transitions satisfied, event bus used for notifications (where visible). Missing files prevent full constraint verification.",
+      "overall": 6.75
+    },
+    "gpt5Score": {
+      "trialId": "openapi-1",
+      "specType": "openapi",
+      "architecturalAdherence": 8,
+      "completeness": 5,
+      "codeQuality": 7,
+      "constraintCompliance": 10,
+      "overall": 7.5,
+      "notes": "EventBus is clean and used correctly; services are separated and own their data, with no direct service-to-service calls. Task status transitions are enforced forward-only, but a statusChanged event is emitted even when status doesn’t change, which is semantically questionable. CommentService’s createComment requires taskTitle/authorName from outside, introducing cross-service data coupling via the router (still within constraints but not ideal). Error handling/validation is minimal (e.g., no checks for user/task existence, member management lacks validation). The changeTaskStatus return type uses a string sentinel, which is less idiomatic. Types are reasonable, code is clean, and no external dependencies are used; each service is in its own file. Major completeness gaps: missing Notification Service (including event subscriptions and notification storage) and missing API Router implementation/endpoints."
+    }
+  },
+  {
+    "model": "Gemini Flash",
+    "trialId": "c4-1",
+    "specType": "c4",
+    "sonnetScore": {
+      "trialId": "c4-1",
+      "specType": "c4",
+      "architecturalAdherence": 8,
+      "completeness": 8,
+      "codeQuality": 8,
+      "constraintCompliance": 8,
+      "notes": "Overall a solid implementation. Architectural adherence is good: event bus is used for inter-service communication, each service owns its data store, HTTP handling is isolated in router.ts, and each service is in its own file. Issues: (1) NotificationService is imported directly in main.ts to force initialization — acceptable workaround but architecturally awkward; the router also imports notificationService directly to expose notification endpoints, which is unavoidable given the constraints but still couples the router to the notification service. (2) The comment.added notification logic is self-aware about its architectural limitation and notifies the comment author instead of the task assignee — this is a real design gap; the CommentAddedEvent payload lacks assigneeId, so the notification is semantically wrong (authors don't need to be notified of their own comments). The event payload should have been enriched at publish time by task service or the comment service should include assigneeId in the event. (3) Status transition allows todo→done directly, which contradicts the specified forward-only sequential chain (todo→in-progress→done); the comment in code acknowledges ambiguity but the spec implies sequential steps. (4) types.ts imports randomUUID but never uses it — unused import. (5) DELETE /projects/:id/members reads body via getJsonBody which is called a second time after the body stream may already be consumed — this is a bug for the member removal endpoint since the body is parsed inside the DELETE branch after other checks that don't consume it, but it's still fragile. (6) Error classification in the router catch block uses string matching on error messages, which is brittle. (7) No input validation that referenced projectId/assigneeId actually exist (cross-entity referential integrity), though the architectural rules make this hard without direct calls. (8) 204 responses call sendJson with null which still calls JSON.stringify(null) = 'null' and sends a body, which is non-standard for 204. (9) The unused BASE_URL constant in demo.ts is a minor cleanliness issue. Despite these issues, the implementation is largely functional and well-structured.",
+      "overall": 8
+    },
+    "gpt5Score": {
+      "trialId": "c4-1",
+      "specType": "c4",
+      "architecturalAdherence": 9,
+      "completeness": 9,
+      "codeQuality": 8,
+      "constraintCompliance": 9,
+      "overall": 8.75,
+      "notes": "Strong separation of concerns: services each have their own in-memory store and do not call each other directly; inter-service communication is via the EventBus. HTTP handling is confined to the router. All required services and endpoints are present (users, projects with add/remove members, tasks with assign/status change, comments, notifications), and events are published/subscribed correctly. Forward-only transitions are enforced against backwards moves, but allowing todo→done directly may violate a strict stepwise interpretation of todo→in-progress→done. Notification for comment.added targets the comment author rather than the task assignee, which is functionally questionable but not a hard architectural breach. Code is generally clean and well-typed, with a typed EventBus and clear service APIs. Minor issues: router’s error mapping can return 500 for invalid status transitions (expects substrings that don’t match thrown messages), no runtime validation of task status strings, and DELETE /projects/:id/members requires a body (unusual REST). Overall, compliant with constraints and nearly complete, with small quality and interpretation gaps."
+    }
+  },
+  {
+    "model": "Gemini Flash",
+    "trialId": "typescript-contracts-1",
+    "specType": "typescript-contracts",
+    "sonnetScore": {
+      "trialId": "typescript-contracts-1",
+      "specType": "typescript-contracts",
+      "architecturalAdherence": 7,
+      "completeness": 8,
+      "codeQuality": 8,
+      "constraintCompliance": 7,
+      "notes": "Overall a solid implementation with clear structure. Issues found: (1) ARCHITECTURAL VIOLATION - main.ts acts as an orchestrator by subscribing to 'comment.created.raw' and directly calling taskService.getById() and userService.getById() to enrich events before notifying. This is effectively a direct service-to-service call mediated through main.ts, violating Rule 1's spirit - services should communicate only via the event bus without a manual broker. The comment event payload design (publishing 'raw' then re-enriching in main) is a workaround that leaks cross-service concerns into the bootstrap file. (2) The event bus wiring in main.ts means NotificationService never directly subscribes to the bus - all notification creation is orchestrated imperatively in main.ts, which partially violates Rule 2 (NotificationService's data creation is triggered outside its own boundary via main.ts logic). (3) Router parameter extraction is fragile - uses string path.includes() checks to reclassify params.id into domain-specific keys, which is error-prone and could misfire (e.g., a task with 'members' in its UUID path). (4) GET /tasks requires projectId query param - no way to get all tasks, which is a minor completeness gap. (5) handleGetTasks returns 400 instead of empty array when no projectId provided - debatable design. (6) No validation that assigneeId or projectId actually exist in their respective services (no referential integrity). (7) Comment body field name collision (comment.body vs request body.body) is handled correctly but is fragile. (8) url.parse is deprecated in favor of URL constructor. (9) handleRemoveProjectMember uses DELETE with a body, which is unconventional. (10) Types are well-defined, interfaces are clean, error handling is consistent. Demo script is comprehensive and tests happy/sad paths. No external npm dependencies used. Forward-only status transitions correctly implemented.",
+      "overall": 7.5
+    },
+    "gpt5Score": {
+      "trialId": "typescript-contracts-1",
+      "specType": "typescript-contracts",
+      "architecturalAdherence": 9,
+      "completeness": 9,
+      "codeQuality": 8,
+      "constraintCompliance": 10,
+      "overall": 9,
+      "notes": "Strong separation of services, exclusive in-memory stores per service, and all HTTP handling confined to the router. Event Bus is properly used to decouple services; notifications are triggered via event subscriptions in main.ts (acceptable mediator), though NotificationService itself does not subscribe directly. All CRUD endpoints are present with add/remove project members, task assignment, and forward-only status transitions enforced. Comments creation triggers notifications; however the event name differs from the spec (comment.created.raw vs comment.added) and the defined CommentAddedPayload is unused. Code is clean and idiomatic TypeScript with reasonable error handling, but the router’s param extraction is fragile (regex + path.includes hacks) and there’s limited cross-entity validation. No external dependencies and each service in its own file; forward-only transitions are enforced."
+    }
+  },
+  {
+    "model": "Gemini Pro",
+    "trialId": "prose-1",
+    "specType": "prose",
+    "sonnetScore": {
+      "trialId": "prose-1",
+      "specType": "prose",
+      "architecturalAdherence": 6,
+      "completeness": 6,
+      "codeQuality": 6,
+      "constraintCompliance": 7,
+      "notes": "Architectural Adherence (6/10): The event bus is used for task.assigned, task.statusChanged, and comment.added events, which is correct. However, the comment.added handler in main.ts directly calls taskService.getTask() — this is a cross-service call disguised inside a wiring module. While main.ts is the composition root, this logic should ideally live in the NotificationService reacting to data carried in the event payload rather than reaching back into TaskService. The NotificationService imports Task and Comment types from sibling services, creating type coupling. The handleCommentAdded method in NotificationService is a dead stub with a comment explaining it was punted to main.ts, which is a design smell. Completeness (6/10): Missing GET /tasks without projectId filter (returns nothing if no query param). The Comment interface uses 'text' but the spec says 'body' — field naming mismatch. No validation that a task/user/project actually exists before creating comments or assigning tasks. No unsubscribe mechanism on EventBus. handleCommentAdded in NotificationService is completely empty/dead code. GET /tasks with no projectId param silently returns nothing instead of all tasks or an error. No endpoint to get all tasks regardless of project. Code Quality (6/10): HTTP status codes are largely ignored — almost every response returns 200 even for not-found cases (returning undefined serialized as empty/null). No input validation — missing fields cause silent failures. Error handling in router catches exceptions but doesn't differentiate 400 vs 404 vs 500. The if-else chain in the router is fragile and doesn't scale. nextId counters are not robust. TypeScript typing is adequate but interfaces could be stricter (no readonly). Constraint Compliance (7/10): No external npm dependencies — compliant. Each service in its own file — compliant. Event bus used for inter-service communication — mostly compliant with the caveat about main.ts orchestration logic. Forward-only status transitions — correctly implemented. Data store ownership — mostly respected. HTTP handling in router only — compliant. The primary violation is the implicit service coupling via type imports and the cross-service taskService call in the event handler.",
+      "overall": 6.25
+    },
+    "gpt5Score": {
+      "trialId": "prose-1",
+      "specType": "prose",
+      "architecturalAdherence": 8,
+      "completeness": 9,
+      "codeQuality": 6,
+      "constraintCompliance": 8,
+      "overall": 7.75,
+      "notes": "Overall the architecture is well separated: services are in their own files, own their data, HTTP handling is confined to the router, and the event bus is used for cross-service events. However, main.ts directly invokes TaskService.getTask and NotificationService.createNotification in the comment.added handler, which edges into direct cross-service access rather than pure event-bus-driven communication. NotificationService is not subscribing itself; main bridges events to service methods. Completeness is strong: CRUD for users, projects, tasks, comments; member add/remove; task assign and forward-only status transitions; notifications on task.assigned, task.statusChanged, and comment.added; demo script included. Code quality issues: Router returns undefined bodies on not-found cases, can hang when required query params are missing (GET /tasks and /comments without projectId/taskId), lacks proper status codes (e.g., 400/404), minimal validation, EventBus is untyped (any). Constraints: no external dependencies, HTTP only in router, forward-only transitions, services in separate files, and exclusive data stores are satisfied; slight concern with rule 1 due to main doing cross-service reads for comment notifications."
+    }
+  },
+  {
+    "model": "Gemini Pro",
+    "trialId": "structured-1",
+    "specType": "structured",
+    "sonnetScore": {
+      "trialId": "structured-1",
+      "specType": "structured",
+      "architecturalAdherence": 7,
+      "completeness": 8,
+      "codeQuality": 8,
+      "constraintCompliance": 7,
+      "notes": "Overall a solid implementation with clear structure. Issues found: (1) ARCHITECTURAL VIOLATION - Rule 1 broken in router.ts: the comment POST handler directly calls `this.taskService.getById(taskId)` and `this.userService.getById(authorId)` to pass data to commentService.create(), creating implicit cross-service coupling through the router layer and leaking domain data (taskTitle, assigneeId, authorName) across service boundaries. The router becomes a data-fetching orchestrator rather than a pure HTTP handler. (2) ARCHITECTURAL VIOLATION - Rule 3 is partially violated: the router is performing business logic (fetching task/user data, extracting assigneeId) that belongs to the service or event layer. (3) The comment.added event payload is enriched with taskAssigneeId by routing through the router — a design smell acknowledged in comments but still present. (4) addMember returns undefined if member already exists (idempotency broken — should arguably return the project). (5) changeStatus returns undefined for invalid transitions vs. task-not-found — the router conflates both into a generic 400, losing diagnostic precision. (6) No input validation (missing required fields, empty strings, invalid email format) — services will create entities with undefined fields silently. (7) TaskService.changeStatus allows skipping statuses (todo→done directly) since it only checks newIndex > oldIndex rather than newIndex === oldIndex + 1. (8) No unsubscribe mechanism on EventBus. (9) DELETE /projects/:id/members reads body, which parseJsonBody skips for DELETE method — member removal via DELETE would always fail. (10) The demo script and all services are present and functional. TypeScript usage is clean and idiomatic throughout.",
+      "overall": 7.5
+    },
+    "gpt5Score": {
+      "trialId": "structured-1",
+      "specType": "structured",
+      "architecturalAdherence": 9,
+      "completeness": 10,
+      "codeQuality": 8,
+      "constraintCompliance": 9,
+      "overall": 9,
+      "notes": "Strong separation of concerns: each service has its own datastore, no service-to-service calls, Event Bus used for inter-service events, and all HTTP is handled in the router. All required services, CRUD operations, events, and a demo script are implemented. Forward-only status logic prevents backward moves but allows skipping directly from todo to done, which may not match a strict stepwise transition. Notification for comment.added is enabled by enriching the event payload in the router (acceptable but a slight architectural workaround). The router returns 400 for both invalid status transition and task not found; it should differentiate (404 vs 400). Minor typing/validation gaps (use of any for request bodies). No external npm dependencies and each service resides in its own file."
+    }
+  },
+  {
+    "model": "Gemini Pro",
+    "trialId": "openapi-1",
+    "specType": "openapi",
+    "sonnetScore": {
+      "trialId": "openapi-1",
+      "specType": "openapi",
+      "architecturalAdherence": 6,
+      "completeness": 7,
+      "codeQuality": 8,
+      "constraintCompliance": 6,
+      "notes": "architecturalAdherence: The event bus is correctly implemented as a singleton pub/sub and used by TaskService and CommentService to publish events, with NotificationService subscribing — that pattern is sound. However, CommentService violates Rule 1 (no direct service-to-service calls) by accepting injected function references (getTask, getUser) from the router, which are direct closures over TaskService and UserService instances. This is a thin disguise over direct coupling; the spirit of the rule is broken even if it avoids a hard import. The router itself instantiates all services and wires them, which is acceptable for an API router acting as a composition root, but passing service method references into CommentService crosses the line. Rule 2 is otherwise respected — each service has its own Map store. Rule 3 is respected; all HTTP logic lives in router.ts. completeness: All five services are present. Full CRUD is implemented for users, projects, and tasks. Comment create/get/delete and list-by-task are present. Notification list and mark-as-read are present. Events task.assigned, task.statusChanged, and comment.added are all published and subscribed. Forward-only status transitions are implemented with STATUS_TRANSITIONS. The demo script exercises most flows. Missing: no email uniqueness validation on user creation; addMember does not verify the userId exists in UserService (cross-service validation is intentionally avoided, but worth noting as a functional gap); comment.added notification notifies only the author (acknowledged in a comment) rather than relevant stakeholders, which is a semantic gap; GET /tasks requires projectId which is a minor but potentially limiting design choice; no update endpoint for comments. codeQuality: TypeScript types are clean, interfaces are well-defined, Omit/Partial generics are used correctly. Error handling in the router is consistent with try/catch and typed sentinel return values (NOT_FOUND, INVALID_TRANSITION, TASK_NOT_FOUND, AUTHOR_NOT_FOUND) which is a reasonable pattern though mixing return types with union string literals instead of throwing is unconventional. The event bus has a try/catch per callback, preventing cascade failures. parseJSONBody will throw on empty body (e.g. GET requests) if called, though it is only called on POST/PUT routes. No input validation beyond presence checks (no type guards, no schema validation). constraintCompliance: Rule 1 violated by injected service method references in CommentService. Rule 5 (no external npm dependencies) is respected — only node built-ins used. Rule 6 (each service in its own file) is respected. Rules 2, 3, 4 are respected. The demo.ts is a bonus that works correctly as an integration script.",
+      "overall": 6.75
+    },
+    "gpt5Score": {
+      "trialId": "openapi-1",
+      "specType": "openapi",
+      "architecturalAdherence": 6,
+      "completeness": 9,
+      "codeQuality": 8,
+      "constraintCompliance": 8,
+      "overall": 7.75,
+      "notes": "Good separation of services, in-memory stores per service, HTTP handling confined to the router, and event bus used for notifications. Forward-only task status transitions are correctly enforced. However, CommentService directly calls TaskService and UserService (via injected getters) to validate references, which violates the 'no direct service-to-service calls' rule—inter-service checks should be event-driven. All required CRUD endpoints and features are present, and the demo exercises them. Code is clean and well-typed with reasonable error handling, though JSON parsing errors result in 500 instead of 400, and comment notifications only notify the author (simplified but acceptable). No external dependencies and each service is in its own file."
+    }
+  },
+  {
+    "model": "Gemini Pro",
+    "trialId": "c4-1",
+    "specType": "c4",
+    "sonnetScore": {
+      "trialId": "c4-1",
+      "specType": "c4",
+      "architecturalAdherence": 7,
+      "completeness": 4,
+      "codeQuality": 7,
+      "constraintCompliance": 6,
+      "notes": "Architectural adherence is reasonable: EventBus is properly implemented as pub/sub, services own their data stores, and task/comment services publish events correctly. However, the router file is entirely missing from the submission, which is a major gap — Rule 3 (all HTTP handling in API Router only) cannot be evaluated. Completeness is significantly penalized: NotificationService is completely absent (no file submitted), the API Router is missing, and there is no demo/index script. Only 4 of 6 required service files are present. The comment-service violates Rule 1 subtly — it requires the router to pass taskTitle and authorName as parameters, meaning the router must query other services to gather that data before calling commentService.create(); this is a leaky abstraction that works around but does not cleanly satisfy the 'no direct service-to-service calls' rule, since the router becomes an orchestrator fetching cross-service data. Project-service has no event bus integration at all (no events published for member add/remove), and user-service similarly publishes no events. The task status transition logic is correct and clean. Code quality is good where present: TypeScript interfaces are well-defined, Map-based stores are appropriate, error handling in the EventBus catch block is present, and naming is consistent. The variable shadowing bug in removeMember (inner 'id' parameter shadows outer 'id' parameter in the filter callback) is a minor but real defect. Update methods accept all fields as required rather than partial updates, limiting flexibility. Overall the foundation is solid but the submission is incomplete — missing ~40% of required components.",
+      "overall": 6
+    },
+    "gpt5Score": {
+      "trialId": "c4-1",
+      "specType": "c4",
+      "architecturalAdherence": 8,
+      "completeness": 4,
+      "codeQuality": 7,
+      "constraintCompliance": 10,
+      "overall": 7.25,
+      "notes": "Services are isolated with their own stores and use the Event Bus for cross-service communication. Task status transitions enforce forward-only. No HTTP logic in services and no external dependencies. Missing Notification Service and API Router; no event subscriptions implemented, so notifications won’t fire. EventBus is untyped (payload: any) and synchronous. Minimal validation (e.g., assign doesn’t verify user/project membership). Minor readability issue in ProjectService.removeMember (shadowed variable). Overall clean TypeScript but incomplete system."
+    }
+  },
+  {
+    "model": "Gemini Pro",
+    "trialId": "typescript-contracts-1",
+    "specType": "typescript-contracts",
+    "sonnetScore": {
+      "trialId": "typescript-contracts-1",
+      "specType": "typescript-contracts",
+      "architecturalAdherence": 6,
+      "completeness": 8,
+      "codeQuality": 7,
+      "constraintCompliance": 6,
+      "notes": "Overall a solid implementation with good structure, but has meaningful architectural violations. ARCHITECTURAL ISSUES: (1) CommentService directly depends on ITaskService and IUserService via constructor injection and calls their methods directly (comment-service.ts lines: taskService.getById, userService.getById) — this is a direct service-to-service call violating Rule 1; the comment payload should be assembled by the caller or the event should carry sufficient data. (2) NotificationService directly calls taskService.getById in handleCommentAdded — another direct service-to-service call violating Rule 1; the CommentAddedPayload already carries taskTitle but not assigneeId, requiring this cross-service lookup. The fix would be to include assigneeId in CommentAddedPayload. CONSTRAINT VIOLATIONS: Rule 1 violated twice as described. Rule 2 is satisfied. Rule 3 (HTTP only in router) is satisfied. Rule 4 (forward-only transitions) is correctly implemented with allowedTransitions map. Rule 5 (no npm deps) is satisfied. Rule 6 (each service in own file) is satisfied. COMPLETENESS: All CRUD operations are present for all entities. All three events (task.assigned, task.statusChanged, comment.added) are published and subscribed. Demo script covers all major flows. Minor gap: GET /tasks without projectId filter returns nothing useful; no validation on required fields (e.g., missing name/email on user creation). DELETE /projects/:id/members uses request body which is non-standard for DELETE. No email uniqueness validation. CODE QUALITY: Good use of TypeScript interfaces in types.ts, clean separation of concerns, consistent error throwing with descriptive messages. The router is verbose but functional. handleSuccess returning void for undefined creates a subtle control-flow issue (no early return after calling handleError). The router's if-else chain is long but manageable. IEventBus uses unknown type correctly. Missing input validation throughout services.",
+      "overall": 6.75
+    },
+    "gpt5Score": {
+      "trialId": "typescript-contracts-1",
+      "specType": "typescript-contracts",
+      "architecturalAdherence": 6,
+      "completeness": 9,
+      "codeQuality": 7,
+      "constraintCompliance": 6,
+      "overall": 7,
+      "notes": "Strong separation of services, an in-memory event bus, and a single HTTP router are present. Events for task.assigned, task.statusChanged, and comment.added are published and subscribed, and all CRUD endpoints appear implemented with a working demo. However, there is a significant architectural violation: CommentService and NotificationService directly call other services (taskService/userService) to enrich payloads, breaking the 'no direct service-to-service calls' rule and introducing tight coupling. Each service owns its own store and the router handles HTTP exclusively; task status transitions are correctly forward-only; no external dependencies are used; and each service is in its own file. Code quality is generally clean and typed, but error handling maps domain not-found errors to 500 instead of 404, DELETE uses a request body for removing members, and there is limited input validation. GET /tasks without projectId yields an empty list rather than all tasks, which may be surprising but not strictly incorrect."
+    }
+  }
+]

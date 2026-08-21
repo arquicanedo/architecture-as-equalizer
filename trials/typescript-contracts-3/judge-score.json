@@ -1,0 +1,10 @@
+{
+  "trialId": "typescript-contracts-3",
+  "specType": "typescript-contracts",
+  "architecturalAdherence": 8,
+  "completeness": 9,
+  "codeQuality": 9,
+  "constraintCompliance": 9,
+  "overall": 8.75,
+  "notes": "Overall a strong, well-structured implementation. Architectural adherence is good: event bus is used for inter-service notifications, each service owns its own Map store, and HTTP handling is confined to the router. Minor concern: the router resolves task and author context (taskTitle, authorName, assigneeId) before calling commentService.create() to avoid cross-service calls inside services — this is a reasonable workaround but slightly leaks domain resolution into the router layer, which ideally should be a thin HTTP adapter only. The event bus is synchronous (in-process function calls), which is acceptable for an in-memory implementation but worth noting. Completeness is high: all five services are implemented with full CRUD, all three events (task.assigned, task.statusChanged, comment.added) are published and consumed, the forward-only status machine is correct and rejects both backward and skip transitions with 422, and the demo script exercises all 26 scenarios end-to-end. One gap: GET /tasks without a projectId returns 400 instead of supporting a 'get all tasks' endpoint, and GET /notifications lacks a 'get all' endpoint — these are minor omissions consistent with the spec. Code quality is clean: TypeScript interfaces are defined for all entities and service contracts, immutable update patterns are used (spread into new objects), error messages are descriptive, and the error-to-HTTP-status mapping in the router (string matching on 'not found' and 'Invalid status transition') works but is fragile — a typed error class hierarchy would be more robust. No external npm dependencies are used; only Node.js built-ins (http, crypto, url). Each service is in its own file. The 100ms setTimeout in demo.ts is a minor smell but functional."
+}

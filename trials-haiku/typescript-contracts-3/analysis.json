@@ -1,0 +1,64 @@
+{
+  "trialId": "typescript-contracts-3",
+  "specType": "typescript-contracts",
+  "structural": {
+    "hasEventBus": true,
+    "hasUserService": true,
+    "hasProjectService": true,
+    "hasTaskService": true,
+    "hasCommentService": true,
+    "hasNotificationService": true,
+    "hasRouter": true,
+    "hasMainEntry": true,
+    "hasDemoScript": true,
+    "fileCount": 18,
+    "folderStructureScore": 10,
+    "details": [
+      "Each service in its own file: YES"
+    ]
+  },
+  "constraints": {
+    "directServiceCalls": [],
+    "sharedDataAccess": [],
+    "httpInServices": [],
+    "invalidStatusTransitions": [],
+    "externalDependencies": [],
+    "totalViolations": 0
+  },
+  "codeMetrics": {
+    "compiles": false,
+    "compilationErrors": [],
+    "totalLines": 1268,
+    "totalFiles": 18,
+    "linesPerFile": {
+      "dist\\demo.d.ts": 2,
+      "dist\\event-bus.d.ts": 10,
+      "dist\\main.d.ts": 14,
+      "dist\\router.d.ts": 22,
+      "dist\\services\\comment-service.d.ts": 41,
+      "dist\\services\\notification-service.d.ts": 19,
+      "dist\\services\\project-service.d.ts": 39,
+      "dist\\services\\task-service.d.ts": 59,
+      "dist\\services\\user-service.d.ts": 34,
+      "src\\demo.ts": 235,
+      "src\\event-bus.ts": 29,
+      "src\\main.ts": 94,
+      "src\\router.ts": 244,
+      "src\\services\\comment-service.ts": 85,
+      "src\\services\\notification-service.ts": 50,
+      "src\\services\\project-service.ts": 85,
+      "src\\services\\task-service.ts": 141,
+      "src\\services\\user-service.ts": 65
+    }
+  },
+  "transcriptMetrics": {
+    "totalInputTokens": 707553,
+    "totalOutputTokens": 27058,
+    "totalTokens": 734611,
+    "messageCount": 38,
+    "toolCallCount": 38,
+    "errorCount": 5,
+    "retryCount": 0,
+    "durationMs": 248518
+  }
+}

@@ -1,0 +1,393 @@
+{
+  "trialId": "typescript-contracts-2",
+  "specType": "typescript-contracts",
+  "messages": [
+    {
+      "role": "assistant",
+      "content": "",
+      "toolCalls": [
+        {
+          "name": "write_file",
+          "input": {
+            "path": "src/types.ts",
+            "content": "// ============================================================\n// Data Models\n// ============================================================\n\nexport interface User {\n  id: string;\n  name: string;\n  email: string;\n}\n\nexport interface Project {\n  id: string;\n  name: string;\n  description: string;\n  memberIds: string[];\n}\n\nexport type TaskStatus = \"todo\" | \"in-progress\" | \"done\";\n\nexport interface Task {\n  id: string;\n  title: string;\n  description: string;\n  status: TaskStatus;\n  assigneeId: string | null;\n  projectId: string;\n}\n\nexport interface Comment {\n  id: string;\n  taskId: string;\n  authorId: string;\n  body: string;\n  createdAt: string; // ISO 8601\n}\n\nexport interface Notification {\n  id: string;\n  userId: string;\n  message: string;\n  read: boolean;\n  createdAt: string; // ISO 8601\n}\n\n// ============================================================\n// Event Bus Contract\n// ============================================================\n\nexport interface IEventBus {\n  publish(event: string, payload: unknown): void;\n  subscribe(event: string, callback: (payload: unknown) => void): () => void; // Returns unsubscribe function\n}\n\n// Event payloads\nexport interface TaskAssignedPayload {\n  taskId: string;\n  taskTitle: string;\n  assigneeId: string;\n  assigneeName: string; // Added for notification\n}\n\nexport interface TaskStatusChangedPayload {\n  taskId: string;\n  taskTitle: string;\n  assigneeId: string | null;\n  oldStatus: TaskStatus;\n  newStatus: TaskStatus;\n}\n\nexport interface CommentAddedPayload {\n  commentId: string;\n  taskId: string;\n  taskTitle: string;\n  authorId: string;\n  authorName: string;\n  taskAssigneeId: string | null; // Added for notification\n}\n\n// ============================================================\n// Service Contracts\n// ============================================================\n\nexport interface IUserService {\n  create(input: { name: string; email: string }): User;\n  getById(id: string): User;\n  getAll(): User[];\n  update(id: string, input: Partial<{ name: string; email: string }>): User;\n  delete(id: string): void;\n}\n\nexport interface IProjectService {\n  create(input: { name: string; description: string }): Project;\n  getById(id: string): Project;\n  getAll(): Project[];\n  update(id: string, input: Partial<{ name: string; description: string }>): Project;\n  delete(id: string): void;\n  addMember(projectId: string, userId: string): Project;\n  removeMember(projectId: string, userId: string): Project;\n}\n\nexport interface ITaskService {\n  create(input: { title: string; description: string; projectId: string }): Task;\n  getById(id: string): Task;\n  getByProject(projectId: string): Task[];\n  update(id: string, input: Partial<{ title: string; description: string }>): Task;\n  delete(id: string): void;\n  assign(taskId: string, assigneeId: string): Task;\n  changeStatus(taskId: string, newStatus: TaskStatus): Task;\n}\n\nexport interface ICommentService {\n  create(input: { taskId: string; authorId: string; body: string }): Comment;\n  getById(id: string): Comment;\n  getByTask(taskId: string): Comment[];\n  delete(id: string): void;\n}\n\nexport interface INotificationService {\n  getByUser(userId: string): Notification[];\n  markAsRead(notificationId: string): Notification;\n  // Internal method for event bus subscription\n  createNotification(userId: string, message: string): Notification;\n}\n"
+          },
+          "output": "File written: src/types.ts (124 lines)",
+          "error": false
+        }
+      ],
+      "inputTokens": 2738,
+      "outputTokens": 903
+    },
+    {
+      "role": "assistant",
+      "content": "",
+      "toolCalls": [
+        {
+          "name": "write_file",
+          "input": {
+            "path": "src/event-bus.ts",
+            "content": "import { IEventBus } from './types';\n\ntype EventCallback = (payload: unknown) => void;\n\nexport class EventBus implements IEventBus {\n  private subscribers = new Map<string, EventCallback[]>();\n\n  publish(event: string, payload: unknown): void {\n    const callbacks = this.subscribers.get(event);\n    if (callbacks) {\n      callbacks.forEach(callback => {\n        try {\n          callback(payload);\n        } catch (error) {\n          console.error(`Error processing event '${event}':`, error);\n        }\n      });\n    }\n  }\n\n  subscribe(event: string, callback: EventCallback): () => void {\n    if (!this.subscribers.has(event)) {\n      this.subscribers.set(event, []);\n    }\n    this.subscribers.get(event)!.push(callback);\n\n    // Return an unsubscribe function\n    return () => {\n      const callbacks = this.subscribers.get(event);\n      if (callbacks) {\n        const index = callbacks.indexOf(callback);\n        if (index > -1) {\n          callbacks.splice(index, 1);\n        }\n      }\n    };\n  }\n}\n"
+          },
+          "output": "File written: src/event-bus.ts (39 lines)",
+          "error": false
+        }
+      ],
+      "inputTokens": 4311,
+      "outputTokens": 292
+    },
+    {
+      "role": "assistant",
+      "content": "",
+      "toolCalls": [
+        {
+          "name": "write_file",
+          "input": {
+            "path": "src/services/user-service.ts",
+            "content": "import { User, IUserService } from '../types';\nimport * as crypto from 'node:crypto';\n\nexport class UserService implements IUserService {\n  private users = new Map<string, User>();\n\n  constructor() {\n    // Seed with some initial data for demo/testing\n    const user1: User = { id: crypto.randomUUID(), name: 'Alice Smith', email: 'alice@example.com' };\n    const user2: User = { id: crypto.randomUUID(), name: 'Bob Johnson', email: 'bob@example.com' };\n    this.users.set(user1.id, user1);\n    this.users.set(user2.id, user2);\n  }\n\n  create(input: { name: string; email: string }): User {\n    const newUser: User = {\n      id: crypto.randomUUID(),\n      name: input.name,\n      email: input.email,\n    };\n    this.users.set(newUser.id, newUser);\n    return newUser;\n  }\n\n  getById(id: string): User {\n    const user = this.users.get(id);\n    if (!user) {\n      throw new Error(`User with ID ${id} not found`);\n    }\n    return user;\n  }\n\n  getAll(): User[] {\n    return Array.from(this.users.values());\n  }\n\n  update(id: string, input: Partial<{ name: string; email: string }>): User {\n    const user = this.getById(id);\n    if (input.name !== undefined) {\n      user.name = input.name;\n    }\n    if (input.email !== undefined) {\n      user.email = input.email;\n    }\n    this.users.set(id, user); // Ensure map is updated with potentially modified object\n    return user;\n  }\n\n  delete(id: string): void {\n    if (!this.users.has(id)) {\n      throw new Error(`User with ID ${id} not found`);\n    }\n    this.users.delete(id);\n  }\n}\n"
+          },
+          "output": "File written: src/services/user-service.ts (56 lines)",
+          "error": false
+        }
+      ],
+      "inputTokens": 4742,
+      "outputTokens": 497
+    },
+    {
+      "role": "assistant",
+      "content": "",
+      "toolCalls": [
+        {
+          "name": "write_file",
+          "input": {
+            "content": "import { Project, IProjectService } from '../types';\nimport * as crypto from 'node:crypto';\n\nexport class ProjectService implements IProjectService {\n  private projects = new Map<string, Project>();\n\n  constructor() {\n    // Seed with some initial data for demo/testing\n    const project1: Project = { id: crypto.randomUUID(), name: 'Website Redesign', description: 'Redesign the company website', memberIds: [] };\n    const project2: Project = { id: crypto.randomUUID(), name: 'Mobile App Dev', description: 'Develop new mobile application', memberIds: [] };\n    this.projects.set(project1.id, project1);\n    this.projects.set(project2.id, project2);\n  }\n\n  create(input: { name: string; description: string }): Project {\n    const newProject: Project = {\n      id: crypto.randomUUID(),\n      name: input.name,\n      description: input.description,\n      memberIds: [],\n    };\n    this.projects.set(newProject.id, newProject);\n    return newProject;\n  }\n\n  getById(id: string): Project {\n    const project = this.projects.get(id);\n    if (!project) {\n      throw new Error(`Project with ID ${id} not found`);\n    }\n    return project;\n  }\n\n  getAll(): Project[] {\n    return Array.from(this.projects.values());\n  }\n\n  update(id: string, input: Partial<{ name: string; description: string }>): Project {\n    const project = this.getById(id);\n    if (input.name !== undefined) {\n      project.name = input.name;\n    }\n    if (input.description !== undefined) {\n      project.description = input.description;\n    }\n    this.projects.set(id, project);\n    return project;\n  }\n\n  delete(id: string): void {\n    if (!this.projects.has(id)) {\n      throw new Error(`Project with ID ${id} not found`);\n    }\n    this.projects.delete(id);\n  }\n\n  addMember(projectId: string, userId: string): Project {\n    const project = this.getById(projectId);\n    if (!project.memberIds.includes(userId)) {\n      project.memberIds.push(userId);\n    }\n    this.projects.set(projectId, project);\n    return project;\n  }\n\n  removeMember(projectId: string, userId: string): Project {\n    const project = this.getById(projectId);\n    project.memberIds = project.memberIds.filter(id => id !== userId);\n    this.projects.set(projectId, project);\n    return project;\n  }\n}\n",
+            "path": "src/services/project-service.ts"
+          },
+          "output": "File written: src/services/project-service.ts (73 lines)",
+          "error": false
+        }
+      ],
+      "inputTokens": 5315,
+      "outputTokens": 652
+    },
+    {
+      "role": "assistant",
+      "content": "",
+      "toolCalls": [
+        {
+          "name": "write_file",
+          "input": {
+            "content": "// ============================================================\n// Data Models\n// ============================================================\n\nexport interface User {\n  id: string;\n  name: string;\n  email: string;\n}\n\nexport interface Project {\n  id: string;\n  name: string;\n  description: string;\n  memberIds: string[];\n}\n\nexport type TaskStatus = \"todo\" | \"in-progress\" | \"done\";\n\nexport interface Task {\n  id: string;\n  title: string;\n  description: string;\n  status: TaskStatus;\n  assigneeId: string | null;\n  projectId: string;\n}\n\nexport interface Comment {\n  id: string;\n  taskId: string;\n  authorId: string;\n  body: string;\n  createdAt: string; // ISO 8601\n}\n\nexport interface Notification {\n  id: string;\n  userId: string;\n  message: string;\n  read: boolean;\n  createdAt: string; // ISO 8601\n}\n\n// ============================================================\n// Event Bus Contract\n// ============================================================\n\nexport interface IEventBus {\n  publish(event: string, payload: unknown): void;\n  subscribe(event: string, callback: (payload: unknown) => void): () => void; // Returns unsubscribe function\n}\n\n// Event payloads\nexport interface TaskAssignedPayload {\n  taskId: string;\n  taskTitle: string;\n  assigneeId: string;\n}\n\nexport interface TaskStatusChangedPayload {\n  taskId: string;\n  taskTitle: string;\n  assigneeId: string | null;\n  oldStatus: TaskStatus;\n  newStatus: TaskStatus;\n}\n\nexport interface CommentAddedPayload {\n  commentId: string;\n  taskId: string;\n  authorId: string;\n  taskAssigneeId: string | null; // For notification targeting\n}\n\n// ============================================================\n// Service Contracts\n// ============================================================\n\nexport interface IUserService {\n  create(input: { name: string; email: string }): User;\n  getById(id: string): User;\n  getAll(): User[];\n  update(id: string, input: Partial<{ name: string; email: string }>): User;\n  delete(id: string): void;\n}\n\nexport interface IProjectService {\n  create(input: { name: string; description: string }): Project;\n  getById(id: string): Project;\n  getAll(): Project[];\n  update(id: string, input: Partial<{ name: string; description: string }>): Project;\n  delete(id: string): void;\n  addMember(projectId: string, userId: string): Project;\n  removeMember(projectId: string, userId: string): Project;\n}\n\nexport interface ITaskService {\n  create(input: { title: string; description: string; projectId: string }): Task;\n  getById(id: string): Task;\n  getByProject(projectId: string): Task[];\n  update(id: string, input: Partial<{ title: string; description: string }>): Task;\n  delete(id: string): void;\n  assign(taskId: string, assigneeId: string): Task;\n  changeStatus(taskId: string, newStatus: TaskStatus): Task;\n}\n\nexport interface ICommentService {\n  create(input: { taskId: string; authorId: string; body: string }): Comment;\n  getById(id: string): Comment;\n  getByTask(taskId: string): Comment[];\n  delete(id: string): void;\n}\n\nexport interface INotificationService {\n  getByUser(userId: string): Notification[];\n  markAsRead(notificationId: string): Notification;\n  // Internal method for event bus subscription, takes IUserService for user name lookup\n  createNotification(userId: string, message: string): Notification;\n}\n",
+            "path": "src/types.ts"
+          },
+          "output": "File written: src/types.ts (121 lines)",
+          "error": false
+        }
+      ],
+      "inputTokens": 6030,
+      "outputTokens": 885
+    },
+    {
+      "role": "assistant",
+      "content": "",
+      "toolCalls": [
+        {
+          "name": "write_file",
+          "input": {
+            "content": "import { Task, TaskStatus, ITaskService, IEventBus, TaskAssignedPayload, TaskStatusChangedPayload } from '../types';\nimport * as crypto from 'node:crypto';\n\nexport class TaskService implements ITaskService {\n  private tasks = new Map<string, Task>();\n  private eventBus: IEventBus;\n\n  constructor(eventBus: IEventBus) {\n    this.eventBus = eventBus;\n    // Seed with some initial data for demo/testing\n    const task1: Task = { id: crypto.randomUUID(), title: 'Implement Login', description: 'Develop user authentication flow', status: 'todo', assigneeId: null, projectId: 'project1' };\n    const task2: Task = { id: crypto.randomUUID(), title: 'Design Database Schema', description: 'Create ER diagrams and define tables', status: 'in-progress', assigneeId: null, projectId: 'project1' };\n    this.tasks.set(task1.id, task1);\n    this.tasks.set(task2.id, task2);\n  }\n\n  create(input: { title: string; description: string; projectId: string }): Task {\n    const newTask: Task = {\n      id: crypto.randomUUID(),\n      title: input.title,\n      description: input.description,\n      status: 'todo',\n      assigneeId: null,\n      projectId: input.projectId,\n    };\n    this.tasks.set(newTask.id, newTask);\n    return newTask;\n  }\n\n  getById(id: string): Task {\n    const task = this.tasks.get(id);\n    if (!task) {\n      throw new Error(`Task with ID ${id} not found`);\n    }\n    return task;\n  }\n\n  getByProject(projectId: string): Task[] {\n    return Array.from(this.tasks.values()).filter(task => task.projectId === projectId);\n  }\n\n  update(id: string, input: Partial<{ title: string; description: string }>): Task {\n    const task = this.getById(id);\n    if (input.title !== undefined) {\n      task.title = input.title;\n    }\n    if (input.description !== undefined) {\n      task.description = input.description;\n    }\n    this.tasks.set(id, task);\n    return task;\n  }\n\n  delete(id: string): void {\n    if (!this.tasks.has(id)) {\n      throw new Error(`Task with ID ${id} not found`);\n    }\n    this.tasks.delete(id);\n  }\n\n  assign(taskId: string, assigneeId: string): Task {\n    const task = this.getById(taskId);\n    const oldAssigneeId = task.assigneeId; // Store old assignee for potential unassignment event\n\n    if (task.assigneeId !== assigneeId) {\n      task.assigneeId = assigneeId;\n      this.tasks.set(taskId, task);\n\n      const payload: TaskAssignedPayload = {\n        taskId: task.id,\n        taskTitle: task.title,\n        assigneeId: assigneeId,\n      };\n      this.eventBus.publish('task.assigned', payload);\n    }\n\n    return task;\n  }\n\n  changeStatus(taskId: string, newStatus: TaskStatus): Task {\n    const task = this.getById(taskId);\n    const oldStatus = task.status;\n\n    if (oldStatus === newStatus) {\n      return task; // No change\n    }\n\n    // Rule 4: FORWARD_ONLY_STATUS\n    const validTransitions: { [key in TaskStatus]: TaskStatus[] } = {\n      'todo': ['in-progress'],\n      'in-progress': ['done'],\n      'done': [], // Cannot transition from done\n    };\n\n    if (!validTransitions[oldStatus].includes(newStatus)) {\n      throw new Error(`Invalid status transition from '${oldStatus}' to '${newStatus}'`);\n    }\n\n    task.status = newStatus;\n    this.tasks.set(taskId, task);\n\n    const payload: TaskStatusChangedPayload = {\n      taskId: task.id,\n      taskTitle: task.title,\n      assigneeId: task.assigneeId,\n      oldStatus: oldStatus,\n      newStatus: newStatus,\n    };\n    this.eventBus.publish('task.statusChanged', payload);\n\n    return task;\n  }\n}\n",
+            "path": "src/services/task-service.ts"
+          },
+          "output": "File written: src/services/task-service.ts (114 lines)",
+          "error": false
+        }
+      ],
+      "inputTokens": 8427,
+      "outputTokens": 1035
+    },
+    {
+      "role": "assistant",
+      "content": "",
+      "toolCalls": [
+        {
+          "name": "write_file",
+          "input": {
+            "path": "src/services/comment-service.ts",
+            "content": "import { Comment, ICommentService, IEventBus, CommentAddedPayload, Task } from '../types';\nimport * as crypto from 'node:crypto';\n\ninterface ITaskServiceForComments { // Mini-interface to avoid direct import of TaskService\n  getById(taskId: string): Task;\n}\n\nexport class CommentService implements ICommentService {\n  private comments = new Map<string, Comment>();\n  private eventBus: IEventBus;\n  private taskService: ITaskServiceForComments; // Dependency for fetching task details\n\n  constructor(eventBus: IEventBus, taskService: ITaskServiceForComments) {\n    this.eventBus = eventBus;\n    this.taskService = taskService;\n  }\n\n  create(input: { taskId: string; authorId: string; body: string }): Comment {\n    // Ensure task exists before creating comment\n    const task = this.taskService.getById(input.taskId); // Throws if task not found\n\n    const newComment: Comment = {\n      id: crypto.randomUUID(),\n      taskId: input.taskId,\n      authorId: input.authorId,\n      body: input.body,\n      createdAt: new Date().toISOString(),\n    };\n    this.comments.set(newComment.id, newComment);\n\n    const payload: CommentAddedPayload = {\n      commentId: newComment.id,\n      taskId: newComment.taskId,\n      authorId: newComment.authorId,\n      taskAssigneeId: task.assigneeId, // Pass assigneeId for notification targeting\n    };\n    this.eventBus.publish('comment.added', payload);\n\n    return newComment;\n  }\n\n  getById(id: string): Comment {\n    const comment = this.comments.get(id);\n    if (!comment) {\n      throw new Error(`Comment with ID ${id} not found`);\n    }\n    return comment;\n  }\n\n  getByTask(taskId: string): Comment[] {\n    return Array.from(this.comments.values()).filter(comment => comment.taskId === taskId);\n  }\n\n  delete(id: string): void {\n    if (!this.comments.has(id)) {\n      throw new Error(`Comment with ID ${id} not found`);\n    }\n    this.comments.delete(id);\n  }\n}\n"
+          },
+          "output": "File written: src/services/comment-service.ts (61 lines)",
+          "error": false
+        }
+      ],
+      "inputTokens": 9516,
+      "outputTokens": 540
+    },
+    {
+      "role": "assistant",
+      "content": "",
+      "toolCalls": [
+        {
+          "name": "write_file",
+          "input": {
+            "path": "src/services/notification-service.ts",
+            "content": "import { Notification, INotificationService, IUserService, TaskAssignedPayload, TaskStatusChangedPayload, CommentAddedPayload, User, Task } from '../types';\nimport * as crypto from 'node:crypto';\n\ninterface ITaskServiceForNotifications { // Minimal interface for TaskService\n  getById(taskId: string): Task;\n}\n\nexport class NotificationService implements INotificationService {\n  private notifications = new Map<string, Notification>();\n  private userService: IUserService;\n  private taskService: ITaskServiceForNotifications; // To fetch task details for comment notifications\n\n  constructor(userService: IUserService, taskService: ITaskServiceForNotifications) {\n    this.userService = userService;\n    this.taskService = taskService;\n  }\n\n  // This method is called by event subscribers, not directly via API\n  createNotification(userId: string, message: string): Notification {\n    const newNotification: Notification = {\n      id: crypto.randomUUID(),\n      userId: userId,\n      message: message,\n      read: false,\n      createdAt: new Date().toISOString(),\n    };\n    // For in-memory storage, we might want to cap notifications per user or just keep adding\n    // For simplicity, just add to the map.\n    this.notifications.set(newNotification.id, newNotification);\n    return newNotification;\n  }\n\n  getByUser(userId: string): Notification[] {\n    return Array.from(this.notifications.values())\n      .filter(notification => notification.userId === userId)\n      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());\n  }\n\n  markAsRead(notificationId: string): Notification {\n    const notification = this.notifications.get(notificationId);\n    if (!notification) {\n      throw new Error(`Notification with ID ${notificationId} not found`);\n    }\n    notification.read = true;\n    this.notifications.set(notificationId, notification);\n    return notification;\n  }\n\n  // Event Handlers (these will be wired up in main.ts)\n  handleTaskAssigned = (payload: unknown) => {\n    const assignedPayload = payload as TaskAssignedPayload;\n    try {\n      const assignee = this.userService.getById(assignedPayload.assigneeId);\n      this.createNotification(\n        assignedPayload.assigneeId,\n        `Task '${assignedPayload.taskTitle}' has been assigned to you.`\n      );\n    } catch (error) {\n      console.error('Error handling task.assigned event:', error);\n    }\n  };\n\n  handleTaskStatusChanged = (payload: unknown) => {\n    const statusChangedPayload = payload as TaskStatusChangedPayload;\n    if (statusChangedPayload.assigneeId) {\n      try {\n        const assignee = this.userService.getById(statusChangedPayload.assigneeId);\n        this.createNotification(\n          statusChangedPayload.assigneeId,\n          `Status of task '${statusChangedPayload.taskTitle}' changed to ${statusChangedPayload.newStatus}.`\n        );\n      } catch (error) {\n        console.error('Error handling task.statusChanged event:', error);\n      }\n    }\n  };\n\n  handleCommentAdded = (payload: unknown) => {\n    const commentAddedPayload = payload as CommentAddedPayload;\n    // Notify the task assignee if there is one\n    if (commentAddedPayload.taskAssigneeId) {\n      try {\n        const assignee = this.userService.getById(commentAddedPayload.taskAssigneeId);\n        // To get the task title for the notification, we need the task service\n        const task = this.taskService.getById(commentAddedPayload.taskId);\n        const author = this.userService.getById(commentAddedPayload.authorId);\n        this.createNotification(\n          commentAddedPayload.taskAssigneeId,\n          `'${author.name}' commented on your task '${task.title}'.`\n        );\n      } catch (error) {\n        console.error('Error handling comment.added event:', error);\n      }\n    }\n  };\n}\n"
+          },
+          "output": "File written: src/services/notification-service.ts (97 lines)",
+          "error": false
+        }
+      ],
+      "inputTokens": 10112,
+      "outputTokens": 944
+    },
+    {
+      "role": "assistant",
+      "content": "",
+      "toolCalls": [
+        {
+          "name": "write_file",
+          "input": {
+            "content": "import * as http from 'node:http';\nimport * as url from 'node:url';\n\nimport {\n  IUserService,\n  IProjectService,\n  ITaskService,\n  ICommentService,\n  INotificationService,\n  User, Project, Task, Comment, Notification,\n  TaskStatus,\n} from './types';\n\ninterface Services {\n  userService: IUserService;\n  projectService: IProjectService;\n  taskService: ITaskService;\n  commentService: ICommentService;\n  notificationService: INotificationService;\n}\n\nexport class Router {\n  private services: Services;\n\n  constructor(services: Services) {\n    this.services = services;\n  }\n\n  private async parseBody(req: http.IncomingMessage): Promise<any> {\n    return new Promise((resolve, reject) => {\n      let body = '';\n      req.on('data', chunk => {\n        body += chunk.toString();\n      });\n      req.on('end', () => {\n        if (body) {\n          try {\n            resolve(JSON.parse(body));\n          } catch (error) {\n            reject(new Error('Invalid JSON body'));\n          }\n        } else {\n          resolve({});\n        }\n      });\n      req.on('error', reject);\n    });\n  }\n\n  private sendResponse(res: http.ServerResponse, statusCode: number, data: any) {\n    res.setHeader('Content-Type', 'application/json');\n    res.writeHead(statusCode);\n    res.end(JSON.stringify(data));\n  }\n\n  private sendError(res: http.ServerResponse, statusCode: number, message: string) {\n    this.sendResponse(res, statusCode, { error: message });\n  }\n\n  public async handleRequest(req: http.IncomingMessage, res: http.ServerResponse) {\n    const parsedUrl = url.parse(req.url || '', true);\n    const path = parsedUrl.pathname;\n    const method = req.method;\n    const query = parsedUrl.query;\n\n    try {\n      let body: any = {};\n      if (method === 'POST' || method === 'PUT' || method === 'PATCH') {\n        body = await this.parseBody(req);\n      }\n\n      if (path === '/users') {\n        if (method === 'GET') {\n          const users = this.services.userService.getAll();\n          return this.sendResponse(res, 200, users);\n        } else if (method === 'POST') {\n          const newUser = this.services.userService.create(body);\n          return this.sendResponse(res, 201, newUser);\n        }\n      } else if (path?.startsWith('/users/')) {\n        const id = path.split('/')[2];\n        if (method === 'GET') {\n          const user = this.services.userService.getById(id);\n          return this.sendResponse(res, 200, user);\n        } else if (method === 'PUT') {\n          const updatedUser = this.services.userService.update(id, body);\n          return this.sendResponse(res, 200, updatedUser);\n        } else if (method === 'DELETE') {\n          this.services.userService.delete(id);\n          return this.sendResponse(res, 204, null);\n        }\n      }\n\n      else if (path === '/projects') {\n        if (method === 'GET') {\n          const projects = this.services.projectService.getAll();\n          return this.sendResponse(res, 200, projects);\n        } else if (method === 'POST') {\n          const newProject = this.services.projectService.create(body);\n          return this.sendResponse(res, 201, newProject);\n        }\n      } else if (path?.startsWith('/projects/')) {\n        const parts = path.split('/');\n        const id = parts[2];\n        if (method === 'GET') {\n          const project = this.services.projectService.getById(id);\n          return this.sendResponse(res, 200, project);\n        } else if (method === 'PUT') {\n          const updatedProject = this.services.projectService.update(id, body);\n          return this.sendResponse(res, 200, updatedProject);\n        } else if (method === 'DELETE') {\n          this.services.projectService.delete(id);\n          return this.sendResponse(res, 204, null);\n        } else if (parts[3] === 'members') {\n          if (method === 'POST') {\n            if (!body.userId) {\n              throw new Error('userId is required');\n            }\n            const project = this.services.projectService.addMember(id, body.userId);\n            return this.sendResponse(res, 200, project);\n          } else if (method === 'DELETE') {\n            if (!body.userId) {\n              throw new Error('userId is required');\n            }\n            const project = this.services.projectService.removeMember(id, body.userId);\n            return this.sendResponse(res, 200, project);\n          }\n        }\n      }\n\n      else if (path === '/tasks') {\n        if (method === 'GET') {\n          if (!query.projectId) {\n            throw new Error('projectId query parameter is required');\n          }\n          const tasks = this.services.taskService.getByProject(query.projectId as string);\n          return this.sendResponse(res, 200, tasks);\n        } else if (method === 'POST') {\n          const newTask = this.services.taskService.create(body);\n          return this.sendResponse(res, 201, newTask);\n        }\n      } else if (path?.startsWith('/tasks/')) {\n        const parts = path.split('/');\n        const id = parts[2];\n        if (method === 'GET') {\n          const task = this.services.taskService.getById(id);\n          return this.sendResponse(res, 200, task);\n        } else if (method === 'PUT') {\n          if (parts[3] === 'status') {\n            if (!body.status) {\n              throw new Error('status is required');\n            }\n            const updatedTask = this.services.taskService.changeStatus(id, body.status as TaskStatus);\n            return this.sendResponse(res, 200, updatedTask);\n          } else if (parts[3] === 'assign') {\n            if (!body.assigneeId) {\n              throw new Error('assigneeId is required');\n            }\n            const updatedTask = this.services.taskService.assign(id, body.assigneeId);\n            return this.sendResponse(res, 200, updatedTask);\n          } else {\n            const updatedTask = this.services.taskService.update(id, body);\n            return this.sendResponse(res, 200, updatedTask);\n          }\n        } else if (method === 'DELETE') {\n          this.services.taskService.delete(id);\n          return this.sendResponse(res, 204, null);\n        }\n      }\n\n      else if (path === '/comments') {\n        if (method === 'GET') {\n          if (!query.taskId) {\n            throw new Error('taskId query parameter is required');\n          }\n          const comments = this.services.commentService.getByTask(query.taskId as string);\n          return this.sendResponse(res, 200, comments);\n        } else if (method === 'POST') {\n          const newComment = this.services.commentService.create(body);\n          return this.sendResponse(res, 201, newComment);\n        }\n      } else if (path?.startsWith('/comments/')) {\n        const id = path.split('/')[2];\n        if (method === 'GET') {\n          const comment = this.services.commentService.getById(id);\n          return this.sendResponse(res, 200, comment);\n        } else if (method === 'DELETE') {\n          this.services.commentService.delete(id);\n          return this.sendResponse(res, 204, null);\n        }\n      }\n\n      else if (path === '/notifications') {\n        if (method === 'GET') {\n          if (!query.userId) {\n            throw new Error('userId query parameter is required');\n          }\n          const notifications = this.services.notificationService.getByUser(query.userId as string);\n          return this.sendResponse(res, 200, notifications);\n        }\n      } else if (path?.startsWith('/notifications/')) {\n        const parts = path.split('/');\n        const id = parts[2];\n        if (parts[3] === 'read' && method === 'PUT') {\n          const notification = this.services.notificationService.markAsRead(id);\n          return this.sendResponse(res, 200, notification);\n        }\n      }\n\n      this.sendError(res, 404, 'Not Found');\n    } catch (error: any) {\n      console.error('Request error:', error.message);\n      const statusCode = error.message.includes('not found') ? 404 : 400;\n      this.sendError(res, statusCode, error.message);\n    }\n  }\n}\n",
+            "path": "src/router.ts"
+          },
+          "output": "File written: src/router.ts (218 lines)",
+          "error": false
+        }
+      ],
+      "inputTokens": 11214,
+      "outputTokens": 2215
+    },
+    {
+      "role": "assistant",
+      "content": "",
+      "toolCalls": [
+        {
+          "name": "write_file",
+          "input": {
+            "path": "src/main.ts",
+            "content": "import * as http from 'node:http';\nimport { EventBus } from './event-bus';\nimport { UserService } from './services/user-service';\nimport { ProjectService } from './services/project-service';\nimport { TaskService } from './services/task-service';\nimport { CommentService } from './services/comment-service';\nimport { NotificationService } from './services/notification-service';\nimport { Router } from './router';\nimport { IUserService, ITaskService } from './types';\n\nconst PORT = 3000;\n\nasync function main() {\n  // Initialize Event Bus\n  const eventBus = new EventBus();\n\n  // Initialize Services\n  const userService = new UserService();\n  const projectService = new ProjectService();\n  // TaskService depends on EventBus\n  const taskService = new TaskService(eventBus);\n  // CommentService depends on EventBus and a minimal ITaskService (for getById)\n  const commentService = new CommentService(eventBus, taskService as ITaskService);\n  // NotificationService depends on IUserService and a minimal ITaskService (for getById)\n  const notificationService = new NotificationService(userService as IUserService, taskService as ITaskService);\n\n  // Wire up Event Subscriptions for NotificationService\n  eventBus.subscribe('task.assigned', notificationService.handleTaskAssigned);\n  eventBus.subscribe('task.statusChanged', notificationService.handleTaskStatusChanged);\n  eventBus.subscribe('comment.added', notificationService.handleCommentAdded);\n\n  // Initialize Router with all services\n  const router = new Router({\n    userService,\n    projectService,\n    taskService,\n    commentService,\n    notificationService,\n  });\n\n  // Create HTTP server\n  const server = http.createServer((req, res) => {\n    router.handleRequest(req, res);\n  });\n\n  server.listen(PORT, () => {\n    console.log(`Server running on http://localhost:${PORT}`);\n  });\n\n  // Handle server shutdown gracefully\n  process.on('SIGTERM', () => {\n    console.log('SIGTERM signal received: closing HTTP server');\n    server.close(() => {\n      console.log('HTTP server closed');\n      process.exit(0);\n    });\n  });\n\n  process.on('SIGINT', () => {\n    console.log('SIGINT signal received: closing HTTP server');\n    server.close(() => {\n      console.log('HTTP server closed');\n      process.exit(0);\n    });\n  });\n}\n\nmain().catch(console.error);\n"
+          },
+          "output": "File written: src/main.ts (69 lines)",
+          "error": false
+        }
+      ],
+      "inputTokens": 13581,
+      "outputTokens": 595
+    },
+    {
+      "role": "assistant",
+      "content": "",
+      "toolCalls": [
+        {
+          "name": "write_file",
+          "input": {
+            "path": "src/demo.ts",
+            "content": "import * as http from 'node:http';\n\nconst BASE_URL = 'http://localhost:3000';\n\nasync function makeRequest(method: string, path: string, body?: any): Promise<any> {\n  return new Promise((resolve, reject) => {\n    const options = {\n      method: method,\n      headers: {\n        'Content-Type': 'application/json',\n      },\n    };\n\n    const req = http.request(`${BASE_URL}${path}`, options, (res) => {\n      let data = '';\n      res.on('data', (chunk) => {\n        data += chunk;\n      });\n      res.on('end', () => {\n        if (res.statusCode && res.statusCode >= 200 && res.statusCode < 300) {\n          try {\n            resolve(data ? JSON.parse(data) : null);\n          } catch (e) {\n            resolve(data); // In case of non-JSON response\n          }\n        } else {\n          reject(new Error(`Request failed with status ${res.statusCode}: ${data}`));\n        }\n      });\n    });\n\n    req.on('error', (e) => {\n      reject(e);\n    });\n\n    if (body) {\n      req.write(JSON.stringify(body));\n    }\n    req.end();\n  });\n}\n\nasync function demo() {\n  console.log('Starting demo...');\n\n  // 1. Create Users\n  console.log('\\n--- Creating Users ---');\n  const user1 = await makeRequest('POST', '/users', { name: 'Alice', email: 'alice@example.com' });\n  console.log('Created user:', user1);\n  const user2 = await makeRequest('POST', '/users', { name: 'Bob', email: 'bob@example.com' });\n  console.log('Created user:', user2);\n  const user3 = await makeRequest('POST', '/users', { name: 'Charlie', email: 'charlie@example.com' });\n  console.log('Created user:', user3);\n\n  // Get all users\n  const allUsers = await makeRequest('GET', '/users');\n  console.log('All users:', allUsers);\n\n  // 2. Create Project\n  console.log('\\n--- Creating Project ---');\n  const project1 = await makeRequest('POST', '/projects', { name: 'New Feature Dev', description: 'Develop a groundbreaking new feature' });\n  console.log('Created project:', project1);\n\n  // 3. Add Members to Project\n  console.log('\\n--- Adding Members to Project ---');\n  await makeRequest('POST', `/projects/${project1.id}/members`, { userId: user1.id });\n  await makeRequest('POST', `/projects/${project1.id}/members`, { userId: user2.id });\n  const updatedProject = await makeRequest('GET', `/projects/${project1.id}`);\n  console.log('Project with members:', updatedProject);\n\n  // 4. Create Tasks\n  console.log('\\n--- Creating Tasks ---');\n  const task1 = await makeRequest('POST', '/tasks', { title: 'Implement UI', description: 'Build the user interface components', projectId: project1.id });\n  console.log('Created task:', task1);\n  const task2 = await makeRequest('POST', '/tasks', { title: 'Write Backend API', description: 'Develop REST endpoints', projectId: project1.id });\n  console.log('Created task:', task2);\n  const task3 = await makeRequest('POST', '/tasks', { title: 'Prepare Documentation', description: 'Write user and developer docs', projectId: project1.id });\n  console.log('Created task:', task3);\n\n  // Get tasks for project\n  const projectTasks = await makeRequest('GET', `/tasks?projectId=${project1.id}`);\n  console.log('Tasks for project:', projectTasks);\n\n  // 5. Assign Tasks\n  console.log('\\n--- Assigning Tasks ---');\n  const assignedTask1 = await makeRequest('PUT', `/tasks/${task1.id}/assign`, { assigneeId: user1.id });\n  console.log('Assigned task 1 to Alice:', assignedTask1);\n  const assignedTask2 = await makeRequest('PUT', `/tasks/${task2.id}/assign`, { assigneeId: user2.id });\n  console.log('Assigned task 2 to Bob:', assignedTask2);\n\n  // 6. Change Task Status\n  console.log('\\n--- Changing Task Status ---');\n  const task1InProgress = await makeRequest('PUT', `/tasks/${task1.id}/status`, { status: 'in-progress' });\n  console.log('Task 1 status to in-progress:', task1InProgress);\n  try {\n    // This should fail: skipping todo -> done\n    await makeRequest('PUT', `/tasks/${task3.id}/status`, { status: 'done' });\n  } catch (error: any) {\n    console.error('Expected error (skipping status): ', error.message);\n  }\n  const task1Done = await makeRequest('PUT', `/tasks/${task1.id}/status`, { status: 'done' });\n  console.log('Task 1 status to done:', task1Done);\n\n  // 7. Add Comments\n  console.log('\\n--- Adding Comments ---');\n  const comment1 = await makeRequest('POST', '/comments', { taskId: task1.id, authorId: user2.id, body: 'Great work on the UI!' });\n  console.log('Commented on task 1:', comment1);\n  const comment2 = await makeRequest('POST', '/comments', { taskId: task2.id, authorId: user1.id, body: 'I need some clarity on the API specs.' });\n  console.log('Commented on task 2:', comment2);\n\n  // Get comments for task\n  const taskComments = await makeRequest('GET', `/comments?taskId=${task1.id}`);\n  console.log('Comments for task 1:', taskComments);\n\n  // 8. Check Notifications\n  console.log('\\n--- Checking Notifications ---');\n  const user1Notifications = await makeRequest('GET', `/notifications?userId=${user1.id}`);\n  console.log('Alice's notifications:', user1Notifications);\n  const user2Notifications = await makeRequest('GET', `/notifications?userId=${user2.id}`);\n  console.log('Bob's notifications:', user2Notifications);\n  const user3Notifications = await makeRequest('GET', `/notifications?userId=${user3.id}`);\n  console.log('Charlie's notifications (should be empty):', user3Notifications);\n\n  // Mark notification as read\n  if (user1Notifications.length > 0) {\n    const notificationToRead = user1Notifications[0];\n    const readNotification = await makeRequest('PUT', `/notifications/${notificationToRead.id}/read`);\n    console.log('Marked notification as read:', readNotification);\n    const updatedUser1Notifications = await makeRequest('GET', `/notifications?userId=${user1.id}`);\n    console.log('Alice's notifications after read:', updatedUser1Notifications);\n  }\n\n  console.log('\\nDemo finished. Please manually stop the server running main.ts.');\n}\n\ndemo().catch(error => {\n  console.error('Demo failed:', error.message);\n});\n"
+          },
+          "output": "File written: src/demo.ts (139 lines)",
+          "error": false
+        }
+      ],
+      "inputTokens": 14305,
+      "outputTokens": 1705
+    },
+    {
+      "role": "assistant",
+      "content": "",
+      "toolCalls": [
+        {
+          "name": "write_file",
+          "input": {
+            "content": "{\n  \"compilerOptions\": {\n    \"target\": \"ES2020\",\n    \"module\": \"CommonJS\",\n    \"lib\": [\"ES2020\"],\n    \"strict\": true,\n    \"esModuleInterop\": true,\n    \"skipLibCheck\": true,\n    \"forceConsistentCasingInFileNames\": true,\n    \"outDir\": \"./dist\",\n    \"rootDir\": \"./src\"\n  },\n  \"include\": [\"src/**/*.ts\"],\n  \"exclude\": [\"node_modules\"]\n}\n",
+            "path": "tsconfig.json"
+          },
+          "output": "File written: tsconfig.json (16 lines)",
+          "error": false
+        }
+      ],
+      "inputTokens": 16156,
+      "outputTokens": 129
+    },
+    {
+      "role": "assistant",
+      "content": "",
+      "toolCalls": [
+        {
+          "name": "run_command",
+          "input": {
+            "command": "npx tsc --noEmit"
+          },
+          "output": "Command failed (exit 1):\n\n\u001b[41m                                                                               \u001b[0m\n\u001b[41m\u001b[37m                This is not the tsc command you are looking for                \u001b[0m\n\u001b[41m                                                                               \u001b[0m\n\nTo get access to the TypeScript compiler, \u001b[34mtsc\u001b[0m, from the command line either:\n\n- Use \u001b[1mnpm install typescript\u001b[0m to first add TypeScript to your project \u001b[1mbefore\u001b[0m using npx\n- Use \u001b[1myarn\u001b[0m to avoid accidentally running code from un-installed packages",
+          "error": true
+        }
+      ],
+      "inputTokens": 16379,
+      "outputTokens": 11
+    },
+    {
+      "role": "assistant",
+      "content": "",
+      "toolCalls": [
+        {
+          "name": "run_command",
+          "input": {
+            "command": "npm install typescript"
+          },
+          "output": "\nadded 2 packages in 7s\n",
+          "error": false
+        }
+      ],
+      "inputTokens": 16565,
+      "outputTokens": 7
+    },
+    {
+      "role": "assistant",
+      "content": "",
+      "toolCalls": [
+        {
+          "name": "run_command",
+          "input": {
+            "command": "npx tsc --noEmit"
+          },
+          "output": "Command failed (exit 1):\nsrc/demo.ts(118,22): error TS1005: ',' expected.\nsrc/demo.ts(118,24): error TS1005: ',' expected.\nsrc/demo.ts(118,37): error TS1005: ',' expected.\nsrc/demo.ts(118,61): error TS1002: Unterminated string literal.\nsrc/demo.ts(119,3): error TS1005: ',' expected.\nsrc/demo.ts(120,20): error TS1005: ',' expected.\nsrc/demo.ts(120,22): error TS1005: ',' expected.\nsrc/demo.ts(120,35): error TS1005: ',' expected.\nsrc/demo.ts(120,59): error TS1002: Unterminated string literal.\nsrc/demo.ts(121,3): error TS1005: ',' expected.\nsrc/demo.ts(122,24): error TS1005: ',' expected.\nsrc/demo.ts(122,26): error TS1005: ',' expected.\nsrc/demo.ts(122,48): error TS1005: ',' expected.\nsrc/demo.ts(122,51): error TS1005: ',' expected.\nsrc/demo.ts(122,57): error TS1005: ',' expected.\nsrc/demo.ts(122,81): error TS1002: Unterminated string literal.\nsrc/demo.ts(125,3): error TS1005: ',' expected.\nsrc/demo.ts(130,24): error TS1005: ',' expected.\nsrc/demo.ts(130,26): error TS1005: ',' expected.\nsrc/demo.ts(130,40): error TS1005: ',' expected.\nsrc/demo.ts(130,46): error TS1005: ',' expected.\nsrc/demo.ts(130,50): error TS1005: ',' expected.\nsrc/demo.ts(130,81): error TS1002: Unterminated string literal.\nsrc/demo.ts(131,3): error TS1005: ',' expected.",
+          "error": true
+        }
+      ],
+      "inputTokens": 16631,
+      "outputTokens": 11
+    },
+    {
+      "role": "assistant",
+      "content": "",
+      "toolCalls": [
+        {
+          "name": "read_file",
+          "input": {
+            "path": "src/demo.ts"
+          },
+          "output": "import * as http from 'node:http';\n\nconst BASE_URL = 'http://localhost:3000';\n\nasync function makeRequest(method: string, path: string, body?: any): Promise<any> {\n  return new Promise((resolve, reject) => {\n    const options = {\n      method: method,\n      headers: {\n        'Content-Type': 'application/json',\n      },\n    };\n\n    const req = http.request(`${BASE_URL}${path}`, options, (res) => {\n      let data = '';\n      res.on('data', (chunk) => {\n        data += chunk;\n      });\n      res.on('end', () => {\n        if (res.statusCode && res.statusCode >= 200 && res.statusCode < 300) {\n          try {\n            resolve(data ? JSON.parse(data) : null);\n          } catch (e) {\n            resolve(data); // In case of non-JSON response\n          }\n        } else {\n          reject(new Error(`Request failed with status ${res.statusCode}: ${data}`));\n        }\n      });\n    });\n\n    req.on('error', (e) => {\n      reject(e);\n    });\n\n    if (body) {\n      req.write(JSON.stringify(body));\n    }\n    req.end();\n  });\n}\n\nasync function demo() {\n  console.log('Starting demo...');\n\n  // 1. Create Users\n  console.log('\\n--- Creating Users ---');\n  const user1 = await makeRequest('POST', '/users', { name: 'Alice', email: 'alice@example.com' });\n  console.log('Created user:', user1);\n  const user2 = await makeRequest('POST', '/users', { name: 'Bob', email: 'bob@example.com' });\n  console.log('Created user:', user2);\n  const user3 = await makeRequest('POST', '/users', { name: 'Charlie', email: 'charlie@example.com' });\n  console.log('Created user:', user3);\n\n  // Get all users\n  const allUsers = await makeRequest('GET', '/users');\n  console.log('All users:', allUsers);\n\n  // 2. Create Project\n  console.log('\\n--- Creating Project ---');\n  const project1 = await makeRequest('POST', '/projects', { name: 'New Feature Dev', description: 'Develop a groundbreaking new feature' });\n  console.log('Created project:', project1);\n\n  // 3. Add Members to Project\n  console.log('\\n--- Adding Members to Project ---');\n  await makeRequest('POST', `/projects/${project1.id}/members`, { userId: user1.id });\n  await makeRequest('POST', `/projects/${project1.id}/members`, { userId: user2.id });\n  const updatedProject = await makeRequest('GET', `/projects/${project1.id}`);\n  console.log('Project with members:', updatedProject);\n\n  // 4. Create Tasks\n  console.log('\\n--- Creating Tasks ---');\n  const task1 = await makeRequest('POST', '/tasks', { title: 'Implement UI', description: 'Build the user interface components', projectId: project1.id });\n  console.log('Created task:', task1);\n  const task2 = await makeRequest('POST', '/tasks', { title: 'Write Backend API', description: 'Develop REST endpoints', projectId: project1.id });\n  console.log('Created task:', task2);\n  const task3 = await makeRequest('POST', '/tasks', { title: 'Prepare Documentation', description: 'Write user and developer docs', projectId: project1.id });\n  console.log('Created task:', task3);\n\n  // Get tasks for project\n  const projectTasks = await makeRequest('GET', `/tasks?projectId=${project1.id}`);\n  console.log('Tasks for project:', projectTasks);\n\n  // 5. Assign Tasks\n  console.log('\\n--- Assigning Tasks ---');\n  const assignedTask1 = await makeRequest('PUT', `/tasks/${task1.id}/assign`, { assigneeId: user1.id });\n  console.log('Assigned task 1 to Alice:', assignedTask1);\n  const assignedTask2 = await makeRequest('PUT', `/tasks/${task2.id}/assign`, { assigneeId: user2.id });\n  console.log('Assigned task 2 to Bob:', assignedTask2);\n\n  // 6. Change Task Status\n  console.log('\\n--- Changing Task Status ---');\n  const task1InProgress = await makeRequest('PUT', `/tasks/${task1.id}/status`, { status: 'in-progress' });\n  console.log('Task 1 status to in-progress:', task1InProgress);\n  try {\n    // This should fail: skipping todo -> done\n    await makeRequest('PUT', `/tasks/${task3.id}/status`, { status: 'done' });\n  } catch (error: any) {\n    console.error('Expected error (skipping status): '\n...(truncated)",
+          "error": false
+        }
+      ],
+      "inputTokens": 17258,
+      "outputTokens": 9
+    },
+    {
+      "role": "assistant",
+      "content": "",
+      "toolCalls": [
+        {
+          "name": "write_file",
+          "input": {
+            "content": "import * as http from 'node:http';\n\nconst BASE_URL = 'http://localhost:3000';\n\nasync function makeRequest(method: string, path: string, body?: any): Promise<any> {\n  return new Promise((resolve, reject) => {\n    const options = {\n      method: method,\n      headers: {\n        'Content-Type': 'application/json',\n      },\n    };\n\n    const req = http.request(`${BASE_URL}${path}`, options, (res) => {\n      let data = '';\n      res.on('data', (chunk) => {\n        data += chunk;\n      });\n      res.on('end', () => {\n        if (res.statusCode && res.statusCode >= 200 && res.statusCode < 300) {\n          try {\n            resolve(data ? JSON.parse(data) : null);\n          } catch (e) {\n            resolve(data); // In case of non-JSON response\n          }\n        } else {\n          reject(new Error(`Request failed with status ${res.statusCode}: ${data}`));\n        }\n      });\n    });\n\n    req.on('error', (e) => {\n      reject(e);\n    });\n\n    if (body) {\n      req.write(JSON.stringify(body));\n    }\n    req.end();\n  });\n}\n\nasync function demo() {\n  console.log('Starting demo...');\n\n  // 1. Create Users\n  console.log('\\n--- Creating Users ---');\n  const user1 = await makeRequest('POST', '/users', { name: 'Alice', email: 'alice@example.com' });\n  console.log('Created user: ' + JSON.stringify(user1));\n  const user2 = await makeRequest('POST', '/users', { name: 'Bob', email: 'bob@example.com' });\n  console.log('Created user: ' + JSON.stringify(user2));\n  const user3 = await makeRequest('POST', '/users', { name: 'Charlie', email: 'charlie@example.com' });\n  console.log('Created user: ' + JSON.stringify(user3));\n\n  // Get all users\n  const allUsers = await makeRequest('GET', '/users');\n  console.log('All users: ' + JSON.stringify(allUsers));\n\n  // 2. Create Project\n  console.log('\\n--- Creating Project ---');\n  const project1 = await makeRequest('POST', '/projects', { name: 'New Feature Dev', description: 'Develop a groundbreaking new feature' });\n  console.log('Created project: ' + JSON.stringify(project1));\n\n  // 3. Add Members to Project\n  console.log('\\n--- Adding Members to Project ---');\n  await makeRequest('POST', `/projects/${project1.id}/members`, { userId: user1.id });\n  await makeRequest('POST', `/projects/${project1.id}/members`, { userId: user2.id });\n  const updatedProject = await makeRequest('GET', `/projects/${project1.id}`);\n  console.log('Project with members: ' + JSON.stringify(updatedProject));\n\n  // 4. Create Tasks\n  console.log('\\n--- Creating Tasks ---');\n  const task1 = await makeRequest('POST', '/tasks', { title: 'Implement UI', description: 'Build the user interface components', projectId: project1.id });\n  console.log('Created task: ' + JSON.stringify(task1));\n  const task2 = await makeRequest('POST', '/tasks', { title: 'Write Backend API', description: 'Develop REST endpoints', projectId: project1.id });\n  console.log('Created task: ' + JSON.stringify(task2));\n  const task3 = await makeRequest('POST', '/tasks', { title: 'Prepare Documentation', description: 'Write user and developer docs', projectId: project1.id });\n  console.log('Created task: ' + JSON.stringify(task3));\n\n  // Get tasks for project\n  const projectTasks = await makeRequest('GET', `/tasks?projectId=${project1.id}`);\n  console.log('Tasks for project: ' + JSON.stringify(projectTasks));\n\n  // 5. Assign Tasks\n  console.log('\\n--- Assigning Tasks ---');\n  const assignedTask1 = await makeRequest('PUT', `/tasks/${task1.id}/assign`, { assigneeId: user1.id });\n  console.log('Assigned task 1 to Alice: ' + JSON.stringify(assignedTask1));\n  const assignedTask2 = await makeRequest('PUT', `/tasks/${task2.id}/assign`, { assigneeId: user2.id });\n  console.log('Assigned task 2 to Bob: ' + JSON.stringify(assignedTask2));\n\n  // 6. Change Task Status\n  console.log('\\n--- Changing Task Status ---');\n  const task1InProgress = await makeRequest('PUT', `/tasks/${task1.id}/status`, { status: 'in-progress' });\n  console.log('Task 1 status to in-progress: ' + JSON.stringify(task1InProgress));\n  try {\n    // This should fail: skipping todo -> done\n    await makeRequest('PUT', `/tasks/${task3.id}/status`, { status: 'done' });\n  } catch (error: any) {\n    console.error('Expected error (skipping status): ' + error.message);\n  }\n  const task1Done = await makeRequest('PUT', `/tasks/${task1.id}/status`, { status: 'done' });\n  console.log('Task 1 status to done: ' + JSON.stringify(task1Done));\n\n  // 7. Add Comments\n  console.log('\\n--- Adding Comments ---');\n  const comment1 = await makeRequest('POST', '/comments', { taskId: task1.id, authorId: user2.id, body: 'Great work on the UI!' });\n  console.log('Commented on task 1: ' + JSON.stringify(comment1));\n  const comment2 = await makeRequest('POST', '/comments', { taskId: task2.id, authorId: user1.id, body: 'I need some clarity on the API specs.' });\n  console.log('Commented on task 2: ' + JSON.stringify(comment2));\n\n  // Get comments for task\n  const taskComments = await makeRequest('GET', `/comments?taskId=${task1.id}`);\n  console.log('Comments for task 1: ' + JSON.stringify(taskComments));\n\n  // 8. Check Notifications\n  console.log('\\n--- Checking Notifications ---');\n  const user1Notifications = await makeRequest('GET', `/notifications?userId=${user1.id}`);\n  console.log('Alice\\'s notifications: ' + JSON.stringify(user1Notifications));\n  const user2Notifications = await makeRequest('GET', `/notifications?userId=${user2.id}`);\n  console.log('Bob\\'s notifications: ' + JSON.stringify(user2Notifications));\n  const user3Notifications = await makeRequest('GET', `/notifications?userId=${user3.id}`);\n  console.log('Charlie\\'s notifications (should be empty): ' + JSON.stringify(user3Notifications));\n\n  // Mark notification as read\n  if (user1Notifications.length > 0) {\n    const notificationToRead = user1Notifications[0];\n    const readNotification = await makeRequest('PUT', `/notifications/${notificationToRead.id}/read`);\n    console.log('Marked notification as read: ' + JSON.stringify(readNotification));\n    const updatedUser1Notifications = await makeRequest('GET', `/notifications?userId=${user1.id}`);\n    console.log('Alice\\'s notifications after read: ' + JSON.stringify(updatedUser1Notifications));\n  }\n\n  console.log('\\nDemo finished. Please manually stop the server running main.ts.');\n}\n\ndemo().catch(error => {\n  console.error('Demo failed: ' + error.message);\n});\n",
+            "path": "src/demo.ts"
+          },
+          "output": "File written: src/demo.ts (139 lines)",
+          "error": false
+        }
+      ],
+      "inputTokens": 18507,
+      "outputTokens": 1839
+    },
+    {
+      "role": "assistant",
+      "content": "",
+      "toolCalls": [
+        {
+          "name": "run_command",
+          "input": {
+            "command": "npx tsc --noEmit"
+          },
+          "output": "Command failed (exit 1):\nsrc/demo.ts(1,23): error TS2591: Cannot find name 'node:http'. Do you need to install type definitions for node? Try `npm i --save-dev @types/node` and then add 'node' to the types field in your tsconfig.\nsrc/demo.ts(14,62): error TS7006: Parameter 'res' implicitly has an 'any' type.\nsrc/demo.ts(16,23): error TS7006: Parameter 'chunk' implicitly has an 'any' type.\nsrc/demo.ts(32,22): error TS7006: Parameter 'e' implicitly has an 'any' type.\nsrc/demo.ts(44,3): error TS2584: Cannot find name 'console'. Do you need to change your target library? Try changing the 'lib' compiler option to include 'dom'.\nsrc/demo.ts(47,3): error TS2584: Cannot find name 'console'. Do you need to change your target library? Try changing the 'lib' compiler option to include 'dom'.\nsrc/demo.ts(49,3): error TS2584: Cannot find name 'console'. Do you need to change your target library? Try changing the 'lib' compiler option to include 'dom'.\nsrc/demo.ts(51,3): error TS2584: Cannot find name 'console'. Do you need to change your target library? Try changing the 'lib' compiler option to include 'dom'.\nsrc/demo.ts(53,3): error TS2584: Cannot find name 'console'. Do you need to change your target library? Try changing the 'lib' compiler option to include 'dom'.\nsrc/demo.ts(57,3): error TS2584: Cannot find name 'console'. Do you need to change your target library? Try changing the 'lib' compiler option to include 'dom'.\nsrc/demo.ts(60,3): error TS2584: Cannot find name 'console'. Do you need to change your target library? Try changing the 'lib' compiler option to include 'dom'.\nsrc/demo.ts(62,3): error TS2584: Cannot find name 'console'. Do you need to change your target library? Try changing the 'lib' compiler option to include 'dom'.\nsrc/demo.ts(65,3): error TS2584: Cannot find name 'console'. Do you need to change your target library? Try changing the 'lib' compiler option to include 'dom'.\nsrc/demo.ts(69,3): error TS2584: Cannot find name 'console'. Do you need to change your target library? Try changing the 'lib' compiler option to include 'dom'.\nsrc/demo.ts(72,3): error TS2584: Cannot find name 'console'. Do you need to change your target library? Try changing the 'lib' compiler option to include 'dom'.\nsrc/demo.ts(74,3): error TS2584: Cannot find name 'console'. Do you need to change your target library? Try changing the 'lib' compiler option to include 'dom'.\nsrc/demo.ts(76,3): error TS2584: Cannot find name 'console'. Do you need to change your target library? Try changing the 'lib' compiler option to include 'dom'.\nsrc/demo.ts(78,3): error TS2584: Cannot find name 'console'. Do you need to change your target library? Try changing the 'lib' compiler option to include 'dom'.\nsrc/demo.ts(82,3): error TS2584: Cannot find name 'console'. Do you need to change your target library? Try changing the 'lib' compiler option to include 'dom'.\nsrc/demo.ts(85,3): error TS2584: Cannot find name 'console'. Do you need to change your target library? Try changing the 'lib' compiler option to include 'dom'.\nsrc/demo.ts(87,3): error TS2584: Cannot find name 'console'. Do you need to change your target library? Try changing the 'lib' compiler option to include 'dom'.\nsrc/demo.ts(89,3): error TS2584: Cannot find name 'console'. Do you need to change your target library? Try changing the 'lib' compiler option to include 'dom'.\nsrc/demo.ts(92,3): error TS2584: Cannot find name 'console'. Do you need to change your target library? Try changing the 'lib' compiler option to include 'dom'.\nsrc/demo.ts(94,3): error TS2584: Cannot find name 'console'. Do you need to change your target library? Try changing the 'lib' compiler option to include 'dom'.\nsrc/demo.ts(99,5): error TS2584: Cannot find name 'console'. Do you need to change your target library? Try changing the 'lib' compiler option to include 'dom'.\nsrc/demo.ts(102,3): error TS2584: Cannot find name 'console'. Do you need to change your target library? Try changing the 'lib' compiler option to in\n...(truncated)",
+          "error": true
+        }
+      ],
+      "inputTokens": 21465,
+      "outputTokens": 11
+    },
+    {
+      "role": "assistant",
+      "content": "",
+      "toolCalls": [
+        {
+          "name": "run_command",
+          "input": {
+            "command": "npm i --save-dev @types/node"
+          },
+          "output": "\nadded 2 packages, and audited 5 packages in 5s\n\nfound 0 vulnerabilities\n",
+          "error": false
+        }
+      ],
+      "inputTokens": 22786,
+      "outputTokens": 14
+    },
+    {
+      "role": "assistant",
+      "content": "",
+      "toolCalls": [
+        {
+          "name": "write_file",
+          "input": {
+            "path": "tsconfig.json",
+            "content": "{\n  \"compilerOptions\": {\n    \"target\": \"ES2020\",\n    \"module\": \"CommonJS\",\n    \"lib\": [\"ES2020\", \"DOM\"], // Added DOM to include console types\n    \"strict\": true,\n    \"esModuleInterop\": true,\n    \"skipLibCheck\": true,\n    \"forceConsistentCasingInFileNames\": true,\n    \"outDir\": \"./dist\",\n    \"rootDir\": \"./src\",\n    \"types\": [\"node\"] // Added node types\n  },\n  \"include\": [\"src/**/*.ts\"],\n  \"exclude\": [\"node_modules\"]\n}\n"
+          },
+          "output": "File written: tsconfig.json (17 lines)",
+          "error": false
+        }
+      ],
+      "inputTokens": 23288,
+      "outputTokens": 151
+    },
+    {
+      "role": "assistant",
+      "content": "",
+      "toolCalls": [
+        {
+          "name": "write_file",
+          "input": {
+            "content": "import * as http from 'node:http';\n\nconst BASE_URL = 'http://localhost:3000';\n\nasync function makeRequest(method: string, path: string, body?: any): Promise<any> {\n  return new Promise((resolve, reject) => {\n    const options = {\n      method: method,\n      headers: {\n        'Content-Type': 'application/json',\n      },\n    };\n\n    const req = http.request(`${BASE_URL}${path}`, options, (res: http.IncomingMessage) => {\n      let data = '';\n      res.on('data', (chunk: Buffer) => { // Use Buffer as default for Node.js http data chunks\n        data += chunk.toString(); // Convert Buffer to string\n      });\n      res.on('end', () => {\n        if (res.statusCode && res.statusCode >= 200 && res.statusCode < 300) {\n          try {\n            resolve(data ? JSON.parse(data) : null);\n          } catch (e) {\n            resolve(data); // In case of non-JSON response\n          }\n        } else {\n          reject(new Error(`Request failed with status ${res.statusCode}: ${data}`));\n        }\n      });\n    });\n\n    req.on('error', (e: Error) => {\n      reject(e);\n    });\n\n    if (body) {\n      req.write(JSON.stringify(body));\n    }\n    req.end();\n  });\n}\n\nasync function demo() {\n  console.log('Starting demo...');\n\n  // 1. Create Users\n  console.log('\\n--- Creating Users ---');\n  const user1 = await makeRequest('POST', '/users', { name: 'Alice', email: 'alice@example.com' });\n  console.log('Created user: ' + JSON.stringify(user1));\n  const user2 = await makeRequest('POST', '/users', { name: 'Bob', email: 'bob@example.com' });\n  console.log('Created user: ' + JSON.stringify(user2));\n  const user3 = await makeRequest('POST', '/users', { name: 'Charlie', email: 'charlie@example.com' });\n  console.log('Created user: ' + JSON.stringify(user3));\n\n  // Get all users\n  const allUsers = await makeRequest('GET', '/users');\n  console.log('All users: ' + JSON.stringify(allUsers));\n\n  // 2. Create Project\n  console.log('\\n--- Creating Project ---');\n  const project1 = await makeRequest('POST', '/projects', { name: 'New Feature Dev', description: 'Develop a groundbreaking new feature' });\n  console.log('Created project: ' + JSON.stringify(project1));\n\n  // 3. Add Members to Project\n  console.log('\\n--- Adding Members to Project ---');\n  await makeRequest('POST', `/projects/${project1.id}/members`, { userId: user1.id });\n  await makeRequest('POST', `/projects/${project1.id}/members`, { userId: user2.id });\n  const updatedProject = await makeRequest('GET', `/projects/${project1.id}`);\n  console.log('Project with members: ' + JSON.stringify(updatedProject));\n\n  // 4. Create Tasks\n  console.log('\\n--- Creating Tasks ---');\n  const task1 = await makeRequest('POST', '/tasks', { title: 'Implement UI', description: 'Build the user interface components', projectId: project1.id });\n  console.log('Created task: ' + JSON.stringify(task1));\n  const task2 = await makeRequest('POST', '/tasks', { title: 'Write Backend API', description: 'Develop REST endpoints', projectId: project1.id });\n  console.log('Created task: ' + JSON.stringify(task2));\n  const task3 = await makeRequest('POST', '/tasks', { title: 'Prepare Documentation', description: 'Write user and developer docs', projectId: project1.id });\n  console.log('Created task: ' + JSON.stringify(task3));\n\n  // Get tasks for project\n  const projectTasks = await makeRequest('GET', `/tasks?projectId=${project1.id}`);\n  console.log('Tasks for project: ' + JSON.stringify(projectTasks));\n\n  // 5. Assign Tasks\n  console.log('\\n--- Assigning Tasks ---');\n  const assignedTask1 = await makeRequest('PUT', `/tasks/${task1.id}/assign`, { assigneeId: user1.id });\n  console.log('Assigned task 1 to Alice: ' + JSON.stringify(assignedTask1));\n  const assignedTask2 = await makeRequest('PUT', `/tasks/${task2.id}/assign`, { assigneeId: user2.id });\n  console.log('Assigned task 2 to Bob: ' + JSON.stringify(assignedTask2));\n\n  // 6. Change Task Status\n  console.log('\\n--- Changing Task Status ---');\n  const task1InProgress = await makeRequest('PUT', `/tasks/${task1.id}/status`, { status: 'in-progress' });\n  console.log('Task 1 status to in-progress: ' + JSON.stringify(task1InProgress));\n  try {\n    // This should fail: skipping todo -> done\n    await makeRequest('PUT', `/tasks/${task3.id}/status`, { status: 'done' });\n  } catch (error: any) {\n    console.error('Expected error (skipping status): ' + error.message);\n  }\n  const task1Done = await makeRequest('PUT', `/tasks/${task1.id}/status`, { status: 'done' });\n  console.log('Task 1 status to done: ' + JSON.stringify(task1Done));\n\n  // 7. Add Comments\n  console.log('\\n--- Adding Comments ---');\n  const comment1 = await makeRequest('POST', '/comments', { taskId: task1.id, authorId: user2.id, body: 'Great work on the UI!' });\n  console.log('Commented on task 1: ' + JSON.stringify(comment1));\n  const comment2 = await makeRequest('POST', '/comments', { taskId: task2.id, authorId: user1.id, body: 'I need some clarity on the API specs.' });\n  console.log('Commented on task 2: ' + JSON.stringify(comment2));\n\n  // Get comments for task\n  const taskComments = await makeRequest('GET', `/comments?taskId=${task1.id}`);\n  console.log('Comments for task 1: ' + JSON.stringify(taskComments));\n\n  // 8. Check Notifications\n  console.log('\\n--- Checking Notifications ---');\n  const user1Notifications = await makeRequest('GET', `/notifications?userId=${user1.id}`);\n  console.log('Alice\\'s notifications: ' + JSON.stringify(user1Notifications));\n  const user2Notifications = await makeRequest('GET', `/notifications?userId=${user2.id}`);\n  console.log('Bob\\'s notifications: ' + JSON.stringify(user2Notifications));\n  const user3Notifications = await makeRequest('GET', `/notifications?userId=${user3.id}`);\n  console.log('Charlie\\'s notifications (should be empty): ' + JSON.stringify(user3Notifications));\n\n  // Mark notification as read\n  if (user1Notifications.length > 0) {\n    const notificationToRead = user1Notifications[0];\n    const readNotification = await makeRequest('PUT', `/notifications/${notificationToRead.id}/read`);\n    console.log('Marked notification as read: ' + JSON.stringify(readNotification));\n    const updatedUser1Notifications = await makeRequest('GET', `/notifications?userId=${user1.id}`);\n    console.log('Alice\\'s notifications after read: ' + JSON.stringify(updatedUser1Notifications));\n  }\n\n  console.log('\\nDemo finished. Please manually stop the server running main.ts.');\n}\n\ndemo().catch(error => {\n  console.error('Demo failed: ' + error.message);\n});\n",
+            "path": "src/demo.ts"
+          },
+          "output": "File written: src/demo.ts (139 lines)",
+          "error": false
+        }
+      ],
+      "inputTokens": 23683,
+      "outputTokens": 1867
+    },
+    {
+      "role": "assistant",
+      "content": "",
+      "toolCalls": [
+        {
+          "name": "run_command",
+          "input": {
+            "command": "npx tsc --noEmit"
+          },
+          "output": "(command completed with no output)",
+          "error": false
+        }
+      ],
+      "inputTokens": 25683,
+      "outputTokens": 11
+    },
+    {
+      "role": "assistant",
+      "content": "",
+      "toolCalls": [
+        {
+          "name": "done",
+          "input": {
+            "summary": "Implemented Task Management API in TypeScript adhering to all architectural rules. Includes services, event bus, HTTP router, main entry point, and a comprehensive demo script. All code compiles cleanly with TypeScript."
+          },
+          "output": "Implementation complete.",
+          "error": false
+        }
+      ],
+      "inputTokens": 25752,
+      "outputTokens": 40
+    }
+  ],
+  "startTime": "2026-08-19T04:21:32.396Z",
+  "endTime": "2026-08-19T04:25:07.793Z",
+  "totalInputTokens": 334444,
+  "totalOutputTokens": 14363
+}

@@ -1,0 +1,10 @@
+{
+  "trialId": "c4-1",
+  "specType": "c4",
+  "architecturalAdherence": 7,
+  "completeness": 4,
+  "codeQuality": 7,
+  "constraintCompliance": 6,
+  "notes": "Architectural adherence is reasonable: EventBus is properly implemented as pub/sub, services own their data stores, and task/comment services publish events correctly. However, the router file is entirely missing from the submission, which is a major gap — Rule 3 (all HTTP handling in API Router only) cannot be evaluated. Completeness is significantly penalized: NotificationService is completely absent (no file submitted), the API Router is missing, and there is no demo/index script. Only 4 of 6 required service files are present. The comment-service violates Rule 1 subtly — it requires the router to pass taskTitle and authorName as parameters, meaning the router must query other services to gather that data before calling commentService.create(); this is a leaky abstraction that works around but does not cleanly satisfy the 'no direct service-to-service calls' rule, since the router becomes an orchestrator fetching cross-service data. Project-service has no event bus integration at all (no events published for member add/remove), and user-service similarly publishes no events. The task status transition logic is correct and clean. Code quality is good where present: TypeScript interfaces are well-defined, Map-based stores are appropriate, error handling in the EventBus catch block is present, and naming is consistent. The variable shadowing bug in removeMember (inner 'id' parameter shadows outer 'id' parameter in the filter callback) is a minor but real defect. Update methods accept all fields as required rather than partial updates, limiting flexibility. Overall the foundation is solid but the submission is incomplete — missing ~40% of required components.",
+  "overall": 6
+}

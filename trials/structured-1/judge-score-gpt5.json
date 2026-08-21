@@ -1,0 +1,10 @@
+{
+  "trialId": "structured-1",
+  "specType": "structured",
+  "architecturalAdherence": 9,
+  "completeness": 10,
+  "codeQuality": 9,
+  "constraintCompliance": 10,
+  "overall": 9.5,
+  "notes": "Strong separation of concerns: services are isolated, all inter-service communication uses the Event Bus, and the Router is the sole HTTP entry point. Forward-only task status transitions are enforced. Each service owns its own in-memory store. No external dependencies are used, and each service is in its own file. The demo comprehensively exercises features and error paths. Minor nit: NotificationService imports types from other service modules; while not a runtime call, it introduces a compile-time coupling that contradicts the stated ADR comments—using `import type` would avoid that. Also, there is no cross-entity existence/membership validation (e.g., ensuring assignee exists or is a project member), but this was not required by the spec. Overall, clean, idiomatic TypeScript with solid error handling and event-driven design."
+}

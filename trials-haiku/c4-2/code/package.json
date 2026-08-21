@@ -1,0 +1,25 @@
+{
+  "name": "task-management-api",
+  "version": "1.0.0",
+  "description": "Task Management API - C4 Architecture",
+  "main": "dist/main.js",
+  "type": "module",
+  "scripts": {
+    "start": "npx tsx src/main.ts",
+    "demo": "npx tsx src/demo.ts",
+    "build": "tsc",
+    "type-check": "tsc --noEmit"
+  },
+  "keywords": [
+    "task-management",
+    "api",
+    "typescript"
+  ],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/node": "^20.19.43",
+    "tsx": "^4.23.12",
+    "typescript": "^5.9.3"
+  }
+}

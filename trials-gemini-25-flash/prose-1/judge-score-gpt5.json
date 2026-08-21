@@ -1,0 +1,10 @@
+{
+  "trialId": "prose-1",
+  "specType": "prose",
+  "architecturalAdherence": 7,
+  "completeness": 3,
+  "codeQuality": 6,
+  "constraintCompliance": 8,
+  "overall": 6,
+  "notes": "Services are separated and own their data stores; inter-service communication uses the EventBus (publish-only shown). Forward-only task status transitions are enforced. However, the Notification Service and API Router are missing, and there are no event subscribers, making the system incomplete. The Comment schema uses 'text' instead of the specified 'body'. TaskAssignedEvent typing is incorrect (assigneeId can be null but the type requires string), and EventBus typings loosen type safety with 'any' and a catch-all payload. projectService imports 'uuid' (external dependency) which violates the no-external-deps constraint, even though a local UUID generator is present. Overall clean code structure, but incomplete and with notable type/schema issues."
+}

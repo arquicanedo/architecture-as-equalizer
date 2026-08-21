@@ -1,0 +1,77 @@
+{
+  "trialId": "structured-3",
+  "specType": "structured",
+  "structural": {
+    "hasEventBus": true,
+    "hasUserService": true,
+    "hasProjectService": true,
+    "hasTaskService": true,
+    "hasCommentService": true,
+    "hasNotificationService": true,
+    "hasRouter": true,
+    "hasMainEntry": true,
+    "hasDemoScript": true,
+    "fileCount": 18,
+    "folderStructureScore": 10,
+    "details": [
+      "Each service in its own file: YES"
+    ]
+  },
+  "constraints": {
+    "directServiceCalls": [
+      {
+        "type": "direct-service-import",
+        "file": "src\\services\\comment-service.ts",
+        "line": 4,
+        "description": "Service file imports another service: task-service"
+      },
+      {
+        "type": "direct-service-import",
+        "file": "src\\services\\comment-service.ts",
+        "line": 5,
+        "description": "Service file imports another service: user-service"
+      }
+    ],
+    "sharedDataAccess": [],
+    "httpInServices": [],
+    "invalidStatusTransitions": [],
+    "externalDependencies": [],
+    "totalViolations": 2
+  },
+  "codeMetrics": {
+    "compiles": false,
+    "compilationErrors": [],
+    "totalLines": 1579,
+    "totalFiles": 18,
+    "linesPerFile": {
+      "dist\\demo.d.ts": 2,
+      "dist\\event-bus.d.ts": 15,
+      "dist\\main.d.ts": 2,
+      "dist\\router.d.ts": 43,
+      "dist\\services\\comment-service.d.ts": 29,
+      "dist\\services\\notification-service.d.ts": 32,
+      "dist\\services\\project-service.d.ts": 40,
+      "dist\\services\\task-service.d.ts": 47,
+      "dist\\services\\user-service.d.ts": 31,
+      "src\\demo.ts": 292,
+      "src\\event-bus.ts": 35,
+      "src\\main.ts": 8,
+      "src\\router.ts": 536,
+      "src\\services\\comment-service.ts": 78,
+      "src\\services\\notification-service.ts": 103,
+      "src\\services\\project-service.ts": 87,
+      "src\\services\\task-service.ts": 138,
+      "src\\services\\user-service.ts": 61
+    }
+  },
+  "transcriptMetrics": {
+    "totalInputTokens": 684759,
+    "totalOutputTokens": 23643,
+    "totalTokens": 708402,
+    "messageCount": 36,
+    "toolCallCount": 36,
+    "errorCount": 3,
+    "retryCount": 0,
+    "durationMs": 210944
+  }
+}

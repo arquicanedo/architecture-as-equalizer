@@ -1,0 +1,14 @@
+{
+  "name": "task-management-api",
+  "version": "1.0.0",
+  "type": "commonjs",
+  "main": "src/main.ts",
+  "scripts": {
+    "start": "node -r ts-node/register src/main.ts"
+  },
+  "devDependencies": {
+    "typescript": "^4.9.5",
+    "tsx": "^3.12.7",
+    "ts-node": "^10.9.1"
+  }
+}

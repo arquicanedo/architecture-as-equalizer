@@ -1,0 +1,95 @@
+{
+  "trialId": "structured-3",
+  "specType": "structured",
+  "messages": [
+    {
+      "role": "assistant",
+      "content": "",
+      "toolCalls": [
+        {
+          "name": "write_file",
+          "input": {
+            "content": "\ntype EventCallback = (payload: any) => void;\n\nclass EventBus {\n    private subscribers: Map<string, EventCallback[]>;\n\n    constructor() {\n        this.subscribers = new Map();\n    }\n\n    /**\n     * Publishes an event to all subscribed listeners.\n     * @param event The name of the event to publish.\n     * @param payload The data associated with the event.\n     */\n    publish(event: string, payload: any): void {\n        const callbacks = this.subscribers.get(event);\n        if (callbacks) {\n            callbacks.forEach(callback => {\n                try {\n                    callback(payload);\n                } catch (error) {\n                    console.error(`Error in event subscriber for event \"${event}\":`, error);\n                }\n            });\n        }\n    }\n\n    /**\n     * Subscribes a callback function to an event.\n     * @param event The name of the event to subscribe to.\n     * @param callback The function to call when the event is published.\n     */\n    subscribe(event: string, callback: EventCallback): void {\n        if (!this.subscribers.has(event)) {\n            this.subscribers.set(event, []);\n        }\n        this.subscribers.get(event)!.push(callback);\n    }\n}\n\nexport const eventBus = new EventBus();\n",
+            "path": "src/event-bus.ts"
+          },
+          "output": "File written: src/event-bus.ts (43 lines)",
+          "error": false
+        }
+      ],
+      "inputTokens": 2288,
+      "outputTokens": 325
+    },
+    {
+      "role": "assistant",
+      "content": "",
+      "toolCalls": [
+        {
+          "name": "write_file",
+          "input": {
+            "content": "import { randomUUID } from 'crypto';\n\nexport interface User {\n    id: string;\n    name: string;\n    email: string;\n}\n\nclass UserService {\n    private users: Map<string, User>;\n\n    constructor() {\n        this.users = new Map();\n    }\n\n    /**\n     * Creates a new user.\n     * @param name The name of the user.\n     * @param email The email of the user.\n     * @returns The created user.\n     */\n    create(name: string, email: string): User {\n        if (!name || !email) {\n            throw new Error('Name and email are required.');\n        }\n        const id = randomUUID();\n        const newUser: User = { id, name, email };\n        this.users.set(id, newUser);\n        return newUser;\n    }\n\n    /**\n     * Retrieves a user by their ID.\n     * @param id The ID of the user.\n     * @returns The user, or undefined if not found.\n     */\n    getById(id: string): User | undefined {\n        return this.users.get(id);\n    }\n\n    /**\n     * Retrieves all users.\n     * @returns An array of all users.\n     */\n    getAll(): User[] {\n        return Array.from(this.users.values());\n    }\n\n    /**\n     * Updates an existing user.\n     * @param id The ID of the user to update.\n     * @param updates An object containing the fields to update (name, email).\n     * @returns The updated user, or undefined if the user was not found.\n     */\n    update(id: string, updates: { name?: string; email?: string }): User | undefined {\n        const user = this.users.get(id);\n        if (user) {\n            if (updates.name !== undefined) user.name = updates.name;\n            if (updates.email !== undefined) user.email = updates.email;\n            this.users.set(id, user); // Re-set to ensure Map updates if value is mutated directly\n            return user;\n        }\n        return undefined;\n    }\n\n    /**\n     * Deletes a user by their ID.\n     * @param id The ID of the user to delete.\n     * @returns True if the user was deleted, false otherwise.\n     */\n    delete(id: string): boolean {\n        return this.users.delete(id);\n    }\n}\n\nexport const userService = new UserService();\n",
+            "path": "src/services/user-service.ts"
+          },
+          "output": "File written: src/services/user-service.ts (77 lines)",
+          "error": false
+        }
+      ],
+      "inputTokens": 3347,
+      "outputTokens": 590
+    },
+    {
+      "role": "assistant",
+      "content": "",
+      "toolCalls": [
+        {
+          "name": "write_file",
+          "input": {
+            "content": "import { randomUUID } from 'crypto';\n\nexport interface Project {\n    id: string;\n    name: string;\n    description: string;\n    memberIds: string[];\n}\n\nclass ProjectService {\n    private projects: Map<string, Project>;\n\n    constructor() {\n        this.projects = new Map();\n    }\n\n    /**\n     * Creates a new project.\n     * @param name The name of the project.\n     * @param description The description of the project.\n     * @returns The created project.\n     */\n    create(name: string, description: string): Project {\n        if (!name) {\n            throw new Error('Project name is required.');\n        }\n        const id = randomUUID();\n        const newProject: Project = { id, name, description, memberIds: [] };\n        this.projects.set(id, newProject);\n        return newProject;\n    }\n\n    /**\n     * Retrieves a project by its ID.\n     * @param id The ID of the project.\n     * @returns The project, or undefined if not found.\n     */\n    getById(id: string): Project | undefined {\n        return this.projects.get(id);\n    }\n\n    /**\n     * Retrieves all projects.\n     * @returns An array of all projects.\n     */\n    getAll(): Project[] {\n        return Array.from(this.projects.values());\n    }\n\n    /**\n     * Updates an existing project.\n     * @param id The ID of the project to update.\n     * @param updates An object containing the fields to update (name, description).\n     * @returns The updated project, or undefined if the project was not found.\n     */\n    update(id: string, updates: { name?: string; description?: string }): Project | undefined {\n        const project = this.projects.get(id);\n        if (project) {\n            if (updates.name !== undefined) project.name = updates.name;\n            if (updates.description !== undefined) project.description = updates.description;\n            this.projects.set(id, project); \n            return project;\n        }\n        return undefined;\n    }\n\n    /**\n     * Deletes a project by its ID.\n     * @param id The ID of the project to delete.\n     * @returns True if the project was deleted, false otherwise.\n     */\n    delete(id: string): boolean {\n        return this.projects.delete(id);\n    }\n\n    /**\n     * Adds a member to a project.\n     * @param projectId The ID of the project.\n     * @param memberId The ID of the user to add as a member.\n     * @returns The updated project, or undefined if the project was not found.\n     */\n    addMember(projectId: string, memberId: string): Project | undefined {\n        const project = this.projects.get(projectId);\n        if (project) {\n            if (!project.memberIds.includes(memberId)) {\n                project.memberIds.push(memberId);\n                this.projects.set(projectId, project);\n            }\n            return project;\n        }\n        return undefined;\n    }\n\n    /**\n     * Removes a member from a project.\n     * @param projectId The ID of the project.\n     * @param memberId The ID of the user to remove from members.\n     * @returns The updated project, or undefined if the project was not found.\n     */\n    removeMember(projectId: string, memberId: string): Project | undefined {\n        const project = this.projects.get(projectId);\n        if (project) {\n            const initialLength = project.memberIds.length;\n            project.memberIds = project.memberIds.filter(id => id !== memberId);\n            if (project.memberIds.length < initialLength) {\n                this.projects.set(projectId, project);\n            }\n            return project;\n        }\n        return undefined;\n    }\n}\n\nexport const projectService = new ProjectService();\n",
+            "path": "src/services/project-service.ts"
+          },
+          "output": "File written: src/services/project-service.ts (115 lines)",
+          "error": false
+        }
+      ],
+      "inputTokens": 4047,
+      "outputTokens": 933
+    },
+    {
+      "role": "assistant",
+      "content": "",
+      "toolCalls": [
+        {
+          "name": "write_file",
+          "input": {
+            "path": "src/services/task-service.ts",
+            "content": "import { randomUUID } from 'crypto';\nimport { eventBus } from '../event-bus';\n\nexport type TaskStatus = 'todo' | 'in-progress' | 'done';\n\nexport interface Task {\n    id: string;\n    title: string;\n    description: string;\n    status: TaskStatus;\n    assigneeId: string | null;\n    projectId: string;\n}\n\nclass TaskService {\n    private tasks: Map<string, Task>;\n\n    constructor() {\n        this.tasks = new Map();\n    }\n\n    /**\n     * Creates a new task.\n     * @param title The title of the task.\n     * @param description The description of the task.\n     * @param projectId The ID of the project the task belongs to.\n     * @returns The created task.\n     */\n    create(title: string, description: string, projectId: string): Task {\n        if (!title || !projectId) {\n            throw new Error('Title and Project ID are required to create a task.');\n        }\n        const id = randomUUID();\n        const newTask: Task = { id, title, description, status: 'todo', assigneeId: null, projectId };\n        this.tasks.set(id, newTask);\n        return newTask;\n    }\n\n    /**\n     * Retrieves a task by its ID.\n     * @param id The ID of the task.\n     * @returns The task, or undefined if not found.\n     */\n    getById(id: string): Task | undefined {\n        return this.tasks.get(id);\n    }\n\n    /**\n     * Retrieves all tasks for a given project.\n     * @param projectId The ID of the project.\n     * @returns An array of tasks belonging to the project.\n     */\n    getByProject(projectId: string): Task[] {\n        return Array.from(this.tasks.values()).filter(task => task.projectId === projectId);\n    }\n\n    /**\n     * Updates an existing task.\n     * @param id The ID of the task to update.\n     * @param updates An object containing the fields to update (title, description).\n     * @returns The updated task, or undefined if the task was not found.\n     */\n    update(id: string, updates: { title?: string; description?: string }): Task | undefined {\n        const task = this.tasks.get(id);\n        if (task) {\n            if (updates.title !== undefined) task.title = updates.title;\n            if (updates.description !== undefined) task.description = updates.description;\n            this.tasks.set(id, task);\n            return task;\n        }\n        return undefined;\n    }\n\n    /**\n     * Deletes a task by its ID.\n     * @param id The ID of the task to delete.\n     * @returns True if the task was deleted, false otherwise.\n     */\n    delete(id: string): boolean {\n        return this.tasks.delete(id);\n    }\n\n    /**\n     * Assigns a task to a user.\n     * Publishes 'task.assigned' event.\n     * @param taskId The ID of the task.\n     * @param assigneeId The ID of the user to assign the task to.\n     * @returns The updated task, or undefined if the task was not found.\n     */\n    assign(taskId: string, assigneeId: string): Task | undefined {\n        const task = this.tasks.get(taskId);\n        if (task) {\n            task.assigneeId = assigneeId;\n            this.tasks.set(taskId, task);\n            eventBus.publish('task.assigned', { taskId: task.id, taskTitle: task.title, assigneeId: task.assigneeId });\n            return task;\n        }\n        return undefined;\n    }\n\n    /**\n     * Changes the status of a task.\n     * Status transitions: 'todo' -> 'in-progress' -> 'done'.\n     * Publishes 'task.statusChanged' event.\n     * @param taskId The ID of the task.\n     * @param newStatus The new status to set.\n     * @returns The updated task, or undefined if the task was not found or transition is invalid.\n     * @throws Error if the status transition is invalid.\n     */\n    changeStatus(taskId: string, newStatus: TaskStatus): Task | undefined {\n        const task = this.tasks.get(taskId);\n        if (task) {\n            const oldStatus = task.status;\n            if (oldStatus === newStatus) {\n                return task; // No change needed\n            }\n\n            // Validate status transitions\n            if (\n                (oldStatus === 'todo' && newStatus === 'in-progress') ||\n                (oldStatus === 'in-progress' && newStatus === 'done')\n            ) {\n                task.status = newStatus;\n                this.tasks.set(taskId, task);\n                eventBus.publish('task.statusChanged', { taskId: task.id, taskTitle: task.title, assigneeId: task.assigneeId, oldStatus, newStatus });\n                return task;\n            } else {\n                throw new Error(`Invalid status transition from '${oldStatus}' to '${newStatus}' for task ${taskId}`);\n            }\n        }\n        return undefined;\n    }\n}\n\nexport const taskService = new TaskService();\n"
+          },
+          "output": "File written: src/services/task-service.ts (136 lines)",
+          "error": false
+        }
+      ],
+      "inputTokens": 5086,
+      "outputTokens": 1233
+    },
+    {
+      "role": "assistant",
+      "content": "",
+      "toolCalls": [
+        {
+          "name": "write_file",
+          "input": {
+            "path": "src/services/comment-service.ts",
+            "content": "import { randomUUID } from 'crypto';\nimport { eventBus } from '../event-bus';\n\nexport interface Comment {\n    id: string;\n    taskId: string;\n    authorId: string;\n    body: string;\n    createdAt: number; // Unix timestamp\n}\n\nclass CommentService {\n    private comments: Map<string, Comment>;\n\n    constructor() {\n        this.comments = new Map();\n    }\n\n    /**\n     * Creates a new comment for a task.\n     * Publishes 'comment.added' event.\n     * @param taskId The ID of the task the comment belongs to.\n     * @param authorId The ID of the user who authored the comment.\n     * @param body The content of the comment.\n     * @param taskTitle The title of the task (needed for event payload, passed by caller).\n     * @param authorName The name of the author (needed for event payload, passed by caller).\n     * @returns The created comment.\n     */\n    create(taskId: string, authorId: string, body: string, taskTitle: string, authorName: string): Comment {\n        if (!taskId || !authorId || !body) {\n            throw new Error('Task ID, Author ID, and comment body are required.');\n        }\n        const id = randomUUID();\n        const newComment: Comment = {\n            id,\n            taskId,\n            authorId,\n            body,\n            createdAt: Date.now(),\n        };\n        this.comments.set(id, newComment);\n        eventBus.publish('comment.added', { commentId: newComment.id, taskId, taskTitle, authorId, authorName });\n        return newComment;\n    }\n\n    /**\n     * Retrieves all comments for a given task.\n     * @param taskId The ID of the task.\n     * @returns An array of comments belonging to the task.\n     */\n    getByTask(taskId: string): Comment[] {\n        return Array.from(this.comments.values()).filter(comment => comment.taskId === taskId);\n    }\n\n    /**\n     * Retrieves a comment by its ID.\n     * @param id The ID of the comment.\n     * @returns The comment, or undefined if not found.\n     */\n    getById(id: string): Comment | undefined {\n        return this.comments.get(id);\n    }\n\n    /**\n     * Deletes a comment by its ID.\n     * @param id The ID of the comment to delete.\n     * @returns True if the comment was deleted, false otherwise.\n     */\n    delete(id: string): boolean {\n        return this.comments.delete(id);\n    }\n}\n\nexport const commentService = new CommentService();\n"
+          },
+          "output": "File written: src/services/comment-service.ts (75 lines)",
+          "error": false
+        }
+      ],
+      "inputTokens": 6477,
+      "outputTokens": 631
+    }
+  ],
+  "startTime": "2026-08-19T03:57:22.227Z",
+  "endTime": "2026-08-19T03:57:58.439Z",
+  "totalInputTokens": 27350,
+  "totalOutputTokens": 3712
+}

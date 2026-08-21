@@ -1,0 +1,10 @@
+{
+  "trialId": "openapi-2",
+  "specType": "openapi",
+  "architecturalAdherence": 6,
+  "completeness": 7,
+  "codeQuality": 7,
+  "constraintCompliance": 6,
+  "notes": "Architectural adherence: The event bus is used for notifications, but the router directly calls multiple services within a single request handler (e.g., comment creation fetches user and task data via userService and taskService before calling commentService). This violates rule #1 — inter-service data enrichment is happening via direct cross-service calls in the router rather than through events. The router is the HTTP entry point (rule #3 satisfied), and each service has its own file and data store. Completeness: All CRUD operations are implemented for all five services. The demo script exercises all major flows. However, the comment.added notification incorrectly notifies the comment *author* instead of the task assignee or project members — the notification service explicitly acknowledges this as a design limitation and works around it incorrectly. The task.statusChanged event fires even when oldStatus === newStatus (same-status 'transition' is allowed), which is a logic flaw. The status transition allows todo→done directly, which contradicts the strict forward-only sequential rule. No 'unread notification count' or delete-notification endpoint, though these weren't strictly required. Code quality: Code is generally clean and well-typed. Error handling is reasonable. The router enrichment pattern (fetching user/task in the comment route) is a design smell. The comment on notification-service acknowledging the architectural compromise is honest but the wrong fix was chosen. The DELETE /projects/:id/members route sends a body, which is non-standard HTTP. The 204 response still calls res.end(JSON.stringify(null)) which sends 'null' as body, violating the 204 No Content spec. Constraint compliance: Rule #1 violated — router performs cross-service data reads to enrich comment creation. Rule #4 partially violated — todo→done direct transition is allowed. Rule #5 satisfied (no npm deps). Rule #6 satisfied. Rules #2 and #3 are satisfied.",
+  "overall": 6.5
+}

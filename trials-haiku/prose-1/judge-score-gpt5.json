@@ -1,0 +1,10 @@
+{
+  "trialId": "prose-1",
+  "specType": "prose",
+  "architecturalAdherence": 4,
+  "completeness": 8,
+  "codeQuality": 8,
+  "constraintCompliance": 5,
+  "overall": 6.25,
+  "notes": "Major violation of the no direct service-to-service calls rule: multiple services import and call other services (project-service→user-service, task-service→project-service/user-service, comment-service→task-service/user-service, notification-service→task-service/user-service). While the Event Bus is implemented and used for publishing/subscribing, services still rely on direct calls for validation and data lookup. Data stores are isolated per service and HTTP handling is correctly confined to the API Router. Task status transitions are properly forward-only. Completeness is strong: CRUD for users/projects/tasks, member add/remove, task assign/status change, comments create/get/delete, notifications reacting to events, and demo provided; minor deviations include comment field names (text/timestamp vs body/createdAt) and no GET /comments/:id route exposed. Code quality is generally good (clear types, error handling, idiomatic TS), but there are small issues: 204 responses include a body, event name mismatch for status change (task.status-changed vs task.statusChanged), and some responses conflate 404 vs 400. No external npm deps and each service resides in its own file."
+}

@@ -1,0 +1,10 @@
+{
+  "trialId": "typescript-contracts-1",
+  "specType": "typescript-contracts",
+  "architecturalAdherence": 7,
+  "completeness": 8,
+  "codeQuality": 8,
+  "constraintCompliance": 7,
+  "notes": "Overall a solid implementation with clear structure. Issues found: (1) ARCHITECTURAL VIOLATION - main.ts acts as an orchestrator by subscribing to 'comment.created.raw' and directly calling taskService.getById() and userService.getById() to enrich events before notifying. This is effectively a direct service-to-service call mediated through main.ts, violating Rule 1's spirit - services should communicate only via the event bus without a manual broker. The comment event payload design (publishing 'raw' then re-enriching in main) is a workaround that leaks cross-service concerns into the bootstrap file. (2) The event bus wiring in main.ts means NotificationService never directly subscribes to the bus - all notification creation is orchestrated imperatively in main.ts, which partially violates Rule 2 (NotificationService's data creation is triggered outside its own boundary via main.ts logic). (3) Router parameter extraction is fragile - uses string path.includes() checks to reclassify params.id into domain-specific keys, which is error-prone and could misfire (e.g., a task with 'members' in its UUID path). (4) GET /tasks requires projectId query param - no way to get all tasks, which is a minor completeness gap. (5) handleGetTasks returns 400 instead of empty array when no projectId provided - debatable design. (6) No validation that assigneeId or projectId actually exist in their respective services (no referential integrity). (7) Comment body field name collision (comment.body vs request body.body) is handled correctly but is fragile. (8) url.parse is deprecated in favor of URL constructor. (9) handleRemoveProjectMember uses DELETE with a body, which is unconventional. (10) Types are well-defined, interfaces are clean, error handling is consistent. Demo script is comprehensive and tests happy/sad paths. No external npm dependencies used. Forward-only status transitions correctly implemented.",
+  "overall": 7.5
+}

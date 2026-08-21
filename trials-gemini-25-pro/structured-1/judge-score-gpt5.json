@@ -1,0 +1,10 @@
+{
+  "trialId": "structured-1",
+  "specType": "structured",
+  "architecturalAdherence": 9,
+  "completeness": 10,
+  "codeQuality": 8,
+  "constraintCompliance": 9,
+  "overall": 9,
+  "notes": "Strong separation of concerns: each service has its own datastore, no service-to-service calls, Event Bus used for inter-service events, and all HTTP is handled in the router. All required services, CRUD operations, events, and a demo script are implemented. Forward-only status logic prevents backward moves but allows skipping directly from todo to done, which may not match a strict stepwise transition. Notification for comment.added is enabled by enriching the event payload in the router (acceptable but a slight architectural workaround). The router returns 400 for both invalid status transition and task not found; it should differentiate (404 vs 400). Minor typing/validation gaps (use of any for request bodies). No external npm dependencies and each service resides in its own file."
+}

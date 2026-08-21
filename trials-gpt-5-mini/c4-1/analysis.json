@@ -1,0 +1,63 @@
+{
+  "trialId": "c4-1",
+  "specType": "c4",
+  "structural": {
+    "hasEventBus": true,
+    "hasUserService": true,
+    "hasProjectService": true,
+    "hasTaskService": true,
+    "hasCommentService": true,
+    "hasNotificationService": true,
+    "hasRouter": true,
+    "hasMainEntry": true,
+    "hasDemoScript": true,
+    "fileCount": 10,
+    "folderStructureScore": 10,
+    "details": [
+      "Each service in its own file: YES"
+    ]
+  },
+  "constraints": {
+    "directServiceCalls": [],
+    "sharedDataAccess": [],
+    "httpInServices": [],
+    "invalidStatusTransitions": [],
+    "externalDependencies": [
+      {
+        "type": "external-dependency",
+        "file": "src\\demo.ts",
+        "line": 2,
+        "description": "Uses external package: timers/promises"
+      }
+    ],
+    "totalViolations": 1
+  },
+  "codeMetrics": {
+    "compiles": false,
+    "compilationErrors": [],
+    "totalLines": 598,
+    "totalFiles": 10,
+    "linesPerFile": {
+      "src\\demo.ts": 63,
+      "src\\event-bus.ts": 26,
+      "src\\main.ts": 16,
+      "src\\router.ts": 185,
+      "src\\services\\comment-service.ts": 41,
+      "src\\services\\notification-service.ts": 63,
+      "src\\services\\project-service.ts": 54,
+      "src\\services\\task-service.ts": 86,
+      "src\\services\\user-service.ts": 39,
+      "src\\shims.d.ts": 25
+    }
+  },
+  "transcriptMetrics": {
+    "totalInputTokens": 234457,
+    "totalOutputTokens": 12820,
+    "totalTokens": 247277,
+    "messageCount": 26,
+    "toolCallCount": 26,
+    "errorCount": 7,
+    "retryCount": 0,
+    "durationMs": 204153
+  }
+}

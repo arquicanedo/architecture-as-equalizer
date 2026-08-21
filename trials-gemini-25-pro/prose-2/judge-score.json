@@ -1,0 +1,10 @@
+{
+  "trialId": "prose-2",
+  "specType": "prose",
+  "architecturalAdherence": 5,
+  "completeness": 6,
+  "codeQuality": 7,
+  "constraintCompliance": 5,
+  "notes": "ARCHITECTURAL ADHERENCE: Critical violation — NotificationService receives TaskService as a constructor dependency and calls this.taskService.getTask() directly (notification-service.ts lines with task lookup), which is direct service-to-service communication, violating Rule #1. The event bus payload should carry all necessary data (title, etc.) so NotificationService never needs to call TaskService. This is the most severe architectural flaw. EVENT BUS: Used for task.assigned, task.statusChanged, comment.added — correct direction, but the direct TaskService dependency undermines it. COMPLETENESS: Missing DELETE for comments (route not wired in api-router despite service method existing), missing PUT for projects (updateProject exists in service but no route), missing DELETE for projects (deleteProject exists but no route), missing DELETE for tasks (deleteTask exists but no route), missing GET/DELETE for individual comments by id, missing PUT for tasks (updateTask method exists but no route). Comment body field is named 'text' in implementation but spec says 'body'. Notification spec says createdAt field — present. CRUD gaps are significant. CONSTRAINT COMPLIANCE: Rule #1 violated (direct service call in NotificationService). Rule #2 satisfied. Rule #3 mostly satisfied. Rule #4 satisfied (valid transitions map is correct). Rule #5 satisfied (only crypto and http built-ins). Rule #6 satisfied. Two rules violated reduces score significantly. CODE QUALITY: TypeScript types are clean, Map usage is appropriate, error handling in event bus listeners is present, async/await used where needed, URL parsing is correct. Input validation is absent (no checks for missing required fields like name/email on user creation). Path matching is fragile (e.g., /users/123/anything would match /users/ GET). The validTransitions map could include 'done' key for completeness. Overall reasonably clean but the architectural violation and missing routes are significant issues.",
+  "overall": 5.75
+}

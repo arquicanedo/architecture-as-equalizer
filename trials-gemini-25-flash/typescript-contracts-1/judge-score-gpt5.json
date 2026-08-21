@@ -1,0 +1,10 @@
+{
+  "trialId": "typescript-contracts-1",
+  "specType": "typescript-contracts",
+  "architecturalAdherence": 9,
+  "completeness": 9,
+  "codeQuality": 8,
+  "constraintCompliance": 10,
+  "overall": 9,
+  "notes": "Strong separation of services, exclusive in-memory stores per service, and all HTTP handling confined to the router. Event Bus is properly used to decouple services; notifications are triggered via event subscriptions in main.ts (acceptable mediator), though NotificationService itself does not subscribe directly. All CRUD endpoints are present with add/remove project members, task assignment, and forward-only status transitions enforced. Comments creation triggers notifications; however the event name differs from the spec (comment.created.raw vs comment.added) and the defined CommentAddedPayload is unused. Code is clean and idiomatic TypeScript with reasonable error handling, but the router’s param extraction is fragile (regex + path.includes hacks) and there’s limited cross-entity validation. No external dependencies and each service in its own file; forward-only transitions are enforced."
+}

@@ -1,0 +1,10 @@
+{
+  "trialId": "c4-1",
+  "specType": "c4",
+  "architecturalAdherence": 10,
+  "completeness": 9,
+  "codeQuality": 9,
+  "constraintCompliance": 10,
+  "overall": 9.5,
+  "notes": "Clear separation of services with exclusive data stores and no direct inter-service calls; all cross-service communication via the Event Bus. The router is the sole HTTP interface and delegates correctly. Task status transitions are enforced forward-only. All required services and operations are implemented, events are published/subscribed appropriately, and the demo exercises the full workflow. Minor gaps: Task creation does not validate that the project exists (router could check ProjectService), and project member add/remove do not validate user existence. Router sends a JSON body on 204 responses and treats invalid JSON as missing body (less precise error reporting). GET /tasks requires projectId, which is fine but slightly restrictive. Overall, clean, idiomatic TypeScript with robust error mapping and in-memory event-driven design."
+}

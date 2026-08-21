@@ -1,0 +1,10 @@
+{
+  "trialId": "functional-only-1",
+  "specType": "functional-only",
+  "architecturalAdherence": 3,
+  "completeness": 7,
+  "codeQuality": 8,
+  "constraintCompliance": 3,
+  "overall": 5.25,
+  "notes": "The implementation is well-written TypeScript with clean code, good validation, proper HTTP status codes, and solid error handling. However, it fails critically on the two most important architectural constraints. (1) NO EVENT BUS: The spec mandates an in-memory pub/sub event bus for inter-service communication, but none exists. Instead, store.ts serves as a shared God-object accessed directly by all handlers. (2) NO SERVICE LAYER: There are no distinct service classes/modules (UserService, ProjectService, TaskService, CommentService, NotificationService). Instead, handlers directly manipulate the store, collapsing the service and persistence layers into one. (3) RULE VIOLATION - direct service-to-service equivalent: Notification creation happens inline inside task and comment handlers by calling store.createNotification() directly, which violates the 'no direct service-to-service calls' rule — it should be mediated by an event bus with a NotificationService subscribing to events like task.assigned, task.statusChanged, comment.added. (4) RULE VIOLATION - shared data store: Each service must own its data store exclusively, but all handlers import from a single shared store.ts, meaning there is no ownership boundary at all. (5) The 'each service in its own file' constraint is partially met structurally (handlers are separated) but these are handlers, not services. Completeness is decent: all CRUD endpoints exist, status transitions are forward-only and correct, member management works, notifications are triggered (though incorrectly wired), and the demo script is thorough. Code quality is genuinely high — clean TypeScript interfaces, good use of generics, consistent response builders, proper 204 handling, URL parsing without external deps — but the architectural foundation is fundamentally wrong for the stated requirements."
+}

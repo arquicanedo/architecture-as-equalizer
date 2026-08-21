@@ -1,0 +1,10 @@
+{
+  "trialId": "functional-only-3",
+  "specType": "functional-only",
+  "architecturalAdherence": 3,
+  "completeness": 7,
+  "codeQuality": 7,
+  "constraintCompliance": 3,
+  "overall": 5,
+  "notes": "The implementation has significant architectural violations. Rule #1 (no direct service-to-service calls — all inter-service communication via Event Bus) is the most critically violated: there is no Event Bus at all. Instead, handlers directly import and access foreign data stores (e.g., comments.ts imports 'tasks', 'users', 'projects' from store.ts; tasks.ts imports 'projects', 'users'). Rule #2 (each service owns its own data store exclusively) is violated — all data collections live in a shared 'store.ts' module and are freely imported by any handler. Rule #6 (each service in its own file) is partially met structurally but undermined by the shared store. The specification calls for an Event Bus with pub/sub (task.assigned, task.statusChanged, comment.added events) — none of this exists. Notification triggers are implemented as direct synchronous function calls inside handlers rather than event-driven subscriptions. On completeness: all CRUD operations are present, status transitions are enforced correctly (forward-only), the demo script is thorough and well-structured, and notifications are functionally triggered even if via wrong mechanism. Missing: Event Bus module entirely, no referential integrity on delete (deleting a user/project doesn't clean up tasks/comments), no validation that assignee is a project member. Code quality is generally good: clean TypeScript typing, consistent error handling, good use of interfaces and type aliases, readable structure, no external dependencies honored, proper use of Node.js built-in http module. The router pattern matching is clean. Minor issues: path params merged into query dict is a slight smell, body parsing silently swallows JSON errors."
+}

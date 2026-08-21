@@ -1,0 +1,10 @@
+{
+  "trialId": "structured-3",
+  "specType": "structured",
+  "architecturalAdherence": 5,
+  "completeness": 6,
+  "codeQuality": 7,
+  "constraintCompliance": 4,
+  "notes": "Multiple significant violations found. Rule 1 (no direct service-to-service calls): comment-service.ts directly imports and calls taskService.getById() and userService.getById() — this is a clear violation; cross-service lookups should go through the event bus. Rule 2 (each service owns its data exclusively): violated by the same comment-service imports. Rule 3 (HTTP handling in router only): partially violated — notification-service.d.ts exposes createCommentNotification() intended to be 'called by router when needed', and the notification service re-publishes an internal event (notification.commentAdded) that nobody subscribes to, indicating broken comment notification flow. The comment.added handler in notification-service never actually notifies the task assignee, meaning comment notifications are completely non-functional — the event is re-published but the task's assigneeId cannot be retrieved without cross-service calls, and this was left as dead code. The createCommentNotification method is an empty stub. Rule 6 (each service in its own file): satisfied. The demo script uses require('http') inside an ES module context which is inconsistent. The update() methods in all services allow overwriting the id field via spread, which is a data integrity issue. The forward-only status enforcement correctly rejects same-status transitions (newIndex <= currentIndex), which is stricter than strictly backward — same-status re-assignment is blocked, which is arguably correct. No input validation for email format, duplicate emails, or referential integrity on projectId when creating tasks. The router correctly handles all HTTP routes. TypeScript types are reasonable but interfaces are not exported from services for reuse. Overall the architecture skeleton is present but the comment notification feature is broken and the core constraint of no direct service-to-service calls is violated.",
+  "overall": 5.5
+}

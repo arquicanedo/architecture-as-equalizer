@@ -1,0 +1,1016 @@
+{
+  "results": [
+    {
+      "trialId": "prose-1",
+      "specType": "prose",
+      "structural": {
+        "hasEventBus": true,
+        "hasUserService": true,
+        "hasProjectService": true,
+        "hasTaskService": true,
+        "hasCommentService": true,
+        "hasNotificationService": true,
+        "hasRouter": true,
+        "hasMainEntry": true,
+        "hasDemoScript": true,
+        "fileCount": 10,
+        "folderStructureScore": 10,
+        "details": [
+          "Each service in its own file: YES"
+        ]
+      },
+      "constraints": {
+        "directServiceCalls": [],
+        "sharedDataAccess": [],
+        "httpInServices": [],
+        "invalidStatusTransitions": [],
+        "externalDependencies": [],
+        "totalViolations": 0
+      },
+      "codeMetrics": {
+        "compiles": false,
+        "compilationErrors": [],
+        "totalLines": 1823,
+        "totalFiles": 10,
+        "linesPerFile": {
+          "src\\demo.ts": 459,
+          "src\\event-bus.ts": 61,
+          "src\\main.ts": 64,
+          "src\\router.ts": 510,
+          "src\\services\\comment-service.ts": 98,
+          "src\\services\\notification-service.ts": 115,
+          "src\\services\\project-service.ts": 107,
+          "src\\services\\task-service.ts": 180,
+          "src\\services\\user-service.ts": 104,
+          "src\\types.ts": 125
+        }
+      },
+      "transcriptMetrics": {
+        "totalInputTokens": 346828,
+        "totalOutputTokens": 19751,
+        "totalTokens": 366579,
+        "messageCount": 22,
+        "toolCallCount": 22,
+        "errorCount": 2,
+        "retryCount": 0,
+        "durationMs": 298263
+      }
+    },
+    {
+      "trialId": "prose-2",
+      "specType": "prose",
+      "structural": {
+        "hasEventBus": true,
+        "hasUserService": true,
+        "hasProjectService": true,
+        "hasTaskService": true,
+        "hasCommentService": true,
+        "hasNotificationService": true,
+        "hasRouter": true,
+        "hasMainEntry": true,
+        "hasDemoScript": true,
+        "fileCount": 10,
+        "folderStructureScore": 10,
+        "details": [
+          "Each service in its own file: YES"
+        ]
+      },
+      "constraints": {
+        "directServiceCalls": [],
+        "sharedDataAccess": [],
+        "httpInServices": [],
+        "invalidStatusTransitions": [],
+        "externalDependencies": [],
+        "totalViolations": 0
+      },
+      "codeMetrics": {
+        "compiles": false,
+        "compilationErrors": [],
+        "totalLines": 1810,
+        "totalFiles": 10,
+        "linesPerFile": {
+          "src\\comment-service.ts": 90,
+          "src\\demo.ts": 512,
+          "src\\event-bus.ts": 41,
+          "src\\main.ts": 75,
+          "src\\notification-service.ts": 99,
+          "src\\project-service.ts": 115,
+          "src\\router.ts": 531,
+          "src\\task-service.ts": 159,
+          "src\\types.ts": 108,
+          "src\\user-service.ts": 80
+        }
+      },
+      "transcriptMetrics": {
+        "totalInputTokens": 574173,
+        "totalOutputTokens": 27493,
+        "totalTokens": 601666,
+        "messageCount": 28,
+        "toolCallCount": 28,
+        "errorCount": 2,
+        "retryCount": 0,
+        "durationMs": 394012
+      }
+    },
+    {
+      "trialId": "prose-3",
+      "specType": "prose",
+      "structural": {
+        "hasEventBus": true,
+        "hasUserService": true,
+        "hasProjectService": true,
+        "hasTaskService": true,
+        "hasCommentService": true,
+        "hasNotificationService": true,
+        "hasRouter": true,
+        "hasMainEntry": true,
+        "hasDemoScript": true,
+        "fileCount": 10,
+        "folderStructureScore": 10,
+        "details": [
+          "Each service in its own file: YES"
+        ]
+      },
+      "constraints": {
+        "directServiceCalls": [],
+        "sharedDataAccess": [],
+        "httpInServices": [],
+        "invalidStatusTransitions": [],
+        "externalDependencies": [],
+        "totalViolations": 0
+      },
+      "codeMetrics": {
+        "compiles": false,
+        "compilationErrors": [],
+        "totalLines": 1424,
+        "totalFiles": 10,
+        "linesPerFile": {
+          "src\\comment-service.ts": 64,
+          "src\\demo.ts": 377,
+          "src\\event-bus.ts": 45,
+          "src\\main.ts": 49,
+          "src\\notification-service.ts": 83,
+          "src\\project-service.ts": 73,
+          "src\\router.ts": 413,
+          "src\\task-service.ts": 128,
+          "src\\types.ts": 122,
+          "src\\user-service.ts": 70
+        }
+      },
+      "transcriptMetrics": {
+        "totalInputTokens": 310158,
+        "totalOutputTokens": 21749,
+        "totalTokens": 331907,
+        "messageCount": 21,
+        "toolCallCount": 21,
+        "errorCount": 2,
+        "retryCount": 0,
+        "durationMs": 296773
+      }
+    },
+    {
+      "trialId": "structured-1",
+      "specType": "structured",
+      "structural": {
+        "hasEventBus": true,
+        "hasUserService": true,
+        "hasProjectService": true,
+        "hasTaskService": true,
+        "hasCommentService": true,
+        "hasNotificationService": true,
+        "hasRouter": true,
+        "hasMainEntry": true,
+        "hasDemoScript": true,
+        "fileCount": 10,
+        "folderStructureScore": 10,
+        "details": [
+          "Each service in its own file: YES"
+        ]
+      },
+      "constraints": {
+        "directServiceCalls": [
+          {
+            "type": "direct-service-import",
+            "file": "src\\services\\notification-service.ts",
+            "line": 19,
+            "description": "Service file imports another service: comment-service"
+          }
+        ],
+        "sharedDataAccess": [],
+        "httpInServices": [],
+        "invalidStatusTransitions": [],
+        "externalDependencies": [],
+        "totalViolations": 1
+      },
+      "codeMetrics": {
+        "compiles": false,
+        "compilationErrors": [],
+        "totalLines": 1576,
+        "totalFiles": 10,
+        "linesPerFile": {
+          "src\\demo.ts": 542,
+          "src\\errors.ts": 14,
+          "src\\event-bus.ts": 41,
+          "src\\main.ts": 61,
+          "src\\router.ts": 387,
+          "src\\services\\comment-service.ts": 101,
+          "src\\services\\notification-service.ts": 90,
+          "src\\services\\project-service.ts": 99,
+          "src\\services\\task-service.ts": 177,
+          "src\\services\\user-service.ts": 64
+        }
+      },
+      "transcriptMetrics": {
+        "totalInputTokens": 1692483,
+        "totalOutputTokens": 42427,
+        "totalTokens": 1734910,
+        "messageCount": 50,
+        "toolCallCount": 50,
+        "errorCount": 6,
+        "retryCount": 0,
+        "durationMs": 674351
+      }
+    },
+    {
+      "trialId": "structured-2",
+      "specType": "structured",
+      "structural": {
+        "hasEventBus": true,
+        "hasUserService": true,
+        "hasProjectService": true,
+        "hasTaskService": true,
+        "hasCommentService": true,
+        "hasNotificationService": true,
+        "hasRouter": true,
+        "hasMainEntry": true,
+        "hasDemoScript": true,
+        "fileCount": 9,
+        "folderStructureScore": 10,
+        "details": [
+          "Each service in its own file: YES"
+        ]
+      },
+      "constraints": {
+        "directServiceCalls": [],
+        "sharedDataAccess": [],
+        "httpInServices": [],
+        "invalidStatusTransitions": [],
+        "externalDependencies": [],
+        "totalViolations": 0
+      },
+      "codeMetrics": {
+        "compiles": false,
+        "compilationErrors": [],
+        "totalLines": 1332,
+        "totalFiles": 9,
+        "linesPerFile": {
+          "src\\demo.ts": 466,
+          "src\\event-bus.ts": 30,
+          "src\\main.ts": 52,
+          "src\\router.ts": 330,
+          "src\\services\\comment-service.ts": 87,
+          "src\\services\\notification-service.ts": 111,
+          "src\\services\\project-service.ts": 73,
+          "src\\services\\task-service.ts": 129,
+          "src\\services\\user-service.ts": 54
+        }
+      },
+      "transcriptMetrics": {
+        "totalInputTokens": 393637,
+        "totalOutputTokens": 18651,
+        "totalTokens": 412288,
+        "messageCount": 24,
+        "toolCallCount": 25,
+        "errorCount": 2,
+        "retryCount": 0,
+        "durationMs": 288151
+      }
+    },
+    {
+      "trialId": "structured-3",
+      "specType": "structured",
+      "structural": {
+        "hasEventBus": true,
+        "hasUserService": true,
+        "hasProjectService": true,
+        "hasTaskService": true,
+        "hasCommentService": true,
+        "hasNotificationService": true,
+        "hasRouter": true,
+        "hasMainEntry": true,
+        "hasDemoScript": true,
+        "fileCount": 9,
+        "folderStructureScore": 10,
+        "details": [
+          "Each service in its own file: YES"
+        ]
+      },
+      "constraints": {
+        "directServiceCalls": [
+          {
+            "type": "direct-service-import",
+            "file": "src\\services\\notification-service.ts",
+            "line": 14,
+            "description": "Service file imports another service: comment-service"
+          }
+        ],
+        "sharedDataAccess": [],
+        "httpInServices": [],
+        "invalidStatusTransitions": [],
+        "externalDependencies": [],
+        "totalViolations": 1
+      },
+      "codeMetrics": {
+        "compiles": false,
+        "compilationErrors": [],
+        "totalLines": 1380,
+        "totalFiles": 9,
+        "linesPerFile": {
+          "src\\demo.ts": 449,
+          "src\\event-bus.ts": 31,
+          "src\\main.ts": 55,
+          "src\\router.ts": 317,
+          "src\\services\\comment-service.ts": 92,
+          "src\\services\\notification-service.ts": 118,
+          "src\\services\\project-service.ts": 91,
+          "src\\services\\task-service.ts": 160,
+          "src\\services\\user-service.ts": 67
+        }
+      },
+      "transcriptMetrics": {
+        "totalInputTokens": 1006118,
+        "totalOutputTokens": 25934,
+        "totalTokens": 1032052,
+        "messageCount": 41,
+        "toolCallCount": 41,
+        "errorCount": 4,
+        "retryCount": 0,
+        "durationMs": 472093
+      }
+    },
+    {
+      "trialId": "openapi-1",
+      "specType": "openapi",
+      "structural": {
+        "hasEventBus": true,
+        "hasUserService": true,
+        "hasProjectService": true,
+        "hasTaskService": true,
+        "hasCommentService": true,
+        "hasNotificationService": true,
+        "hasRouter": true,
+        "hasMainEntry": true,
+        "hasDemoScript": true,
+        "fileCount": 10,
+        "folderStructureScore": 10,
+        "details": [
+          "Each service in its own file: YES"
+        ]
+      },
+      "constraints": {
+        "directServiceCalls": [],
+        "sharedDataAccess": [],
+        "httpInServices": [],
+        "invalidStatusTransitions": [],
+        "externalDependencies": [],
+        "totalViolations": 0
+      },
+      "codeMetrics": {
+        "compiles": false,
+        "compilationErrors": [],
+        "totalLines": 1573,
+        "totalFiles": 10,
+        "linesPerFile": {
+          "src\\demo.ts": 548,
+          "src\\event-bus.ts": 68,
+          "src\\main.ts": 29,
+          "src\\router.ts": 363,
+          "src\\services\\comment-service.ts": 81,
+          "src\\services\\notification-service.ts": 89,
+          "src\\services\\project-service.ts": 95,
+          "src\\services\\task-service.ts": 138,
+          "src\\services\\user-service.ts": 64,
+          "src\\types.ts": 98
+        }
+      },
+      "transcriptMetrics": {
+        "totalInputTokens": 498234,
+        "totalOutputTokens": 23287,
+        "totalTokens": 521521,
+        "messageCount": 26,
+        "toolCallCount": 26,
+        "errorCount": 2,
+        "retryCount": 0,
+        "durationMs": 330873
+      }
+    },
+    {
+      "trialId": "openapi-2",
+      "specType": "openapi",
+      "structural": {
+        "hasEventBus": true,
+        "hasUserService": true,
+        "hasProjectService": true,
+        "hasTaskService": true,
+        "hasCommentService": true,
+        "hasNotificationService": true,
+        "hasRouter": true,
+        "hasMainEntry": true,
+        "hasDemoScript": true,
+        "fileCount": 9,
+        "folderStructureScore": 10,
+        "details": [
+          "Each service in its own file: YES"
+        ]
+      },
+      "constraints": {
+        "directServiceCalls": [],
+        "sharedDataAccess": [],
+        "httpInServices": [],
+        "invalidStatusTransitions": [],
+        "externalDependencies": [],
+        "totalViolations": 0
+      },
+      "codeMetrics": {
+        "compiles": false,
+        "compilationErrors": [],
+        "totalLines": 1522,
+        "totalFiles": 9,
+        "linesPerFile": {
+          "src\\demo.ts": 450,
+          "src\\event-bus.ts": 67,
+          "src\\main.ts": 37,
+          "src\\router.ts": 458,
+          "src\\services\\comment-service.ts": 78,
+          "src\\services\\notification-service.ts": 101,
+          "src\\services\\project-service.ts": 104,
+          "src\\services\\task-service.ts": 156,
+          "src\\services\\user-service.ts": 71
+        }
+      },
+      "transcriptMetrics": {
+        "totalInputTokens": 316838,
+        "totalOutputTokens": 17273,
+        "totalTokens": 334111,
+        "messageCount": 19,
+        "toolCallCount": 19,
+        "errorCount": 2,
+        "retryCount": 0,
+        "durationMs": 234937
+      }
+    },
+    {
+      "trialId": "openapi-3",
+      "specType": "openapi",
+      "structural": {
+        "hasEventBus": true,
+        "hasUserService": true,
+        "hasProjectService": true,
+        "hasTaskService": true,
+        "hasCommentService": true,
+        "hasNotificationService": true,
+        "hasRouter": true,
+        "hasMainEntry": true,
+        "hasDemoScript": true,
+        "fileCount": 10,
+        "folderStructureScore": 10,
+        "details": [
+          "Each service in its own file: YES"
+        ]
+      },
+      "constraints": {
+        "directServiceCalls": [],
+        "sharedDataAccess": [],
+        "httpInServices": [],
+        "invalidStatusTransitions": [],
+        "externalDependencies": [],
+        "totalViolations": 0
+      },
+      "codeMetrics": {
+        "compiles": false,
+        "compilationErrors": [],
+        "totalLines": 1539,
+        "totalFiles": 10,
+        "linesPerFile": {
+          "src\\demo.ts": 555,
+          "src\\event-bus.ts": 32,
+          "src\\main.ts": 27,
+          "src\\router.ts": 415,
+          "src\\services\\comment-service.ts": 60,
+          "src\\services\\notification-service.ts": 93,
+          "src\\services\\project-service.ts": 77,
+          "src\\services\\task-service.ts": 116,
+          "src\\services\\user-service.ts": 47,
+          "src\\types.ts": 117
+        }
+      },
+      "transcriptMetrics": {
+        "totalInputTokens": 490037,
+        "totalOutputTokens": 27261,
+        "totalTokens": 517298,
+        "messageCount": 24,
+        "toolCallCount": 24,
+        "errorCount": 3,
+        "retryCount": 0,
+        "durationMs": 372273
+      }
+    },
+    {
+      "trialId": "c4-1",
+      "specType": "c4",
+      "structural": {
+        "hasEventBus": true,
+        "hasUserService": true,
+        "hasProjectService": true,
+        "hasTaskService": true,
+        "hasCommentService": true,
+        "hasNotificationService": true,
+        "hasRouter": true,
+        "hasMainEntry": true,
+        "hasDemoScript": true,
+        "fileCount": 9,
+        "folderStructureScore": 10,
+        "details": [
+          "Each service in its own file: YES"
+        ]
+      },
+      "constraints": {
+        "directServiceCalls": [],
+        "sharedDataAccess": [],
+        "httpInServices": [],
+        "invalidStatusTransitions": [],
+        "externalDependencies": [],
+        "totalViolations": 0
+      },
+      "codeMetrics": {
+        "compiles": false,
+        "compilationErrors": [],
+        "totalLines": 1776,
+        "totalFiles": 9,
+        "linesPerFile": {
+          "src\\demo.ts": 682,
+          "src\\event-bus.ts": 33,
+          "src\\main.ts": 29,
+          "src\\router.ts": 328,
+          "src\\services\\comment-service.ts": 128,
+          "src\\services\\notification-service.ts": 159,
+          "src\\services\\project-service.ts": 119,
+          "src\\services\\task-service.ts": 202,
+          "src\\services\\user-service.ts": 96
+        }
+      },
+      "transcriptMetrics": {
+        "totalInputTokens": 847579,
+        "totalOutputTokens": 32808,
+        "totalTokens": 880387,
+        "messageCount": 32,
+        "toolCallCount": 32,
+        "errorCount": 4,
+        "retryCount": 0,
+        "durationMs": 483814
+      }
+    },
+    {
+      "trialId": "c4-2",
+      "specType": "c4",
+      "structural": {
+        "hasEventBus": true,
+        "hasUserService": true,
+        "hasProjectService": true,
+        "hasTaskService": true,
+        "hasCommentService": true,
+        "hasNotificationService": true,
+        "hasRouter": true,
+        "hasMainEntry": true,
+        "hasDemoScript": true,
+        "fileCount": 9,
+        "folderStructureScore": 10,
+        "details": [
+          "Each service in its own file: YES"
+        ]
+      },
+      "constraints": {
+        "directServiceCalls": [
+          {
+            "type": "direct-service-import",
+            "file": "src\\services\\notification-service.ts",
+            "line": 10,
+            "description": "Service file imports another service: task-service"
+          },
+          {
+            "type": "direct-service-import",
+            "file": "src\\services\\notification-service.ts",
+            "line": 11,
+            "description": "Service file imports another service: comment-service"
+          }
+        ],
+        "sharedDataAccess": [],
+        "httpInServices": [],
+        "invalidStatusTransitions": [],
+        "externalDependencies": [],
+        "totalViolations": 2
+      },
+      "codeMetrics": {
+        "compiles": false,
+        "compilationErrors": [],
+        "totalLines": 1492,
+        "totalFiles": 9,
+        "linesPerFile": {
+          "src\\demo.ts": 557,
+          "src\\event-bus.ts": 33,
+          "src\\main.ts": 46,
+          "src\\router.ts": 395,
+          "src\\services\\comment-service.ts": 96,
+          "src\\services\\notification-service.ts": 89,
+          "src\\services\\project-service.ts": 76,
+          "src\\services\\task-service.ts": 143,
+          "src\\services\\user-service.ts": 57
+        }
+      },
+      "transcriptMetrics": {
+        "totalInputTokens": 498667,
+        "totalOutputTokens": 19324,
+        "totalTokens": 517991,
+        "messageCount": 28,
+        "toolCallCount": 29,
+        "errorCount": 3,
+        "retryCount": 0,
+        "durationMs": 304438
+      }
+    },
+    {
+      "trialId": "c4-3",
+      "specType": "c4",
+      "structural": {
+        "hasEventBus": true,
+        "hasUserService": true,
+        "hasProjectService": true,
+        "hasTaskService": true,
+        "hasCommentService": true,
+        "hasNotificationService": true,
+        "hasRouter": true,
+        "hasMainEntry": true,
+        "hasDemoScript": true,
+        "fileCount": 9,
+        "folderStructureScore": 10,
+        "details": [
+          "Each service in its own file: YES"
+        ]
+      },
+      "constraints": {
+        "directServiceCalls": [],
+        "sharedDataAccess": [],
+        "httpInServices": [],
+        "invalidStatusTransitions": [],
+        "externalDependencies": [],
+        "totalViolations": 0
+      },
+      "codeMetrics": {
+        "compiles": false,
+        "compilationErrors": [],
+        "totalLines": 1380,
+        "totalFiles": 9,
+        "linesPerFile": {
+          "src\\demo.ts": 498,
+          "src\\event-bus.ts": 38,
+          "src\\main.ts": 52,
+          "src\\router.ts": 343,
+          "src\\services\\comment-service.ts": 90,
+          "src\\services\\notification-service.ts": 111,
+          "src\\services\\project-service.ts": 73,
+          "src\\services\\task-service.ts": 125,
+          "src\\services\\user-service.ts": 50
+        }
+      },
+      "transcriptMetrics": {
+        "totalInputTokens": 479181,
+        "totalOutputTokens": 23247,
+        "totalTokens": 502428,
+        "messageCount": 26,
+        "toolCallCount": 27,
+        "errorCount": 1,
+        "retryCount": 0,
+        "durationMs": 347607
+      }
+    },
+    {
+      "trialId": "typescript-contracts-1",
+      "specType": "typescript-contracts",
+      "structural": {
+        "hasEventBus": true,
+        "hasUserService": true,
+        "hasProjectService": true,
+        "hasTaskService": true,
+        "hasCommentService": true,
+        "hasNotificationService": true,
+        "hasRouter": true,
+        "hasMainEntry": true,
+        "hasDemoScript": true,
+        "fileCount": 10,
+        "folderStructureScore": 10,
+        "details": [
+          "Each service in its own file: YES"
+        ]
+      },
+      "constraints": {
+        "directServiceCalls": [],
+        "sharedDataAccess": [],
+        "httpInServices": [],
+        "invalidStatusTransitions": [],
+        "externalDependencies": [],
+        "totalViolations": 0
+      },
+      "codeMetrics": {
+        "compiles": false,
+        "compilationErrors": [],
+        "totalLines": 1392,
+        "totalFiles": 10,
+        "linesPerFile": {
+          "src\\demo.ts": 454,
+          "src\\event-bus.ts": 29,
+          "src\\main.ts": 99,
+          "src\\router.ts": 302,
+          "src\\services\\comment-service.ts": 69,
+          "src\\services\\notification-service.ts": 80,
+          "src\\services\\project-service.ts": 73,
+          "src\\services\\task-service.ts": 119,
+          "src\\services\\user-service.ts": 47,
+          "src\\types.ts": 120
+        }
+      },
+      "transcriptMetrics": {
+        "totalInputTokens": 934491,
+        "totalOutputTokens": 25843,
+        "totalTokens": 960334,
+        "messageCount": 42,
+        "toolCallCount": 42,
+        "errorCount": 8,
+        "retryCount": 0,
+        "durationMs": 426348
+      }
+    },
+    {
+      "trialId": "typescript-contracts-2",
+      "specType": "typescript-contracts",
+      "structural": {
+        "hasEventBus": true,
+        "hasUserService": true,
+        "hasProjectService": true,
+        "hasTaskService": true,
+        "hasCommentService": true,
+        "hasNotificationService": true,
+        "hasRouter": true,
+        "hasMainEntry": true,
+        "hasDemoScript": true,
+        "fileCount": 10,
+        "folderStructureScore": 10,
+        "details": [
+          "Each service in its own file: YES"
+        ]
+      },
+      "constraints": {
+        "directServiceCalls": [],
+        "sharedDataAccess": [],
+        "httpInServices": [],
+        "invalidStatusTransitions": [],
+        "externalDependencies": [],
+        "totalViolations": 0
+      },
+      "codeMetrics": {
+        "compiles": false,
+        "compilationErrors": [],
+        "totalLines": 1286,
+        "totalFiles": 10,
+        "linesPerFile": {
+          "src\\demo.ts": 414,
+          "src\\event-bus.ts": 29,
+          "src\\main.ts": 83,
+          "src\\router.ts": 257,
+          "src\\services\\comment-service.ts": 69,
+          "src\\services\\notification-service.ts": 81,
+          "src\\services\\project-service.ts": 74,
+          "src\\services\\task-service.ts": 112,
+          "src\\services\\user-service.ts": 47,
+          "src\\types.ts": 120
+        }
+      },
+      "transcriptMetrics": {
+        "totalInputTokens": 440452,
+        "totalOutputTokens": 15771,
+        "totalTokens": 456223,
+        "messageCount": 28,
+        "toolCallCount": 28,
+        "errorCount": 6,
+        "retryCount": 0,
+        "durationMs": 268815
+      }
+    },
+    {
+      "trialId": "typescript-contracts-3",
+      "specType": "typescript-contracts",
+      "structural": {
+        "hasEventBus": true,
+        "hasUserService": true,
+        "hasProjectService": true,
+        "hasTaskService": true,
+        "hasCommentService": true,
+        "hasNotificationService": true,
+        "hasRouter": true,
+        "hasMainEntry": true,
+        "hasDemoScript": true,
+        "fileCount": 9,
+        "folderStructureScore": 10,
+        "details": [
+          "Each service in its own file: YES"
+        ]
+      },
+      "constraints": {
+        "directServiceCalls": [],
+        "sharedDataAccess": [],
+        "httpInServices": [],
+        "invalidStatusTransitions": [],
+        "externalDependencies": [],
+        "totalViolations": 0
+      },
+      "codeMetrics": {
+        "compiles": false,
+        "compilationErrors": [],
+        "totalLines": 1254,
+        "totalFiles": 9,
+        "linesPerFile": {
+          "src\\demo.ts": 392,
+          "src\\event-bus.ts": 57,
+          "src\\main.ts": 27,
+          "src\\router.ts": 309,
+          "src\\services\\comment-service.ts": 90,
+          "src\\services\\notification-service.ts": 95,
+          "src\\services\\project-service.ts": 93,
+          "src\\services\\task-service.ts": 125,
+          "src\\services\\user-service.ts": 66
+        }
+      },
+      "transcriptMetrics": {
+        "totalInputTokens": 411795,
+        "totalOutputTokens": 17564,
+        "totalTokens": 429359,
+        "messageCount": 26,
+        "toolCallCount": 26,
+        "errorCount": 2,
+        "retryCount": 0,
+        "durationMs": 264585
+      }
+    }
+  ],
+  "judgeScores": [
+    {
+      "trialId": "prose-1",
+      "specType": "prose",
+      "architecturalAdherence": 8,
+      "completeness": 9,
+      "codeQuality": 9,
+      "constraintCompliance": 8,
+      "overall": 8.5,
+      "notes": "Overall a strong, well-structured implementation. Architectural adherence is good: EventBus is used for task.assigned, task.statusChanged, and comment.added; services own their own Maps; the router is the sole HTTP handler. However, there are two notable architectural tensions: (1) The router performs direct cross-service calls for validation (e.g., userService.getUser() before taskService.assignTask(), projectService.getProject() before taskService.createTask()), which technically violates rule 1 ('no direct service-to-service calls') even if it is the router doing it rather than a service — the spirit of the rule is that inter-service data flow goes through the bus, but here the router acts as an orchestrator/mediator which is a common and defensible pattern; (2) cascade deletes (deleteTasksByProject, deleteCommentsByTask) are orchestrated directly by the router calling multiple services, bypassing the event bus — a project.deleted event could have driven this instead, which would be cleaner. On constraint compliance: rule 5 (no external npm deps) is respected; rule 4 (forward-only transitions) is correctly enforced with same-status treated as a no-op rather than an error (debatable but documented); rule 6 (each service in its own file) is satisfied. The status same-status no-op is a minor design choice that could be argued either way. Completeness is high: all CRUD operations are present for all entities, all three event types are published and consumed, notifications support listing/filtering/mark-as-read, and a thorough demo script exercises all paths including error cases and cascade deletes. Code quality is excellent: consistent TypeScript interfaces in types.ts, clean error propagation, good use of generics in EventBus, idiomatic Map usage, immutable-style service constructors, proper Content-Length headers, snapshot iteration in event bus for safe mid-iteration unsubscribe, and clear comments throughout. Minor issues: the router catches all non-'not found' service errors as 400 which could mask genuine 500s; the demo's 'todo→todo same-status' test case comment is slightly misleading; deleteCommentsByTask is not called when a task is deleted via the project cascade path (only deleteTasksByProject is called, skipping comment cleanup for cascaded tasks)."
+    },
+    {
+      "trialId": "prose-2",
+      "specType": "prose",
+      "architecturalAdherence": 8,
+      "completeness": 9,
+      "codeQuality": 9,
+      "constraintCompliance": 8,
+      "overall": 8.5,
+      "notes": "Overall a strong, well-structured implementation. Architectural adherence is good: EventBus is properly typed and used for inter-service communication, each service owns its own data store, and the Router is the sole HTTP handler. However, there are two notable architectural violations: (1) The Router calls `this.taskService.getTask()` inside `createComment()` to retrieve task title and assigneeId before passing them to CommentService — this is a direct cross-service data fetch orchestrated in the router, which technically works but means the router is doing cross-service data stitching that skirts the spirit of the event-bus rule; the comment service signature accepting `taskTitle` and `assigneeId` as caller-supplied parameters is a design smell that leaks task domain knowledge into the router layer. (2) `deleteTask` in the Router calls both `commentService.deleteCommentsByTask()` and `taskService.deleteTask()` — this is cross-service coordination in the router rather than via an event (e.g., a `task.deleted` event that CommentService subscribes to), which violates Rule 1. Completeness is high: all CRUD operations are present for all five services, status transitions are enforced forward-only, all required events are published and subscribed, and the demo script exercises every feature. A `task.deleted` event is missing (comments are cascade-deleted via direct router coordination instead). HTTP status codes are mostly appropriate but some errors that should be 400 (bad transition) return 500 since they throw from the service layer and are caught generically. Code quality is excellent: clean TypeScript, proper use of generics in EventBus, immutable update patterns, good validation, no external dependencies, each service in its own file. Minor issues: no input sanitization beyond presence checks, `description` is not marked optional in the Project type but treated as optional in practice, and the demo hardcodes expected error status codes that don't always match actual responses (e.g., expecting 500 for not-found cases that could be 404)."
+    },
+    {
+      "trialId": "prose-3",
+      "specType": "prose",
+      "architecturalAdherence": 7,
+      "completeness": 9,
+      "codeQuality": 9,
+      "constraintCompliance": 8,
+      "overall": 8.25,
+      "notes": "Overall a very clean, well-structured implementation. Scores and issues by category: ARCHITECTURAL ADHERENCE (7/10): The most significant violation is that the Router performs cross-service lookups directly (e.g., calling userService.getUserById() before calling projectService.addMember(), calling taskService.getTaskById() before calling commentService.createComment(), calling userService.getUserById() before calling taskService.assignTask()). While the requirement says 'no direct service-to-service calls' and the router is technically the HTTP layer, passing taskTitle and assigneeId as parameters to commentService.createComment() is an awkward coupling that leaks task internals through the router into the comment service — this is a design smell even if not a strict rule violation. The event bus is otherwise used correctly for all notifications. COMPLETENESS (9/10): All services are implemented with full CRUD. All three events (task.assigned, task.status_changed, comment.added) are published and handled. The demo script is thorough and exercises all features including edge cases. Minor gap: no PATCH support (acceptable since PUT is used), no pagination, and there is no GET /notifications/:id route tested in the demo. The description says 'get comments on tasks' but there's no update comment operation (acceptable per spec). CODE QUALITY (9/10): Excellent TypeScript typing with EventPayloadMap providing full type safety on the event bus. Clean separation of concerns, consistent error handling patterns, good use of private methods in the router, proper UUID generation, ISO timestamps, input trimming/validation. The readBody helper is clean. Minor issues: use of 'any' in demo.ts is reasonable for a demo; the Router class is large (could be split further) but acceptable per constraints. CONSTRAINT COMPLIANCE (8/10): Violation 1 — Rule 1 (no direct service-to-service calls): The router calls multiple services in sequence to fulfill one request (e.g., userService then projectService for member add, taskService then commentService for comment create), which is not strictly inter-service communication but does blur the line. Violation 2 — Rule 2 (each service owns its data exclusively): commentService.createComment() accepts taskTitle and assigneeId as parameters supplied by the router after reading from taskService — this means task data is being passed through the router into the comment service rather than being obtained via event, which is a minor but real data ownership concern. All other constraints (no npm deps, each service in own file, forward-only transitions, in-memory stores, built-in http module) are cleanly respected."
+    },
+    {
+      "trialId": "structured-1",
+      "specType": "structured",
+      "architecturalAdherence": 9,
+      "completeness": 10,
+      "codeQuality": 9,
+      "constraintCompliance": 10,
+      "overall": 9.5,
+      "notes": "Architecturally very strong. The event bus is used correctly for all cross-service communication (task.assigned, task.statusChanged, comment.added). No direct service-to-service calls exist. Each service owns its own Map-based store exclusively. HTTP handling is cleanly isolated in the Router. The one mild architectural tension is the router acting as a data-resolution layer for CommentService (fetching task and user data before calling comment.create), which is explicitly justified in comments as ADR-002 — a reasonable and documented tradeoff. Completeness is excellent: all five services implemented, all CRUD operations present, all three events fired, notifications triggered correctly, demo exercises every feature including edge cases (duplicate member 409, backward/skip status transitions, 404s, missing query params). Code quality is high: clean TypeScript interfaces, proper use of readonly, immutable updates via spread, consistent error handling through ApiError with appropriate status codes, good separation of concerns, thorough JSDoc. The forward-only status machine using NEXT_STATUS is elegant and correct — both skip (todo→done) and backward (done→todo) transitions are properly rejected. Minor issues: UserService error messages for name/email validation are slightly misleading ('name and email are required' thrown for either field missing individually); email format is not validated; no email uniqueness check; TaskService.create accepts an initial status parameter which could bypass the forward-only invariant if misused externally (though the router doesn't expose it). All six architectural constraints are fully respected: no npm dependencies, each service in its own file, event bus for inter-service comms, services own their data, HTTP only in router, forward-only transitions enforced."
+    },
+    {
+      "trialId": "structured-2",
+      "specType": "structured",
+      "architecturalAdherence": 8,
+      "completeness": 9,
+      "codeQuality": 9,
+      "constraintCompliance": 9,
+      "overall": 8.75,
+      "notes": "Overall a strong, well-structured implementation. Architectural adherence is good: the EventBus is used for all inter-service communication, each service owns its own Map store, and HTTP handling is isolated to the router. The one notable architectural tension is in the router's comment creation path, where it calls both taskService.getById() and userService.getById() before invoking commentService.create() — this is done to enrich the event payload without direct service-to-service calls, which is a pragmatic workaround, but it means the router is doing cross-service data resolution that feels like a leaky abstraction; a stricter architecture would embed all needed data in the task.assigned event or use a separate lookup mechanism. The notification service also has a minor redundancy: assigneeId is destructured from payload but then re-read via (payload as any).assigneeId. Completeness is very high: all five services are implemented, all CRUD operations are present, all three event types (task.assigned, task.statusChanged, comment.added) are published and consumed, forward-only status transitions are enforced, and the demo script exercises every feature including edge cases and 404/400 responses. Code quality is clean and idiomatic TypeScript with good use of interfaces, Map stores, UUIDs, and consistent error messaging. The errorStatus() heuristic in the router is a minor code smell — mapping error messages to HTTP codes via string matching is fragile. The constraint of no external npm dependencies is respected (only built-in crypto and http modules used). Each service is in its own file. The demo uses require('http') inside a function which mixes ESM and CJS style unnecessarily. Minor: status transition validation allows same-status assignment (newIndex <= oldIndex catches equal), which is correct but the error message could be clearer for that case."
+    },
+    {
+      "trialId": "structured-3",
+      "specType": "structured",
+      "architecturalAdherence": 6,
+      "completeness": 9,
+      "codeQuality": 8,
+      "constraintCompliance": 6,
+      "overall": 7.25,
+      "notes": "Completeness is strong: all five services exist, full CRUD is implemented for every entity, all three events (task.assigned, task.statusChanged, comment.added) are published, and the demo script exercises every endpoint with meaningful assertions. Code quality is solid — clean TypeScript interfaces, consistent immutable updates via spread, good error-message-driven HTTP status mapping, and readable structure throughout. However, several architectural and constraint violations drag the scores down. (1) Architectural Rule 1 (no direct service-to-service calls) is violated in the router: the router calls both `this.tasks.getById(taskId)` and `this.users.getById(authorId)` inside the POST /comments handler specifically to enrich notification data, then manually calls `this.notifications.createForUser(...)`. The router is acting as an orchestrator doing cross-service data resolution, which is the exact coupling the event bus is supposed to prevent. (2) The comment.added event subscription in NotificationService is effectively dead code for the assignee-notification use case — the real assignee notification is fired directly from the router, bypassing the event bus entirely for that notification. This means the event bus is not the sole inter-service communication channel. (3) The `comment.added` subscriber in NotificationService creates a self-notification for the author ('Your comment was posted by X') which is semantically odd and not in the spec. (4) Rule 3 (all HTTP handling in router only) is partially violated: `NotificationService.createForUser` is a public method that exists solely because the router needs to imperatively create notifications outside the event flow — it blurs the boundary of what belongs in the service vs. the router. (5) The router imports from TaskService and CommentService payload types, which is fine, but also imports TaskStatus directly — minor but indicative of tight coupling. (6) No email-uniqueness validation on user creation. These issues are not cosmetic; the comment notification flow is a genuine architectural compromise that the code itself acknowledges in inline comments, confirming the author was aware but chose expediency over compliance."
+    },
+    {
+      "trialId": "openapi-1",
+      "specType": "openapi",
+      "architecturalAdherence": 7,
+      "completeness": 9,
+      "codeQuality": 9,
+      "constraintCompliance": 7,
+      "overall": 8,
+      "notes": "Overall a well-structured, clean implementation. Scores and issues by category: ARCHITECTURAL ADHERENCE (7/10): The event bus is used correctly for task.assigned, task.statusChanged, and comment.added. Services do not import each other. However, the router directly calls both taskService.getTask() and userService.getUser() inside the POST /comments handler to enrich the comment payload — this is a deliberate design choice documented in comments, but it means the router is performing cross-service orchestration that arguably belongs behind the event bus or a dedicated enrichment mechanism. The router is supposed to be an HTTP entry point only, not a service orchestrator. This is a meaningful architectural compromise. COMPLETENESS (9/10): All five services are present with full CRUD. All three events (task.assigned, task.statusChanged, comment.added) are published and consumed. The notification service implements listForUser and markRead. The demo script exercises all endpoints including edge cases (backward transitions, skip transitions, invalid status values, missing fields, 404s, delete flows). Minor gap: no GET /notifications/:id endpoint (only markRead via PUT), and no update endpoint for comments — but these weren't explicitly required. Also, task listing requires projectId query param, which slightly limits flexibility but matches spec. CONSTRAINT COMPLIANCE (7/10): Constraint 1 (no direct service-to-service calls) is violated in router.ts POST /comments — the router calls taskService.getTask() and userService.getUser() to pass enriched data to commentService.createComment(). While the router is not a 'service', this cross-service data fetching in the router to satisfy comment service needs is a design smell that bends the spirit of the rule. Constraint 2 (each service owns its data store exclusively) is respected. Constraint 3 (HTTP handling only in router) is respected. Constraint 4 (forward-only transitions) is correctly implemented with VALID_TRANSITIONS map. Constraint 5 (no external npm dependencies) is respected — only built-in Node.js modules used. Constraint 6 (each service in its own file) is respected. CODE QUALITY (9/10): TypeScript types are well-defined in types.ts. The ServiceResult discriminated union with ok()/fail() helpers is clean and consistent. Error handling is thorough throughout. The event bus isolation of errors per handler is good practice. Input validation is present in all services. The router is verbose but clear and maintainable. Minor issues: body parsing in router casts to Record<string,unknown> without runtime validation library (acceptable given no-npm constraint); project description field validation in createProject is overly strict (rejects empty string which might be valid)."
+    },
+    {
+      "trialId": "openapi-2",
+      "specType": "openapi",
+      "architecturalAdherence": 9,
+      "completeness": 9,
+      "codeQuality": 9,
+      "constraintCompliance": 8,
+      "overall": 8.75,
+      "notes": "Overall a very clean, well-structured implementation. Architectural adherence is strong: services own their data exclusively, the event bus is properly used for inter-service communication (task.assigned, task.statusChanged, comment.added), and the Router is the sole HTTP entry point. The singleton eventBus export is a pragmatic in-memory pub/sub that satisfies the constraint. Completeness is high — all five services are implemented with full CRUD, forward-only status transitions work correctly, notifications are triggered by all three event types, and a thorough demo script exercises every endpoint. Minor completeness gaps: no GET /comments/:id is tested for the missing-comment 404 case, and there is no validation that assigneeId or userId actually exist as users in TaskService/ProjectService (cross-service validation is deferred to the router only for comments, inconsistently). Code quality is high: idiomatic TypeScript, proper use of Map stores, immutable updates via spread, typed payloads on the event bus, and solid error handling in the router. The main code quality issue is the use of require('http') inside the demo's request() helper — a CommonJS dynamic require inside an ESM/tsx file is an antipattern and should be a top-level import. Constraint compliance deductions: (1) the demo.ts uses require() instead of an import, violating the no-external-pattern spirit and ESM consistency; (2) the router reads from both taskSvc and userSvc to resolve context before calling commentSvc.create() — this is explicitly justified in a comment as a router-layer concern and is architecturally defensible, but it does mean the router has read-coupling to two services to serve a third, which is a mild boundary smell; (3) the eventBus singleton is a module-level global shared across all service instances, which works but makes test isolation difficult and is not flagged as a concern. No external npm dependencies are used in application code. Each service is in its own file. The forward-only transition table is correctly implemented. All six architectural rules are substantially respected."
+    },
+    {
+      "trialId": "openapi-3",
+      "specType": "openapi",
+      "architecturalAdherence": 8,
+      "completeness": 9,
+      "codeQuality": 9,
+      "constraintCompliance": 8,
+      "overall": 8.5,
+      "notes": "Overall a very clean, well-structured implementation. Architectural adherence is strong: EventBus singleton is used for all cross-service communication, each service owns its own Map store, and the router is the sole HTTP handler. The one meaningful architectural tension is in the router itself — it calls userService.getUser() and taskService.getTask() inside the POST /comments handler to validate existence and resolve denormalized data (taskTitle, authorName) before passing them to commentService. The code acknowledges this with a comment, framing it as 'the router resolves cross-service data,' which is a pragmatic workaround but still represents the router acting as an orchestrator with direct service coupling rather than purely delegating. Similarly, task existence validation for comments is done in the router rather than being event-driven. The notification logic for comment.added notifies the author rather than the task assignee/owner, which is semantically questionable but is honestly documented. Completeness is excellent: all five services are implemented, all CRUD operations are present, all three event types (task.assigned, task.statusChanged, comment.added) are published and handled, the demo script is thorough with 60+ assertions covering happy paths, error paths, idempotency, and forward-only status transitions. Constraint compliance is largely met: no npm dependencies, no direct service-to-service calls (the router intermediary is borderline but defensible), each service in its own file, forward-only transitions enforced with a clean transition table. Code quality is high: consistent TypeScript typing, discriminated union return type for changeStatus, immutable update patterns with spread, proper 204 responses, Content-Length headers set correctly, error isolation in EventBus subscribers, and clean separation of helpers in the router. Minor issues: no email uniqueness validation on user creation, no validation that assigneeId or projectId exist as real entities in the task service, and the comment notification targets the author rather than interested parties — but these are feature gaps rather than architectural violations."
+    },
+    {
+      "trialId": "c4-1",
+      "specType": "c4",
+      "architecturalAdherence": 9,
+      "completeness": 10,
+      "codeQuality": 9,
+      "constraintCompliance": 10,
+      "overall": 9.5,
+      "notes": "Excellent implementation overall. Architectural adherence is strong: the event bus is used correctly for all inter-service communication (task.assigned, task.statusChanged, comment.added), each service owns its own private Map store, and the router is the sole HTTP layer. The clever router-mediated context passing (resolving taskTitle, authorName, taskAssigneeId before calling commentService.create) elegantly preserves service isolation without violating rule #1 — the router is explicitly permitted to orchestrate. Minor architectural note: the router calling taskService.getById() and userService.getById() before commentService.create() is a pragmatic and acceptable pattern, though a purist might argue that task/user validation belongs fully in-band with the comment event. One small deduction: notification-service.ts uses a duplicate import of eventBus at the bottom of the file (both as a constructor parameter and a separate import for the singleton), which is slightly untidy but functionally harmless. Completeness is perfect: all five services implemented, all CRUD operations present, all three events fired and consumed, forward-only status transitions enforced with correct one-step validation, idempotent member add, self-notification suppression, and a thorough demo script covering happy paths and error cases. Code quality is high: consistent use of custom typed error classes mapped cleanly to HTTP status codes, good TypeScript typing throughout, no any types, clean separation of concerns, and well-structured comments. All six constraints are fully respected: no npm dependencies, no direct service-to-service calls, each service in its own file, event bus used for cross-service communication, forward-only status transitions enforced, and HTTP handling isolated to the router."
+    },
+    {
+      "trialId": "c4-2",
+      "specType": "c4",
+      "architecturalAdherence": 7,
+      "completeness": 9,
+      "codeQuality": 8,
+      "constraintCompliance": 7,
+      "overall": 7.75,
+      "notes": "Overall a solid implementation with good structure and clean code. Issues found: (1) ARCHITECTURAL VIOLATION - The router directly calls taskService.getById() and userService.getById() before invoking commentService.create(), passing resolved data as parameters. While this is a creative workaround, it means the router contains cross-service data resolution logic that arguably belongs to the service layer, and it couples the router tightly to inter-service data flow. The comment service's create() method signature accepting taskTitle/authorName/taskAssigneeId is a design smell — these fields are only needed for event publishing, not for the comment entity itself. (2) CONSTRAINT VIOLATION - Rule 3 states 'All HTTP handling is in the API Router only' but the router is performing service-to-service data resolution (reading user and task data to pass to comment service), which blurs the boundary. (3) CONSTRAINT VIOLATION - userService and projectService are exported as singletons from their service files and imported directly in main.ts and demo.ts, while TaskService, CommentService, and NotificationService are instantiated with constructor injection. This inconsistency means UserService and ProjectService don't receive the eventBus (acceptable since they don't need it), but the pattern is inconsistent. (4) The demo.ts uses require('http') inside a function instead of a top-level import, which is inconsistent with the ES module style used elsewhere. (5) Invalid status transitions return HTTP 500 instead of 400/422 — semantically incorrect. (6) GET /tasks without projectId returns 400 rather than returning all tasks, which is a design limitation. (7) No email uniqueness validation for users. (8) No referential integrity checks (e.g., assigning non-existent user to task). (9) Notification for task.statusChanged notifies the assignee about their own status change which may be unnecessary. Positive aspects: clean TypeScript types, proper event bus pub/sub pattern, forward-only status transitions correctly enforced, comprehensive demo script with assertions, good error messages, each service in its own file, no external dependencies."
+    },
+    {
+      "trialId": "c4-3",
+      "specType": "c4",
+      "architecturalAdherence": 7,
+      "completeness": 9,
+      "codeQuality": 8,
+      "constraintCompliance": 7,
+      "overall": 7.75,
+      "notes": "Overall a solid, well-structured implementation. Specific issues: (1) ARCHITECTURAL VIOLATION — the Router directly calls `this.taskService.getById(taskId)` and `this.userService.getById(authorId)` inside the POST /comments handler to resolve task title, author name, and assigneeId before forwarding them to CommentService.create(). This means the Router is performing cross-service data resolution, effectively acting as a mediator between services. Rule 1 says no direct service-to-service calls, but the Router doing cross-service lookups to paper over inter-service coupling is a design smell that circumvents the spirit of the rule — the comment.added event payload is enriched with data from other services' stores via the router, rather than services being truly independent. (2) The workaround of passing taskTitle, authorName, and assigneeId as extra parameters to CommentService.create() is an architectural compromise — it leaks TaskService and UserService concerns into the CommentService interface. A cleaner solution would have TaskService publish richer events or have NotificationService query only its own data. (3) Error classification in the router catch block uses brittle string matching on error messages (e.g., checking for 'not found', 'required', 'Invalid JSON') to determine HTTP status codes — this is fragile and error-prone; typed custom error classes would be far more robust. (4) DELETE /projects/:id/members uses a request body, which is non-standard HTTP (DELETE with body is discouraged). (5) No input validation for email format, duplicate email checking, or ensuring assigneeId/userId actually exist in their respective stores before operations. (6) GET /tasks only supports filtering by projectId; there is no way to get all tasks or filter by assignee. (7) The same-level status transition rejection (in-progress → in-progress) is correctly handled because newIndex <= oldIndex covers equality. (8) The demo script is thorough and well-structured with clear assertions. (9) TypeScript types are clean and well-defined throughout. (10) EventBus is simple, correct, and synchronous as required. All six services are in separate files as required."
+    },
+    {
+      "trialId": "typescript-contracts-1",
+      "specType": "typescript-contracts",
+      "architecturalAdherence": 8,
+      "completeness": 9,
+      "codeQuality": 9,
+      "constraintCompliance": 8,
+      "overall": 8.5,
+      "notes": "Overall a strong, well-structured implementation. Architectural adherence is good: EventBus is used for all inter-service communication (task.assigned, task.statusChanged, comment.added), services own their own stores, and the Router is the sole HTTP handler. The injected resolver pattern in CommentService and NotificationService is a clever workaround to avoid direct service-to-service imports while still allowing data lookups — however, this is a grey area. The closures in main.ts call taskService.getById() and userService.getById() directly, meaning cross-service data access does happen at composition time, which slightly bends Rule 1 (no direct service-to-service calls). A purist reading would say the NotificationService and CommentService are indirectly calling other services synchronously within their own execution context rather than purely reacting to events. The forward-only status transition enforcement is correctly implemented with VALID_TRANSITIONS. All six services are present in separate files (Rule 6 satisfied). No external npm dependencies used. Completeness is high: all CRUD operations are implemented for all entities, all three event types are published and subscribed, and the demo script exercises all major flows including negative cases. Minor gaps: no input validation (missing fields on create don't return 400, they'd likely throw 500 or produce broken entities), no duplicate email check for users, no verification that assigneeId or projectId exist when creating/assigning tasks, and GET /tasks without projectId returns 400 rather than all tasks (a mild but potentially unexpected API design choice). Code quality is high: clean TypeScript interfaces in types.ts, consistent use of defensive copying (spread operator) to prevent store mutation via returned references, proper async/await in the router, and error-to-HTTP-status mapping in the catch block. The error mapping heuristic (string matching on 'not found', 'invalid', 'transition') is fragile and could misclassify errors, but works for the current error messages. The demo is thorough and self-validating with assertions."
+    },
+    {
+      "trialId": "typescript-contracts-2",
+      "specType": "typescript-contracts",
+      "architecturalAdherence": 7,
+      "completeness": 9,
+      "codeQuality": 9,
+      "constraintCompliance": 7,
+      "overall": 8,
+      "notes": "Overall a strong implementation with clean structure and good TypeScript usage. Architectural adherence: The event bus is used correctly for task and comment events. However, CommentService and NotificationService receive resolver callbacks (resolveAuthorName, resolveTaskTitle, resolveTaskAssigneeId) that are closures directly calling UserService.getById() and TaskService.getById() — this is effectively a disguised direct service-to-service call, violating Rule 1. The intent is to avoid imports, but the runtime coupling remains. A proper solution would embed the needed data in the event payload itself (e.g., include assigneeId in the task.assigned payload for NotificationService, embed authorName/taskTitle at publish time from within TaskService/UserService). TaskService already includes taskTitle in its events which is good, but CommentService still reaches into UserService and TaskService via injected closures. Constraint compliance: Rule 1 (no direct service-to-service calls) is partially violated via the callback injection pattern in main.ts — semantically it's the same as a direct call. Rule 5 (no external npm dependencies) is respected. Rule 4 (forward-only transitions) is correctly enforced with the STATUS_ORDER map requiring newOrder === currentOrder + 1. Rule 6 (each service in its own file) is satisfied. Completeness: All CRUD operations are implemented for all entities. All three events (task.assigned, task.statusChanged, comment.added) are published and handled. Notification mark-as-read is implemented. Demo script is thorough and tests error cases, status machine boundaries, and notifications. Minor gap: DELETE on tasks is implemented but not exercised in the demo. Also, removing member returns 200 instead of 204 which is slightly inconsistent. Code quality: Clean, well-typed interfaces in types.ts, proper use of Map for stores, defensive cloning of returned objects to prevent mutation, error messages are consistent and descriptive, router error classification by message content is a bit fragile but functional. The main.ts module detection via process.argv[1].includes('main') is brittle."
+    },
+    {
+      "trialId": "typescript-contracts-3",
+      "specType": "typescript-contracts",
+      "architecturalAdherence": 8,
+      "completeness": 9,
+      "codeQuality": 9,
+      "constraintCompliance": 9,
+      "overall": 8.75,
+      "notes": "Overall a strong, well-structured implementation. Architectural adherence is good: event bus is used for inter-service notifications, each service owns its own Map store, and HTTP handling is confined to the router. Minor concern: the router resolves task and author context (taskTitle, authorName, assigneeId) before calling commentService.create() to avoid cross-service calls inside services — this is a reasonable workaround but slightly leaks domain resolution into the router layer, which ideally should be a thin HTTP adapter only. The event bus is synchronous (in-process function calls), which is acceptable for an in-memory implementation but worth noting. Completeness is high: all five services are implemented with full CRUD, all three events (task.assigned, task.statusChanged, comment.added) are published and consumed, the forward-only status machine is correct and rejects both backward and skip transitions with 422, and the demo script exercises all 26 scenarios end-to-end. One gap: GET /tasks without a projectId returns 400 instead of supporting a 'get all tasks' endpoint, and GET /notifications lacks a 'get all' endpoint — these are minor omissions consistent with the spec. Code quality is clean: TypeScript interfaces are defined for all entities and service contracts, immutable update patterns are used (spread into new objects), error messages are descriptive, and the error-to-HTTP-status mapping in the router (string matching on 'not found' and 'Invalid status transition') works but is fragile — a typed error class hierarchy would be more robust. No external npm dependencies are used; only Node.js built-ins (http, crypto, url). Each service is in its own file. The 100ms setTimeout in demo.ts is a minor smell but functional."
+    }
+  ]
+}

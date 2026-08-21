@@ -1,0 +1,10 @@
+{
+  "trialId": "prose-2",
+  "specType": "prose",
+  "architecturalAdherence": 5,
+  "completeness": 6,
+  "codeQuality": 6,
+  "constraintCompliance": 4,
+  "notes": "ARCHITECTURAL VIOLATIONS: (1) notification-service.ts directly imports and calls taskService.getTask() — a direct service-to-service call, violating Rule 1. The task data should be included in the event payload instead. (2) api-router.ts imports all five services directly, which is acceptable per Rule 3, but the notification service import in main.ts as a side-effect hack is a code smell. CONSTRAINT VIOLATIONS: (3) Status transition table is NOT forward-only — VALID_STATUS_TRANSITIONS allows 'todo'→['in-progress','done'], 'in-progress'→['todo','done'], and 'done'→['todo','in-progress'], meaning backward transitions are permitted, directly violating Rule 4. The correct table should be todo→[in-progress], in-progress→[done], done→[]. (4) demo.ts uses require('http') — a CommonJS require() call inside an ES module TypeScript file, which is inconsistent and likely broken. COMPLETENESS ISSUES: (5) Comment interface specifies 'body' and 'createdAt' per spec but implementation uses 'text' and 'timestamp' — schema mismatch. (6) Project spec says 'memberIds' but implementation uses 'members'. (7) No unsubscribe mechanism on event bus. (8) No input validation for email format, duplicate email prevention, or referential integrity (assigning non-existent user, tasks referencing deleted projects). (9) createNotification is private with no public API for manually creating notifications. CODE QUALITY: (10) Extensive use of 'as any' and unsafe casts in api-router.ts. (11) Return type inconsistency — void handlers use 'return this.sendJson()' which works but is misleading. (12) No request size limiting on body reads. (13) Sequential ID generation is not collision-safe in theory. The overall design is reasonably structured but the forward-only status transition failure is a core functional requirement violation, and the direct cross-service call in NotificationService is the primary architectural violation.",
+  "overall": 5.25
+}

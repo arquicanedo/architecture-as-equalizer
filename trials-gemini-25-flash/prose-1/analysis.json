@@ -1,0 +1,63 @@
+{
+  "trialId": "prose-1",
+  "specType": "prose",
+  "structural": {
+    "hasEventBus": true,
+    "hasUserService": true,
+    "hasProjectService": true,
+    "hasTaskService": true,
+    "hasCommentService": true,
+    "hasNotificationService": false,
+    "hasRouter": false,
+    "hasMainEntry": false,
+    "hasDemoScript": false,
+    "fileCount": 6,
+    "folderStructureScore": 5,
+    "details": [
+      "Missing: Notification Service",
+      "Missing: Router",
+      "Missing: Main Entry",
+      "Missing: Demo Script",
+      "Each service in its own file: NO — some services may be combined"
+    ]
+  },
+  "constraints": {
+    "directServiceCalls": [],
+    "sharedDataAccess": [],
+    "httpInServices": [],
+    "invalidStatusTransitions": [],
+    "externalDependencies": [
+      {
+        "type": "external-dependency",
+        "file": "src\\projectService.ts",
+        "line": 3,
+        "description": "Uses external package: uuid"
+      }
+    ],
+    "totalViolations": 1
+  },
+  "codeMetrics": {
+    "compiles": false,
+    "compilationErrors": [],
+    "totalLines": 447,
+    "totalFiles": 6,
+    "linesPerFile": {
+      "src\\commentService.ts": 61,
+      "src\\eventBus.ts": 37,
+      "src\\projectService.ts": 101,
+      "src\\taskService.ts": 118,
+      "src\\types.ts": 88,
+      "src\\userService.ts": 42
+    }
+  },
+  "transcriptMetrics": {
+    "totalInputTokens": 27200,
+    "totalOutputTokens": 3836,
+    "totalTokens": 31036,
+    "messageCount": 6,
+    "toolCallCount": 6,
+    "errorCount": 0,
+    "retryCount": 0,
+    "durationMs": 102757
+  }
+}

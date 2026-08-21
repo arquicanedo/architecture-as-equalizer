@@ -1,0 +1,10 @@
+{
+  "trialId": "prose-2",
+  "specType": "prose",
+  "architecturalAdherence": 7,
+  "completeness": 8,
+  "codeQuality": 8,
+  "constraintCompliance": 7,
+  "notes": "Overall a solid implementation with good structure. Issues found: (1) ARCHITECTURAL VIOLATION - TaskService subscribes to 'comment.added' and re-publishes 'comment.added.enriched' to provide assignee context to NotificationService. This is a workaround for the no-direct-calls rule but represents a service acting as a mediator/enricher rather than a pure domain service — TaskService is now coupled to comment notification logic, which is a design smell. The NotificationService also has a dead 'onCommentAdded' handler. (2) CONSTRAINT VIOLATION - The spec requires 'forward-only' transitions but isValidTransition allows idempotent transitions (toIdx === fromIdx), meaning setting a task to its current status is permitted — this is a minor but real deviation from strict forward-only semantics. (3) Comment model uses 'text' field but spec requires 'body'; the demo also sends 'text' — minor spec deviation. (4) Project model uses 'members' (array of strings) but spec says 'memberIds' — naming deviation. (5) The router correctly holds all HTTP logic and delegates to services. EventBus is used for all inter-service communication with no direct service-to-service calls otherwise. (6) No external npm dependencies are used. (7) Each service is in its own file. (8) The node-shims.d.ts file is unnecessary since Node.js types are available via @types/node — suggests some tooling confusion. (9) ID generation using Math.random() + Date.now() is weak but acceptable for in-memory demo. (10) Error handling in the router is reasonable but missing input validation (e.g., creating a user with no name/email succeeds silently). (11) The demo script is comprehensive and exercises all major paths. (12) Task.create fires both 'task.created' and 'task.assigned' when assigneeId is present, causing duplicate notifications for the assignee on creation — a functional bug.",
+  "overall": 7.5
+}
